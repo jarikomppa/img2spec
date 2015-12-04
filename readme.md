@@ -1,5 +1,7 @@
 # Image Spectrumizer
 
+![ScreenShot](https://raw.github.com/jarikomppa/img2spec/master/img2spec2.jpg)
+
 This is a GUI tool to help convert normal images suitable to be used in ZX Spectrum (and similar devices).
 Note that the resolution is 256x192. Feeding the tool smaller or bigger images works, but the internal
 image size remains the same.
