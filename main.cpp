@@ -468,13 +468,12 @@ public:
 	}
 };
 
-
-void process_image()
+void bitmap_to_float(unsigned int *aBitmap)
 {
 	int i;
 	for (i = 0; i < 256 * 192; i++)
 	{
-		int c = gBitmapOrig[i];
+		int c = aBitmap[i];
 		int r = (c >> 16) & 0xff;
 		int g = (c >> 8) & 0xff;
 		int b = (c >> 0) & 0xff;
@@ -483,6 +482,34 @@ void process_image()
 		gBitmapProcFloat[i * 3 + 1] = g * (1.0f / 255.0f);
 		gBitmapProcFloat[i * 3 + 2] = b * (1.0f / 255.0f);
 	}
+}
+
+void float_to_bitmap()
+{
+	int i;
+	for (i = 0; i < 256 * 192; i++)
+	{
+		float r = gBitmapProcFloat[i * 3 + 0];
+		float g = gBitmapProcFloat[i * 3 + 1];
+		float b = gBitmapProcFloat[i * 3 + 2];
+
+		r = (r < 0) ? 0 : (r > 1) ? 1 : r;
+		g = (g < 0) ? 0 : (g > 1) ? 1 : g;
+		b = (b < 0) ? 0 : (b > 1) ? 1 : b;
+
+		gBitmapProc[i] =
+			((int)floor(r * 255) << 16) |
+			((int)floor(g * 255) << 8) |
+			((int)floor(b * 255) << 0) |
+			0xff000000;
+	}
+}
+
+void process_image()
+{
+	int i;
+
+	bitmap_to_float(gBitmapOrig);
 	
 	Modifier *walker = gModifierRoot;
 	Modifier *prev = 0;
@@ -537,23 +564,7 @@ void process_image()
 			walker = walker->mNext;
 		}
 	}
-	
-	for (i = 0; i < 256 * 192; i++)
-	{
-		float r = gBitmapProcFloat[i * 3 + 0];
-		float g = gBitmapProcFloat[i * 3 + 1];
-		float b = gBitmapProcFloat[i * 3 + 2];
-
-		r = (r < 0) ? 0 : (r > 1) ? 1 : r;
-		g = (g < 0) ? 0 : (g > 1) ? 1 : g;
-		b = (b < 0) ? 0 : (b > 1) ? 1 : b;
-
-		gBitmapProc[i] = 
-			((int)floor(r * 255) << 16) |
-			((int)floor(g * 255) << 8) |
-			((int)floor(b * 255) << 0) |
-			0xff000000;
-	}
+	float_to_bitmap();
 }
 
 
@@ -1068,6 +1079,33 @@ void gen_attr_bitm()
 
 }
 
+void ordered_dither()
+{
+	float matrix8x8[] =
+	{ 
+		0.0f, 32.0f, 8.0f, 40.0f, 2.0f, 34.0f, 10.0f, 42.0f,
+		48.0f, 16.0f, 56.0f, 24.0f, 50.0f, 18.0f, 58.0f, 26.0f,
+		12.0f, 44.0f, 4.0f, 36.0f, 14.0f, 46.0f, 6.0f, 38.0f,
+		60.0f, 28.0f, 52.0f, 20.0f, 62.0f, 30.0f, 54.0f, 22.0f,
+		3.0f, 35.0f, 11.0f, 43.0f, 1.0f, 33.0f, 9.0f, 41.0f,
+		51.0f, 19.0f, 59.0f, 27.0f, 49.0f, 17.0f, 57.0f, 25.0f,
+		15.0f, 47.0f, 7.0f, 39.0f, 13.0f, 45.0f, 5.0f, 37.0f,
+		63.0f, 31.0f, 55.0f, 23.0f, 61.0f, 29.0f, 53.0f, 21.0f
+	};
+
+	int i, j;
+	for (i = 0; i < 192; i++)
+	{
+		for (j = 0; j < 256; j++)
+		{
+			gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0];
+			gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1];
+			gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2];
+		}
+	}
+	float_to_bitmap();
+}
+
 
 
 int main(int, char**)
@@ -1195,7 +1233,7 @@ int main(int, char**)
 				ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0");
 				ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0");
 				ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0");
-				ImGui::Combo("Dithering", &gOptDither, "None\0");// Ordered\0Random\0Floyd - Steinberg\0");
+				ImGui::Combo("Dithering", &gOptDither, "None\0Ordered\0"); // Floyd - Steinberg\0");
 			}
 			ImGui::End();
 		}
@@ -1240,6 +1278,12 @@ int main(int, char**)
 		process_image();
 		ImGui::End();
 		
+		switch (gOptDither)
+		{
+		case 1:
+			ordered_dither();
+			break;		
+		}
 
 		spectrumize_image();
 
