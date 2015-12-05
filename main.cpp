@@ -70,6 +70,7 @@ int gUniqueValueCounter = 0;
 bool gWindowAttribBitmap = false;
 bool gWindowHistograms = false;
 bool gWindowConvOptions = false;
+bool gWindowModifierPalette = false;
 int gOptAttribOrder = 0;
 int gOptBright = 2;
 int gOptPaper = 0;
@@ -357,8 +358,8 @@ public:
 			ImGui::SliderFloat("Brightness", &mB, -2, 2); ImGui::SameLine();	
 			if (ImGui::Button("Reset brightness ")) mB = 0;
 
-			ImGui::SliderFloat("Pivot", &mP, -2, 2); ImGui::SameLine();
-			if (ImGui::Button("Reset pivot ")) mB = 0.5f;
+			ImGui::SliderFloat("Pivot     ", &mP, -2, 2); ImGui::SameLine();
+			if (ImGui::Button("Reset pivot      ")) mB = 0.5f;
 		}
 
 		int i;
@@ -1248,10 +1249,13 @@ int main(int, char**)
 				if (ImGui::MenuItem("Attribute/bitmap")) { gWindowAttribBitmap = !gWindowAttribBitmap; }
 				if (ImGui::MenuItem("Histogram")) { gWindowHistograms = !gWindowHistograms; }
 				if (ImGui::MenuItem("Conversion options")) { gWindowConvOptions = !gWindowConvOptions; }
+				if (ImGui::MenuItem("Modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Modifier"))
 			{
+				if (ImGui::MenuItem("Open modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
+				ImGui::Separator();
 				if (ImGui::MenuItem("Add RGB modifier")) { addModifier(new RGBModifier); }
 				if (ImGui::MenuItem("Add HSV modifier")) { addModifier(new HSVModifier); }
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
@@ -1260,6 +1264,19 @@ int main(int, char**)
 				ImGui::EndMenu();
 			}		
 			ImGui::EndMainMenuBar();
+		}
+
+		if (gWindowModifierPalette)
+		{
+			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				if (ImGui::Button("RGB")) { addModifier(new RGBModifier); }
+				if (ImGui::Button("HSV")) { addModifier(new HSVModifier); }
+				if (ImGui::Button("Contrast")) { addModifier(new ContrastModifier); }
+				if (ImGui::Button("Noise")) { addModifier(new NoiseModifier); }
+				if (ImGui::Button("Ordered Dither")) { addModifier(new OrderedDitherModifier); }
+			}
+			ImGui::End();
 		}
 
 
@@ -1306,15 +1323,17 @@ int main(int, char**)
 			ImGui::End();
 		}
 		
-		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);	
+		ImGui::SetNextWindowContentSize(ImVec2(816, 600));
+		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse /*| ImGuiWindowFlags_AlwaysAutoResize*/ | ImGuiWindowFlags_NoResize);	
 
+		
 		ImGui::Image((ImTextureID)gTextureSpec, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureProc, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureOrig, picsize);
-
+		ImGui::BeginChild("Modifiers");
 		process_image();
 		spectrumize_image();
-
+		ImGui::EndChild();
 		ImGui::End();	
 
 		glBindTexture(GL_TEXTURE_2D, gTextureProc);
