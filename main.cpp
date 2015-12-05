@@ -1323,8 +1323,8 @@ int main(int, char**)
 			ImGui::End();
 		}
 		
-		ImGui::SetNextWindowContentSize(ImVec2(816, 600));
-		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse /*| ImGuiWindowFlags_AlwaysAutoResize*/ | ImGuiWindowFlags_NoResize);	
+		ImGui::SetNextWindowContentSize(ImVec2(840, 512));
+		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);	
 
 		
 		ImGui::Image((ImTextureID)gTextureSpec, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
