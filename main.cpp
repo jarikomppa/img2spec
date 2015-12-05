@@ -69,11 +69,12 @@ int gUniqueValueCounter = 0;
 
 bool gWindowAttribBitmap = false;
 bool gWindowHistograms = false;
-bool gWindowConvOptions = true;
+bool gWindowConvOptions = false;
 int gOptAttribOrder = 0;
 int gOptBright = 2;
 int gOptPaper = 0;
 int gOptCellSize = 0;
+int gOptDither = 0;
 
 // Texture handles
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
@@ -1100,16 +1101,49 @@ int main(int, char**)
                 done = true;
         }
         ImGui_ImplSdl_NewFrame(window);
-		ImGui::ShowTestWindow();
+		//ImGui::ShowTestWindow();
+
+
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Load image")) { loadimg(); }
+				ImGui::Separator();
+				if (ImGui::MenuItem("Save .png")) { savepng(); }
+				if (ImGui::MenuItem("Save .raw")) { saveraw(); }
+				if (ImGui::MenuItem("Save .h")) { saveh(); }
+				if (ImGui::MenuItem("Save .inc")) { saveinc(); }
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Window"))
+			{
+				if (ImGui::MenuItem("Attribute/bitmap")) { gWindowAttribBitmap = !gWindowAttribBitmap; }
+				if (ImGui::MenuItem("Histogram")) { gWindowHistograms = !gWindowHistograms; }
+				if (ImGui::MenuItem("Conversion options")) { gWindowConvOptions = !gWindowConvOptions; }
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Modifier"))
+			{
+				if (ImGui::MenuItem("Add RGB modifier")) { addModifier(new RGBModifier); }
+				if (ImGui::MenuItem("Add HSV modifier")) { addModifier(new HSVModifier); }
+				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
+				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
+				ImGui::EndMenu();
+			}		
+			ImGui::EndMainMenuBar();
+		}
+
 
 		if (gWindowConvOptions)
 		{
 			if (ImGui::Begin("Conversion options", &gWindowConvOptions, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
-				ImGui::Combo("Attribute order", &gOptAttribOrder, "Pretty\0Compressable\0");
+				ImGui::Combo("Attribute order", &gOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0");
 				ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0");
 				ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0");
-				//ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0");
+				ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\0"); // 8x4 (bicolor)\08x2\08x1\0");
+				ImGui::Combo("Dithering", &gOptDither, "None\0");// Ordered\0Random\0Floyd - Steinberg\0");
 			}
 			ImGui::End();
 		}
@@ -1145,79 +1179,16 @@ int main(int, char**)
 			ImGui::End();
 		}
 		
-		ImGui::Begin("Main", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);	
 
 		ImGui::Image((ImTextureID)gTextureSpec, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureProc, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureOrig, picsize);
-		
-		ImGui::Text("File ops:");
-		ImGui::SameLine();
-		if (ImGui::Button("Load image"))
-		{
-			loadimg();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Save png"))
-		{
-			savepng();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Save raw"))
-		{
-			saveraw();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Save .h"))
-		{
-			saveh();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Save .inc"))
-		{
-			saveinc();
-		}
-		ImGui::Text("Windows:");
-		ImGui::SameLine();
-		if (ImGui::Button("Histogram"))
-		{
-			gWindowHistograms = !gWindowHistograms;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Attribute/Bitmap"))
-		{
-			gWindowAttribBitmap = !gWindowAttribBitmap;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Conversion options"))
-		{
-			gWindowConvOptions = !gWindowConvOptions;
-		}
-
-		ImGui::Text("Add modifiers:");
-		ImGui::SameLine();
-		if (ImGui::Button("RGB"))
-		{
-			addModifier(new RGBModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("HSV"))
-		{
-			addModifier(new HSVModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Contrast"))
-		{
-			addModifier(new ContrastModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Noise"))
-		{
-			addModifier(new NoiseModifier);
-		}
-		
 
 		process_image();
+		ImGui::End();
+		
+
 		spectrumize_image();
 
 		glBindTexture(GL_TEXTURE_2D, gTextureProc);
@@ -1225,7 +1196,6 @@ int main(int, char**)
 		glBindTexture(GL_TEXTURE_2D, gTextureSpec);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
 
-		ImGui::End();
 
         // Rendering
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
