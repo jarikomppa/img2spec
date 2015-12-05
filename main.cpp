@@ -259,13 +259,14 @@ public:
 class ContrastModifier : public Modifier
 {
 public:
-	float mC, mB;
+	float mC, mB, mP;
 	int mOnce;
 
 	ContrastModifier()
 	{
 		mB = 0;
 		mC = 1;
+		mP = 0.5f;
 		mOnce = 0;
 	}
 
@@ -288,6 +289,9 @@ public:
 
 			ImGui::SliderFloat("Brightness", &mB, -2, 2); ImGui::SameLine();	
 			if (ImGui::Button("Reset brightness ")) mB = 0;
+
+			ImGui::SliderFloat("Pivot", &mP, -2, 2); ImGui::SameLine();
+			if (ImGui::Button("Reset pivot ")) mB = 0.5f;
 		}
 
 		int i;
@@ -295,7 +299,7 @@ public:
 		{
 			for (i = 0; i < 256 * 192 * 3; i++)
 			{
-				gBitmapProcFloat[i] = (gBitmapProcFloat[i] - 0.5f) * mC + 0.5f + mB;
+				gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
 			}
 		}
 		ImGui::PopID();
