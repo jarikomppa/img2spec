@@ -38,7 +38,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 
 #define SPEC_Y(y)  ((((y>>0)&7)<< 3) | (((y >> 3)&7) <<0) | ((y >> 6) & 3) << 6)
 
@@ -64,6 +64,17 @@ int gSpeccyPalette[]
 	0xffffff
 };
 
+// used to avoid id collisions in ImGui
+int gUniqueValueCounter = 0;
+
+bool gWindowAttribBitmap = false;
+bool gWindowHistograms = false;
+bool gWindowConvOptions = true;
+int gOptAttribOrder = 0;
+int gOptBright = 2;
+int gOptPaper = 0;
+int gOptCellSize = 0;
+
 // Texture handles
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
 
@@ -86,8 +97,6 @@ float gHistogramR[256];
 float gHistogramG[256];
 float gHistogramB[256];
 
-// used to avoid id collisions in ImGui
-int gUniqueValueCounter = 0;
 
 class Modifier;
 // Modifier stack
@@ -627,13 +636,25 @@ void spectrumize_image()
 						blacks++;
 				}
 			}
-			
-			// Thing is.. using the bright palette tends to suck. So,
-			// avoid using them unless almost all of the tile is bright.
-			// black + bright is okay)			
-			//brights = (brights >= (4 * 8)) * 8;
 
-			brights = (brights >= (6 * 8 - blacks)) * 8;
+			switch (gOptBright)
+			{
+			case 0: // only dark
+				brights = 0;
+				break;
+			case 1: // prefer dark
+				brights = (brights >= (8 * 8 - blacks)) * 8;
+				break;
+			case 2: // default
+				brights = (brights >= (8 * 8 - blacks) / 2) * 8;
+				break;
+			case 3: // prefer bright
+				brights = (brights >= (8 * 8 - blacks) / 4) * 8;
+				break;
+			case 4: // only bright
+				brights = 8;
+				break;
+			}		
 
 			int counts[16];
 			for (i = 0; i < 16; i++)
@@ -654,13 +675,20 @@ void spectrumize_image()
 			// Find two most common colors in cell
 			int col1 = 0, col2 = 0;
 			int best = 0;
-			for (i = 0; i < 16; i++)
+			if (gOptPaper == 0)
 			{
-				if (counts[i] > best)
+				for (i = 0; i < 16; i++)
 				{
-					best = counts[i];
-					col1 = i;
+					if (counts[i] > best)
+					{
+						best = counts[i];
+						col1 = i;
+					}
 				}
+			}
+			else
+			{
+				col1 = (gOptPaper - 1) + brights;
 			}
 			counts[col1] = 0;
 			best = 0;
@@ -686,6 +714,17 @@ void spectrumize_image()
 				}
 			}		
 			
+			if (gOptPaper == 0)
+			{
+				// Make the "brighter" color the ink to make bitmap pretty (if wanted)
+				if (gOptAttribOrder == 0 && col2 < col1)
+				{
+					int tmp = col2;
+					col2 = col1;
+					col1 = tmp;
+				}
+			}
+
 			// Store the cell's attribute
 			gSpectrumAttributes[y * 32 + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
 		}
@@ -962,8 +1001,9 @@ void gen_attr_bitm()
 	{
 		for (j = 0; j < 256; j++)
 		{
-			int fg = gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 0) & 7) | (((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) != 0) << 3)] | 0xff000000;
-			int bg = gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | (((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) != 0) << 3)] | 0xff000000;
+			int attr = gSpectrumAttributes[(i / 8) * 32 + j / 8];
+			int fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+			int bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 			gBitmapAttr[i * 256 + j] = (j % 8 < i % 8) ? fg : bg;			
 			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 		}
@@ -974,6 +1014,7 @@ void gen_attr_bitm()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapBitm);
 
 }
+
 
 
 int main(int, char**)
@@ -1059,32 +1100,50 @@ int main(int, char**)
                 done = true;
         }
         ImGui_ImplSdl_NewFrame(window);
-		//ImGui::ShowTestWindow();
+		ImGui::ShowTestWindow();
 
-		if (ImGui::Begin("Attrib/bitmap", 0, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+		if (gWindowConvOptions)
 		{
-			gen_attr_bitm();
-			ImGui::Image((ImTextureID)gTextureAttr, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::Image((ImTextureID)gTextureBitm, picsize); ImGui::SameLine(); ImGui::Text(" ");
+			if (ImGui::Begin("Conversion options", &gWindowConvOptions, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				ImGui::Combo("Attribute order", &gOptAttribOrder, "Pretty\0Compressable\0");
+				ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0");
+				ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0");
+				//ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0");
+			}
+			ImGui::End();
 		}
-		ImGui::End();
 
-		if (ImGui::Begin("Histograms", 0, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+		if (gWindowAttribBitmap)
 		{
-			calc_histogram(gBitmapOrig);
-			ImGui::PlotHistogram("###1", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###2", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###3", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
-			calc_histogram(gBitmapProc);
-			ImGui::PlotHistogram("###4", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###5", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###6", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
-			calc_histogram(gBitmapSpec);
-			ImGui::PlotHistogram("###7", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###8", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-			ImGui::PlotHistogram("###9", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
+			if (ImGui::Begin("Attrib/bitmap", &gWindowAttribBitmap, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				gen_attr_bitm();
+				ImGui::Image((ImTextureID)gTextureAttr, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::Image((ImTextureID)gTextureBitm, picsize); ImGui::SameLine(); ImGui::Text(" ");
+			}
+			ImGui::End();
 		}
-		ImGui::End();
+
+		if (gWindowHistograms)
+		{
+			if (ImGui::Begin("Histograms", &gWindowHistograms, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				calc_histogram(gBitmapOrig);
+				ImGui::PlotHistogram("###hist1", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist2", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist3", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
+				calc_histogram(gBitmapProc);
+				ImGui::PlotHistogram("###hist4", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist5", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist6", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
+				calc_histogram(gBitmapSpec);
+				ImGui::PlotHistogram("###hist7", gHistogramR, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist8", gHistogramG, 256, 0, 0, 0, 1024, ImVec2(256, 32)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::PlotHistogram("###hist9", gHistogramB, 256, 0, 0, 0, 1024, ImVec2(256, 32));
+			}
+			ImGui::End();
+		}
 		
 		ImGui::Begin("Main", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
 
@@ -1092,29 +1151,7 @@ int main(int, char**)
 		ImGui::Image((ImTextureID)gTextureProc, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureOrig, picsize);
 		
-		ImGui::Text("Add modifiers:");
-		ImGui::SameLine();
-		if (ImGui::Button("RGB"))
-		{
-			addModifier(new RGBModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("HSV"))
-		{
-			addModifier(new HSVModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Contrast"))
-		{
-			addModifier(new ContrastModifier);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Noise"))
-		{
-			addModifier(new NoiseModifier);
-		}
-		ImGui::SameLine();
-		ImGui::Text("| File ops:");
+		ImGui::Text("File ops:");
 		ImGui::SameLine();
 		if (ImGui::Button("Load image"))
 		{
@@ -1140,6 +1177,45 @@ int main(int, char**)
 		{
 			saveinc();
 		}
+		ImGui::Text("Windows:");
+		ImGui::SameLine();
+		if (ImGui::Button("Histogram"))
+		{
+			gWindowHistograms = !gWindowHistograms;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Attribute/Bitmap"))
+		{
+			gWindowAttribBitmap = !gWindowAttribBitmap;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Conversion options"))
+		{
+			gWindowConvOptions = !gWindowConvOptions;
+		}
+
+		ImGui::Text("Add modifiers:");
+		ImGui::SameLine();
+		if (ImGui::Button("RGB"))
+		{
+			addModifier(new RGBModifier);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("HSV"))
+		{
+			addModifier(new HSVModifier);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Contrast"))
+		{
+			addModifier(new ContrastModifier);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Noise"))
+		{
+			addModifier(new NoiseModifier);
+		}
+		
 
 		process_image();
 		spectrumize_image();
