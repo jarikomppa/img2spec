@@ -1522,11 +1522,12 @@ int main(int, char**)
 		{
 			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
-				if (ImGui::Button("RGB")) { addModifier(new RGBModifier); }
-				if (ImGui::Button("HSV")) { addModifier(new HSVModifier); }
-				if (ImGui::Button("Contrast")) { addModifier(new ContrastModifier); }
-				if (ImGui::Button("Noise")) { addModifier(new NoiseModifier); }
-				if (ImGui::Button("Ordered Dither")) { addModifier(new OrderedDitherModifier); }
+				if (ImGui::Button("RGB", ImVec2(-1,0))) { addModifier(new RGBModifier); }
+				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
+				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
+				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
+				// widest button defines the window width, so we can't set it to "auto size"
+				if (ImGui::Button("Ordered Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new OrderedDitherModifier); }
 			}
 			ImGui::End();
 		}
