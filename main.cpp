@@ -1189,7 +1189,7 @@ void saveh()
 		w = 0;
 		for (i = 0; i < 32 * 24 * attrib_size_multiplier; i++)
 		{
-			w += fprintf(f, "%3d,", gSpectrumAttributes[i]);
+			w += fprintf(f, "%3d%s", gSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier)-1?",":"");
 			if (w > 75)
 			{
 				fprintf(f, "\n");
@@ -1482,20 +1482,37 @@ int main(int, char**)
 			if (ImGui::Begin("Halp!", &gWindowHelp, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
 				ImGui::TextWrapped(
+					"Tips:\n"
+					"----\n"
+					"- The window can be resized.\n"
+					"- Various helper windows can be opened from the window menu.\n"
+					"- Don't hesistate to play with conversion options.\n"
+					"\n"
 					"Typical workflow:\n"
 					"----------------"
 					"\n"
 					"1. Load an image (file->load image)\n"
 					"2. Add modifiers (modifiers->...)\n"
 					"3. (optionally) open options (window->options) and change conversion options\n"
-					"4. Tweak modifiers until result is acceptable\n"					
+					"4. Tweak modifiers until result is acceptable\n"
 					"5. Save result (file->save ...)\n"
 					"\n"
 					"File formats:\n"
 					"------------\n"
 					"The file formats for scr, h and inc are basically the same. Bitmap (in spectrum screen "
 					"order) is followed by attribute data. In case of non-standard cell sizes, the attribute "
-					"data is bigger, but still in linear order.\n"
+					"data is bigger, but still in linear order - it is up to the code that uses the data to "
+					"figure out how to use it.\n"
+					"\n"
+					".scr is a binary format.\n"
+					"\n"
+					".h is C array, only data is included, so typical use would be:\n"
+					"  const myimagedata[]= {\n"
+					"  #include \"myimagedata.h\"\n"
+					"  };\n"
+					"\n"
+					".inc is assember .db lines.\n"
+					"\n"
 					);
 			}
 			ImGui::End();
