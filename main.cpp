@@ -42,7 +42,6 @@ Still, if you find it useful, great!
 
 #define SPEC_Y(y)  ((((y>>0)&7)<< 3) | (((y >> 3)&7) <<0) | ((y >> 6) & 3) << 6)
 
-
 int gSpeccyPalette[]
 {
 	0x000000, // black
@@ -72,6 +71,8 @@ bool gWindowAttribBitmap = false;
 bool gWindowHistograms = false;
 bool gWindowOptions = false;
 bool gWindowModifierPalette = false;
+bool gWindowAbout = false;
+bool gWindowHelp = false;
 int gOptZoom = 2;
 int gOptZoomStyle = 0;
 int gOptAttribOrder = 0;
@@ -1386,7 +1387,104 @@ int main(int, char**)
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
 				ImGui::EndMenu();
 			}		
+			if (ImGui::BeginMenu("Help"))
+			{
+				if (ImGui::MenuItem("About")) { gWindowAbout = !gWindowAbout; }
+				ImGui::Separator();
+				if (ImGui::MenuItem("Show help")) { gWindowHelp= !gWindowHelp; }
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
+		}
+
+		if (gWindowAbout)
+		{
+			ImGui::SetNextWindowSize(ImVec2(400, 300));
+			if (ImGui::Begin("About Image Spectrumizer " VERSION, &gWindowAbout, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				ImGui::TextWrapped(
+					"Image Spectrumizer\n"
+					"\n"
+					"Sources available at:\n"
+					"https://github.com/jarikomppa/img2spec\n"
+					"\n"
+					"Copyright(c) 2015 Jari Komppa, http://iki.fi/sol\n"
+					"\n"
+					"This software is provided 'as-is', without any express or implied "
+					"warranty.In no event will the authors be held liable for any damages "
+					"arising from the use of this software.\n"
+					"\n"
+					"Permission is granted to anyone to use this software for any purpose, "
+					"including commercial applications, and to alter it and redistribute it "
+					"freely, subject to the following restrictions :\n"
+					"\n"
+					"1. The origin of this software must not be misrepresented; you must not "
+					"claim that you wrote the original software.If you use this software "
+					"in a product, an acknowledgement in the product documentation would be "
+					"appreciated but is not required.\n"
+					"2. Altered source versions must be plainly marked as such, and must not be "
+					"misrepresented as being the original software.\n"
+					"3. This notice may not be removed or altered from any source distribution.\n"
+					"-----------\n"
+					"\n"
+					"Uses Ocornut's ImGui library, from:\n"
+					"https://github.com/ocornut/imgui\n"
+					"\n"
+					"The MIT License(MIT)\n"
+					"\n"
+					"Copyright(c) 2014 - 2015 Omar Cornut and ImGui contributors\n"
+					"\n"
+					"Permission is hereby granted, free of charge, to any person obtaining a copy "
+					"of this software and associated documentation files(the \"Software\"), to deal "
+					"in the Software without restriction, including without limitation the rights "
+					"to use, copy, modify, merge, publish, distribute, sublicense, and / or sell "
+					"copies of the Software, and to permit persons to whom the Software is "
+					"furnished to do so, subject to the following conditions :\n"
+					"\n"
+					"The above copyright notice and this permission notice shall be included in all "
+					"copies or substantial portions of the Software.\n"
+					"\n"
+					"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR "
+					"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+					"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE "
+					"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+					"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+					"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE "
+					"SOFTWARE.\n"
+					"\n"
+					"-----------\n"
+					"Uses various STB libraries from:\n"
+					"https://github.com/nothings/stb/\n"
+					"by Sean Barrett, under public domain\n");
+
+			}
+			ImGui::End();
+		}
+
+		if (gWindowHelp)
+		{
+			ImGui::SetNextWindowSize(ImVec2(400, 300));
+			if (ImGui::Begin("Halp!", &gWindowHelp, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				ImGui::TextWrapped(
+					"Typical workflow:\n"
+					"----------------"
+					"\n"
+					"1. Load an image (file->load image)\n"
+					"2. Add modifiers (modifiers->...)\n"
+					"3. (optionally) open options (window->options) and change conversion options\n"
+					"4. Tweak modifiers until result is acceptable\n"					
+					"5. Save result (file->save ...)\n"
+					"\n"
+					"File formats:\n"
+					"------------\n"
+					"The file formats for raw, h and inc are basically the same. Bitmap (in spectrum screen "
+					"order) is followed by attribute data. In case of non-standard cell sizes, the attribute "
+					"data is bigger, but still in linear order.\n"
+					);
+			}
+			ImGui::End();
 		}
 
 		if (gWindowModifierPalette)
@@ -1445,7 +1543,7 @@ int main(int, char**)
 						{
 							ImGui::Image(
 								(ImTextureID)gTextureSpec, 
-								ImVec2(8 * gOptZoom, cellht * gOptZoom),
+								ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
 								ImVec2((8 / 256.0f) * (j + 0), (cellht / 192.0f) * (i + 0)),
 								ImVec2((8 / 256.0f) * (j + 1), (cellht / 192.0f) * (i + 1)));
 							
@@ -1459,7 +1557,7 @@ int main(int, char**)
 				}
 				else
 				{
-					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(256 * gOptZoom, 192 * gOptZoom));
+					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(256.0f * gOptZoom, 192.0f * gOptZoom));
 				}
 
 			}
