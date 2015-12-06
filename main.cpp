@@ -102,7 +102,8 @@ float gHistogramB[256];
 class Modifier;
 // Modifier stack
 Modifier *gModifierRoot = 0;
-
+// Modifiers are applied in reverse order
+Modifier *gModifierApplyStack = 0;
 
 class Modifier
 {
@@ -110,6 +111,7 @@ public:
 	int mUnique;
 	bool mEnabled;
 	Modifier * mNext;
+	Modifier * mApplyNext;
 
 	Modifier()
 	{ 
@@ -129,7 +131,8 @@ public:
 		return ret;
 	}
 
-	virtual int process() = 0;	
+	virtual int ui() = 0;	
+	virtual void process() = 0;
 };
 
 class RGBModifier : public Modifier
@@ -143,30 +146,35 @@ public:
 		mR = mG = mB = 0; 
 		mOnce = 0;
 	}
-	virtual int process()
+	virtual int ui()
 	{
 		int ret = 0;
 		ImGui::PushID(mUnique);
-	
-		if (!mOnce) 
+
+		if (!mOnce)
 		{
-			ImGui::OpenNextNode(1); 
+			ImGui::OpenNextNode(1);
 			mOnce = 1;
 		}
-		
+
 		if (ImGui::CollapsingHeader("RGB Modifier"))
 		{
 			ret = common();
-			ImGui::SliderFloat("Red  ", &mR, -1, 1); ImGui::SameLine();	
+			ImGui::SliderFloat("Red  ", &mR, -1, 1); ImGui::SameLine();
 			if (ImGui::Button("Reset red   ")) mR = 0;
 
-			ImGui::SliderFloat("Green", &mG, -1, 1); ImGui::SameLine();	
+			ImGui::SliderFloat("Green", &mG, -1, 1); ImGui::SameLine();
 			if (ImGui::Button("Reset green ")) mG = 0;
 
-			ImGui::SliderFloat("Blue ", &mB, -1, 1); ImGui::SameLine();	
+			ImGui::SliderFloat("Blue ", &mB, -1, 1); ImGui::SameLine();
 			if (ImGui::Button("Reset blue  ")) mB = 0;
 		}
-
+		ImGui::PopID();
+		return ret;
+	}
+	
+	virtual void process()
+	{
 		int i;
 		if (mEnabled)
 		{
@@ -178,7 +186,6 @@ public:
 			}
 		}
 		ImGui::PopID();
-		return ret;
 	}
 	
 };
@@ -204,7 +211,7 @@ public:
 		mB_en = true;
 	}
 	
-	virtual int process()
+	virtual int ui()
 	{
 		int ret = 0;
 		ImGui::PushID(mUnique);
@@ -230,6 +237,12 @@ public:
 			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine(); 
 			ImGui::Checkbox("Blue enable", &mB_en);
 		}
+		ImGui::PopID();
+		return ret;
+	}
+
+	virtual void process()
+	{
 
 		int i;
 		if (mEnabled)
@@ -250,8 +263,6 @@ public:
 				if (mR_en) gBitmapProcFloat[i * 3 + 2] += r;
 			}
 		}
-		ImGui::PopID();
-		return ret;
 	}
 };
 
@@ -261,6 +272,8 @@ public:
 	float mV;
 	bool mR_en, mG_en, mB_en;
 	int mOnce;
+	int mXOfs, mYOfs;
+	int mMatrix;
 
 	OrderedDitherModifier()
 	{
@@ -269,9 +282,12 @@ public:
 		mR_en = true;
 		mG_en = true;
 		mB_en = true;
+		mXOfs = 0;
+		mYOfs = 0;
+		mMatrix = 4;
 	}
 
-	virtual int process()
+	virtual int ui()
 	{
 		int ret = 0;
 		ImGui::PushID(mUnique);
@@ -285,6 +301,12 @@ public:
 		if (ImGui::CollapsingHeader("Ordered Dither Modifier"))
 		{
 			ret = common();
+			ImGui::Combo(    "Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0"); ImGui::SameLine();
+			if (ImGui::Button("Reset matrix     ")) mMatrix = 4;
+			ImGui::SliderInt("X offset", &mXOfs, 0, 8);	ImGui::SameLine();
+			if (ImGui::Button("Reset X offset   ")) mXOfs = 0;
+			ImGui::SliderInt("Y offset", &mYOfs, 0, 8);	ImGui::SameLine();
+			if (ImGui::Button("Reset Y offset   ")) mYOfs = 0;
 			ImGui::SliderFloat("Strength", &mV, 0, 2);	ImGui::SameLine();
 			if (ImGui::Button("Reset strength   ")) mV = 1.0f;
 
@@ -292,9 +314,44 @@ public:
 			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine();
 			ImGui::Checkbox("Blue enable", &mB_en);
 		}
+		ImGui::PopID();
+		return ret;
+	}
+
+	virtual void process()
+	{
 
 		if (mEnabled)
 		{
+
+			float matrix2x2[] =
+			{
+				1.0f,  3.0f,
+				4.0f,  2.0f
+			};
+
+			float matrix3x3[] =
+			{
+				8.0f,  3.0f,  4.0f,
+				6.0f,  1.0f,  2.0f,
+				7.0f,  5.0f,  9.0f
+			};
+
+			float matrix3x3alt[] =
+			{
+				1.0f,  7.0f,  4.0f,
+				5.0f,  8.0f,  3.0f,
+				6.0f,  2.0f,  9.0f
+			};
+
+			float matrix4x4[] =
+			{
+				1.0f,  9.0f,  3.0f, 11.0f,
+				13.0f,  5.0f, 15.0f,  7.0f,
+				4.0f, 12.0f,  2.0f, 10.0f,
+				16.0f,  8.0f, 14.0f,  6.0f
+			};
+
 			float matrix8x8[] =
 			{
 				0.0f, 32.0f, 8.0f, 40.0f, 2.0f, 34.0f, 10.0f, 42.0f,
@@ -307,19 +364,49 @@ public:
 				63.0f, 31.0f, 55.0f, 23.0f, 61.0f, 29.0f, 53.0f, 21.0f
 			};
 
+			float *matrix;
+			int matsize;
+			float matdiv;
+
+			switch (mMatrix)
+			{
+			case 0:
+				matrix = matrix2x2;
+				matsize = 2;
+				matdiv = 4.0f;
+				break;
+			case 1:
+				matrix = matrix3x3;
+				matsize = 3;
+				matdiv = 9.0f;
+				break;
+			case 2:
+				matrix = matrix3x3alt;
+				matsize = 3;
+				matdiv = 9.0f;
+				break;
+			case 3:
+				matrix = matrix4x4;
+				matsize = 4;
+				matdiv = 16.0f;
+				break;
+			case 4:
+				matrix = matrix8x8;
+				matsize = 8;
+				matdiv = 63.0f;
+				break;
+			}
 			int i, j;
 			for (i = 0; i < 192; i++)
 			{
 				for (j = 0; j < 256; j++)
 				{
-					if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0] * mV;
-					if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1] * mV;
-					if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix8x8[(i % 8) * 8 + (j % 8)] / 63.0f - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2] * mV;
+					if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0] * mV;
+					if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1] * mV;
+					if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2] * mV;
 				}
 			}
 		}
-		ImGui::PopID();
-		return ret;
 	}
 };
 
@@ -338,7 +425,7 @@ public:
 		mOnce = 0;
 	}
 
-	virtual int process()
+	virtual int ui()
 	{
 		int ret = 0;
 		ImGui::PushID(mUnique);
@@ -361,6 +448,12 @@ public:
 			ImGui::SliderFloat("Pivot     ", &mP, -2, 2); ImGui::SameLine();
 			if (ImGui::Button("Reset pivot      ")) mB = 0.5f;
 		}
+		ImGui::PopID();
+		return ret;
+	}
+
+	virtual void process()
+	{
 
 		int i;
 		if (mEnabled)
@@ -370,8 +463,6 @@ public:
 				gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
 			}
 		}
-		ImGui::PopID();
-		return ret;
 	}
 };
 
@@ -489,7 +580,7 @@ public:
 		}
 	}
 
-	virtual int process()
+	virtual int ui()
 	{
 		int ret = 0;
 		ImGui::PushID(mUnique);
@@ -513,7 +604,13 @@ public:
 			ImGui::SliderFloat("Value     ", &mV, -2, 2);     ImGui::SameLine();	
 			if (ImGui::Button("Reset value      ")) mV = 0;
 		}
-		
+		ImGui::PopID();
+		return ret;
+	}
+
+	virtual void process()
+	{
+
 		int i;
 		if (mEnabled)
 		{
@@ -531,8 +628,6 @@ public:
 				hsv2rgb(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
 			}
 		}
-		ImGui::PopID();
-		return ret;
 	}
 };
 
@@ -573,17 +668,14 @@ void float_to_bitmap()
 	}
 }
 
-void process_image()
+void modifier_ui()
 {
-
-	bitmap_to_float(gBitmapOrig);
-	
 	Modifier *walker = gModifierRoot;
 	Modifier *prev = 0;
-
+	
 	while (walker)
 	{
-		int ret = walker->process();
+		int ret = walker->ui();
 		if (ret == 1) // move down
 		{
 			if (walker->mNext)
@@ -611,26 +703,53 @@ void process_image()
 			}
 		}
 		else
-		if (ret == -1) // delete
-		{
-			Modifier *t = walker;
-			if (prev == 0)
+			if (ret == -1) // delete
 			{
-				gModifierRoot = walker->mNext;
+				Modifier *t = walker;
+				if (prev == 0)
+				{
+					gModifierRoot = walker->mNext;
+				}
+				else
+				{
+					prev->mNext = walker->mNext;
+				}
+				walker = walker->mNext;
+				delete t;
 			}
-			else
+			else // normal op
 			{
-				prev->mNext = walker->mNext;
+				prev = walker;
+				walker = walker->mNext;
 			}
-			walker = walker->mNext;
-			delete t;
-		}
-		else // normal op
+	}
+
+	gModifierApplyStack = gModifierRoot;
+	if (gModifierApplyStack)
+	{
+		gModifierApplyStack->mApplyNext = 0;
+
+		walker = gModifierRoot->mNext;
+		while (walker)
 		{
-			prev = walker;
+			walker->mApplyNext = gModifierApplyStack;
+			gModifierApplyStack = walker;
 			walker = walker->mNext;
 		}
 	}
+}
+
+void process_image()
+{
+	bitmap_to_float(gBitmapOrig);
+
+	Modifier *walker = gModifierApplyStack;
+	while (walker)
+	{
+		walker->process();
+		walker = walker->mApplyNext;
+	}
+
 	float_to_bitmap();
 }
 
@@ -1323,7 +1442,7 @@ int main(int, char**)
 			ImGui::End();
 		}
 		
-		ImGui::SetNextWindowContentSize(ImVec2(840, 512));
+		ImGui::SetNextWindowContentSize(ImVec2(828, 512));
 		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);	
 
 		
@@ -1331,10 +1450,12 @@ int main(int, char**)
 		ImGui::Image((ImTextureID)gTextureProc, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		ImGui::Image((ImTextureID)gTextureOrig, picsize);
 		ImGui::BeginChild("Modifiers");
-		process_image();
-		spectrumize_image();
+		modifier_ui();
 		ImGui::EndChild();
 		ImGui::End();	
+
+		process_image();
+		spectrumize_image();
 
 		glBindTexture(GL_TEXTURE_2D, gTextureProc);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
