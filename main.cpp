@@ -79,6 +79,7 @@ int gOptAttribOrder = 0;
 int gOptBright = 2;
 int gOptPaper = 0;
 int gOptCellSize = 0;
+int gOptScreenOrder = 1;
 
 // Texture handles
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
@@ -1083,22 +1084,36 @@ void savepng()
 // When converting to speccy format we process stuff cell by cell..
 // easier to just analyze the result to generate the bitmap than to
 // mess up the conversion further.
-void grab_speccy_bitmap()
+void grab_speccy_bitmap(int aScreenOrder)
 {	
 	int i, j;
-	for (i = 0; i < 192; i++)
+	if (aScreenOrder)
 	{
-		for (j = 0; j < 256; j++)
+		for (i = 0; i < 192; i++)
 		{
-			gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] <<= 1;
-			int v = ((gBitmapSpec[i * 256 + j] & 0xffffff) != gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | ((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) << 3)]);
-			gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] |= v;
+			for (j = 0; j < 256; j++)
+			{
+				gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] <<= 1;
+				int v = ((gBitmapSpec[i * 256 + j] & 0xffffff) != gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | ((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) << 3)]);
+				gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] |= v;
+			}
+		}
+	}
+	else
+	{
+		for (i = 0; i < 192; i++)
+		{
+			for (j = 0; j < 256; j++)
+			{
+				gSpectrumBitmap[i * 32 + j / 8] <<= 1;
+				int v = ((gBitmapSpec[i * 256 + j] & 0xffffff) != gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | ((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) << 3)]);
+				gSpectrumBitmap[i * 32 + j / 8] |= v;
+			}
 		}
 	}
 }
 
-
-void saveraw()
+void savescr()
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -1108,7 +1123,7 @@ void saveraw()
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = 0;
 	ofn.lpstrFilter =
-		"RAW (*.raw)\0*.raw\0"
+		"scr (*.scr)\0*.scr\0"
 		"All Files (*.*)\0*.*\0\0";
 
 	ofn.nMaxFile = 1024;
@@ -1116,7 +1131,7 @@ void saveraw()
 	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 	ofn.lpstrFile = szFileName;
 
-	ofn.lpstrTitle = "Save raw";
+	ofn.lpstrTitle = "Save scr";
 
 	FILE * f = NULL;
 
@@ -1124,14 +1139,13 @@ void saveraw()
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap();
+		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "wb");
 		fwrite(gSpectrumBitmap, 32 * 192, 1, f);
 		fwrite(gSpectrumAttributes, 32 * 24 * attrib_size_multiplier, 1, f);
 		fclose(f);
 	}
 }
-
 
 void saveh()
 {
@@ -1159,7 +1173,7 @@ void saveh()
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap();
+		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "w");
 		int i, w = 0;
 		for (i = 0; i < 32 * 192; i++)
@@ -1213,7 +1227,7 @@ void saveinc()
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap();
+		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "w");
 		int i;
 		for (i = 0; i < 32 * 192; i++)
@@ -1249,7 +1263,7 @@ void gen_attr_bitm()
 		break;
 	}
 
-	grab_speccy_bitmap();
+	grab_speccy_bitmap(0);
 	int i, j;
 	for (i = 0; i < 192; i++)
 	{
@@ -1259,7 +1273,7 @@ void gen_attr_bitm()
 			int fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 			int bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 			gBitmapAttr[i * 256 + j] = (j % 8 < (((8-cellht)/2) + i % cellht)) ? fg : bg;
-			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[i * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr);
@@ -1362,7 +1376,7 @@ int main(int, char**)
 				if (ImGui::MenuItem("Load image")) { loadimg(); }
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save .png")) { savepng(); }
-				if (ImGui::MenuItem("Save .raw")) { saveraw(); }
+				if (ImGui::MenuItem("Save .scr")) { savescr(); }
 				if (ImGui::MenuItem("Save .h")) { saveh(); }
 				if (ImGui::MenuItem("Save .inc")) { saveinc(); }
 				ImGui::EndMenu();
@@ -1479,7 +1493,7 @@ int main(int, char**)
 					"\n"
 					"File formats:\n"
 					"------------\n"
-					"The file formats for raw, h and inc are basically the same. Bitmap (in spectrum screen "
+					"The file formats for scr, h and inc are basically the same. Bitmap (in spectrum screen "
 					"order) is followed by attribute data. In case of non-standard cell sizes, the attribute "
 					"data is bigger, but still in linear order.\n"
 					);
@@ -1512,6 +1526,8 @@ int main(int, char**)
 				ImGui::Separator();
 				ImGui::SliderInt("Zoomed window zoom factor", &gOptZoom, 1, 8);
 				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
+				ImGui::Separator();
+				ImGui::Combo("Bitmap order when saving", &gOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 			}
 			ImGui::End();
 		}
