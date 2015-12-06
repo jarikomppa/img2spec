@@ -165,14 +165,17 @@ public:
 		if (ImGui::CollapsingHeader("RGB Modifier"))
 		{
 			ret = common();
-			ImGui::SliderFloat("Red  ", &mR, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset red   ")) mR = 0;
+			ImGui::SliderFloat("##Red  ", &mR, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##red   ")) mR = 0; ImGui::SameLine();
+			ImGui::Text("Red");
 
-			ImGui::SliderFloat("Green", &mG, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset green ")) mG = 0;
+			ImGui::SliderFloat("##Green", &mG, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##green ")) mG = 0; ImGui::SameLine();
+			ImGui::Text("Green");
 
-			ImGui::SliderFloat("Blue ", &mB, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset blue  ")) mB = 0;
+			ImGui::SliderFloat("##Blue ", &mB, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##blue  ")) mB = 0; ImGui::SameLine();
+			ImGui::Text("Blue");
 		}
 		ImGui::PopID();
 		return ret;
@@ -230,12 +233,15 @@ public:
 		if (ImGui::CollapsingHeader("Noise Modifier"))
 		{
 			ret = common();			
-			ImGui::SliderFloat("Strength", &mV, 0, 0.25f);	ImGui::SameLine(); 
-			if (ImGui::Button("Reset strength   ")) mV = 0;			
+			ImGui::SliderFloat("##Strength", &mV, 0, 0.25f);	ImGui::SameLine(); 
+			if (ImGui::Button("Reset##strength   ")) mV = 0; ImGui::SameLine();
+			if (ImGui::Button("Randomize##strength")) mV = 0.25f * ((SDL_GetTicks() * 74531) % 65535)/65535.0f; ImGui::SameLine();
+			ImGui::Text("Strength");
 
-			ImGui::SliderInt("Seed    ", &mSeed, 0, 65535); ImGui::SameLine(); 
-			if (ImGui::Button("Reset seed       ")) mSeed = 0; ImGui::SameLine();  
-			if (ImGui::Button("Randomize ")) mSeed = (SDL_GetTicks() * 74531) % 65535;
+			ImGui::SliderInt("##Seed    ", &mSeed, 0, 65535); ImGui::SameLine(); 
+			if (ImGui::Button("Reset##seed       ")) mSeed = 0; ImGui::SameLine();  
+			if (ImGui::Button("Randomize")) mSeed = (SDL_GetTicks() * 74531) % 65535; ImGui::SameLine();
+			ImGui::Text("Seed");
 
 			ImGui::Checkbox("Color noise", &mColornoise);   ImGui::SameLine(); 
 			ImGui::Checkbox("Red enable", &mR_en); ImGui::SameLine(); 
@@ -306,14 +312,21 @@ public:
 		if (ImGui::CollapsingHeader("Ordered Dither Modifier"))
 		{
 			ret = common();
-			ImGui::Combo(    "Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0"); ImGui::SameLine();
-			if (ImGui::Button("Reset matrix     ")) mMatrix = 4;
-			ImGui::SliderInt("X offset", &mXOfs, 0, 8);	ImGui::SameLine();
-			if (ImGui::Button("Reset X offset   ")) mXOfs = 0;
-			ImGui::SliderInt("Y offset", &mYOfs, 0, 8);	ImGui::SameLine();
-			if (ImGui::Button("Reset Y offset   ")) mYOfs = 0;
-			ImGui::SliderFloat("Strength", &mV, 0, 2);	ImGui::SameLine();
-			if (ImGui::Button("Reset strength   ")) mV = 1.0f;
+			ImGui::Combo(    "##Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0"); ImGui::SameLine();
+			if (ImGui::Button("Reset##matrix     ")) mMatrix = 4; ImGui::SameLine();
+			ImGui::Text("Matrix");
+
+			ImGui::SliderInt("##X offset", &mXOfs, 0, 8);	ImGui::SameLine();
+			if (ImGui::Button("Reset##X offset   ")) mXOfs = 0; ImGui::SameLine();
+			ImGui::Text("X Offset");
+
+			ImGui::SliderInt("##Y offset", &mYOfs, 0, 8);	ImGui::SameLine();
+			if (ImGui::Button("Reset##Y offset   ")) mYOfs = 0; ImGui::SameLine();
+			ImGui::Text("Y Offset");
+
+			ImGui::SliderFloat("##Strength", &mV, 0, 2);	ImGui::SameLine();
+			if (ImGui::Button("Reset##strength   ")) mV = 1.0f; ImGui::SameLine();
+			ImGui::Text("Strength");
 
 			ImGui::Checkbox("Red enable", &mR_en); ImGui::SameLine();
 			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine();
@@ -444,14 +457,17 @@ public:
 		{
 			ret = common();
 			
-			ImGui::SliderFloat("Contrast  ", &mC, 0, 5);  ImGui::SameLine();	
-			if (ImGui::Button("Reset contrast   ")) mC = 1;
+			ImGui::SliderFloat("##Contrast  ", &mC, 0, 5);  ImGui::SameLine();	
+			if (ImGui::Button("Reset##contrast   ")) mC = 1; ImGui::SameLine();
+			ImGui::Text("Contrast");
 
-			ImGui::SliderFloat("Brightness", &mB, -2, 2); ImGui::SameLine();	
-			if (ImGui::Button("Reset brightness ")) mB = 0;
+			ImGui::SliderFloat("##Brightness", &mB, -2, 2); ImGui::SameLine();	
+			if (ImGui::Button("Reset##brightness ")) mB = 0; ImGui::SameLine();
+			ImGui::Text("Brightness");
 
-			ImGui::SliderFloat("Pivot     ", &mP, -2, 2); ImGui::SameLine();
-			if (ImGui::Button("Reset pivot      ")) mB = 0.5f;
+			ImGui::SliderFloat("##Pivot     ", &mP, -2, 2); ImGui::SameLine();
+			if (ImGui::Button("Reset##pivot      ")) mB = 0.5f; ImGui::SameLine();
+			ImGui::Text("Pivot");
 		}
 		ImGui::PopID();
 		return ret;
@@ -600,14 +616,17 @@ public:
 		{
 			ret = common();
 
-			ImGui::SliderFloat("Hue       ", &mH, -360, 360); ImGui::SameLine();	
-			if (ImGui::Button("Reset hue        ")) mH = 0;
+			ImGui::SliderFloat("##Hue       ", &mH, -360, 360); ImGui::SameLine();	
+			if (ImGui::Button("Reset##hue        ")) mH = 0; ImGui::SameLine();
+			ImGui::Text("Hue");
 			
-			ImGui::SliderFloat("Saturation", &mS, -2, 2);     ImGui::SameLine();	
-			if (ImGui::Button("Reset saturation ")) mS = 0;
+			ImGui::SliderFloat("##Saturation", &mS, -2, 2);     ImGui::SameLine();	
+			if (ImGui::Button("Reset##saturation ")) mS = 0; ImGui::SameLine();
+			ImGui::Text("Saturation");
 			
-			ImGui::SliderFloat("Value     ", &mV, -2, 2);     ImGui::SameLine();	
-			if (ImGui::Button("Reset value      ")) mV = 0;
+			ImGui::SliderFloat("##Value     ", &mV, -2, 2);     ImGui::SameLine();	
+			if (ImGui::Button("Reset##value      ")) mV = 0; ImGui::SameLine();
+			ImGui::Text("Value");
 		}
 		ImGui::PopID();
 		return ret;
