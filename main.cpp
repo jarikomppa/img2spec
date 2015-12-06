@@ -67,10 +67,13 @@ int gSpeccyPalette[]
 // used to avoid id collisions in ImGui
 int gUniqueValueCounter = 0;
 
+bool gWindowZoomedOutput = false;
 bool gWindowAttribBitmap = false;
 bool gWindowHistograms = false;
-bool gWindowConvOptions = false;
+bool gWindowOptions = false;
 bool gWindowModifierPalette = false;
+int gOptZoom = 2;
+int gOptZoomStyle = 0;
 int gOptAttribOrder = 0;
 int gOptBright = 2;
 int gOptPaper = 0;
@@ -1367,8 +1370,9 @@ int main(int, char**)
 			{
 				if (ImGui::MenuItem("Attribute/bitmap")) { gWindowAttribBitmap = !gWindowAttribBitmap; }
 				if (ImGui::MenuItem("Histogram")) { gWindowHistograms = !gWindowHistograms; }
-				if (ImGui::MenuItem("Conversion options")) { gWindowConvOptions = !gWindowConvOptions; }
 				if (ImGui::MenuItem("Modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
+				if (ImGui::MenuItem("Zoomed output")) { gWindowZoomedOutput = !gWindowZoomedOutput;  }
+				if (ImGui::MenuItem("Options")) { gWindowOptions = !gWindowOptions; }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Modifier"))
@@ -1399,14 +1403,17 @@ int main(int, char**)
 		}
 
 
-		if (gWindowConvOptions)
+		if (gWindowOptions)
 		{
-			if (ImGui::Begin("Conversion options", &gWindowConvOptions, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			if (ImGui::Begin("Options", &gWindowOptions, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
 				ImGui::Combo("Attribute order", &gOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0");
 				ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0");
 				ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0");
 				ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0");
+				ImGui::Separator();
+				ImGui::SliderInt("Zoomed window zoom factor", &gOptZoom, 1, 8);
+				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
 			}
 			ImGui::End();
 		}
@@ -1418,6 +1425,43 @@ int main(int, char**)
 				gen_attr_bitm();
 				ImGui::Image((ImTextureID)gTextureAttr, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 				ImGui::Image((ImTextureID)gTextureBitm, picsize); ImGui::SameLine(); ImGui::Text(" ");
+			}
+			ImGui::End();
+		}
+
+		if (gWindowZoomedOutput)
+		{
+			if (ImGui::Begin("Zoomed output", &gWindowZoomedOutput, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				if (gOptZoomStyle == 1)
+				{
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
+					int i, j;
+					int cellht = 8 >> gOptCellSize;
+					int ymax = 24 << gOptCellSize;
+					for (i = 0; i < ymax; i++)
+					{
+						for (j = 0; j < 32; j++)
+						{
+							ImGui::Image(
+								(ImTextureID)gTextureSpec, 
+								ImVec2(8 * gOptZoom, cellht * gOptZoom),
+								ImVec2((8 / 256.0f) * (j + 0), (cellht / 192.0f) * (i + 0)),
+								ImVec2((8 / 256.0f) * (j + 1), (cellht / 192.0f) * (i + 1)));
+							
+							if (j != 31)
+							{
+								ImGui::SameLine();
+							}
+						}
+					}
+					ImGui::PopStyleVar();
+				}
+				else
+				{
+					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(256 * gOptZoom, 192 * gOptZoom));
+				}
+
 			}
 			ImGui::End();
 		}
