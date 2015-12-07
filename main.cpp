@@ -151,6 +151,7 @@ public:
 		mR = mG = mB = 0; 
 		mOnce = 0;
 	}
+
 	virtual int ui()
 	{
 		int ret = 0;
@@ -193,9 +194,86 @@ public:
 				gBitmapProcFloat[i * 3 + 2] += mR;
 			}
 		}
-		ImGui::PopID();
 	}
 	
+};
+
+class YIQModifier : public Modifier
+{
+public:
+	float mY, mI, mQ;
+	int mOnce;
+
+	YIQModifier()
+	{
+		mY = mI = mQ = 0;
+		mOnce = 0;
+	}
+
+	virtual int ui()
+	{
+		
+		int ret = 0;
+		
+		ImGui::PushID(mUnique);
+
+		if (!mOnce)
+		{
+			ImGui::OpenNextNode(1);
+			mOnce = 1;
+		}
+
+		if (ImGui::CollapsingHeader("YIQ Modifier"))
+		{
+			ret = common();
+
+			ImGui::SliderFloat("##Y  ", &mY, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##Y   ")) mY = 0; ImGui::SameLine();
+			ImGui::Text("Y (brightness)");
+
+			ImGui::SliderFloat("##I", &mI, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##I ")) mI = 0; ImGui::SameLine();
+			ImGui::Text("I (blue-red)");
+
+			ImGui::SliderFloat("##Q ", &mQ, -1, 1); ImGui::SameLine();
+			if (ImGui::Button("Reset##Q  ")) mQ = 0; ImGui::SameLine();
+			ImGui::Text("Q (green-purple)");
+		}
+		ImGui::PopID();
+		
+		return ret;
+	}
+
+	virtual void process()
+	{
+		int c;
+		if (mEnabled)
+		{
+			for (c = 0; c < 256 * 192; c++)
+			{
+				float r = gBitmapProcFloat[c * 3 + 2];
+				float g = gBitmapProcFloat[c * 3 + 1];
+				float b = gBitmapProcFloat[c * 3 + 0];
+				
+				float y = 0.299f * r + 0.587f * g + 0.114f * b;
+				float i = 0.596f * r - 0.274f * g - 0.322f * b;
+				float q = 0.211f * r - 0.523f * g + 0.312f * b;
+				
+				y += mY;
+				i += mI;
+				q += mQ;
+				
+				r = y + 0.956f * i + 0.621f * q;
+				g = y - 0.272f * i - 0.647f * q;
+				b = y - 1.106f * i + 1.703f * q;
+
+				gBitmapProcFloat[c * 3 + 0] = b;
+				gBitmapProcFloat[c * 3 + 1] = g;
+				gBitmapProcFloat[c * 3 + 2] = r;
+			}
+		}
+	}
+
 };
 
 
@@ -618,15 +696,15 @@ public:
 
 			ImGui::SliderFloat("##Hue       ", &mH, -360, 360); ImGui::SameLine();	
 			if (ImGui::Button("Reset##hue        ")) mH = 0; ImGui::SameLine();
-			ImGui::Text("Hue");
+			ImGui::Text("Hue (color)");
 			
 			ImGui::SliderFloat("##Saturation", &mS, -2, 2);     ImGui::SameLine();	
 			if (ImGui::Button("Reset##saturation ")) mS = 0; ImGui::SameLine();
-			ImGui::Text("Saturation");
+			ImGui::Text("Saturation (richness)");
 			
 			ImGui::SliderFloat("##Value     ", &mV, -2, 2);     ImGui::SameLine();	
 			if (ImGui::Button("Reset##value      ")) mV = 0; ImGui::SameLine();
-			ImGui::Text("Value");
+			ImGui::Text("Value (brightness)");
 		}
 		ImGui::PopID();
 		return ret;
@@ -1415,6 +1493,7 @@ int main(int, char**)
 				ImGui::Separator();
 				if (ImGui::MenuItem("Add RGB modifier")) { addModifier(new RGBModifier); }
 				if (ImGui::MenuItem("Add HSV modifier")) { addModifier(new HSVModifier); }
+				if (ImGui::MenuItem("Add YIQ modifier")) { addModifier(new YIQModifier); }
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
@@ -1543,6 +1622,7 @@ int main(int, char**)
 			{
 				if (ImGui::Button("RGB", ImVec2(-1,0))) { addModifier(new RGBModifier); }
 				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
+				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
 				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
 				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				// widest button defines the window width, so we can't set it to "auto size"
