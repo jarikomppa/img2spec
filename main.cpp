@@ -63,6 +63,10 @@ int gSpeccyPalette[]
 	0xffffff
 };
 
+int rgb_to_speccy_pal(int c, int first, int count);
+int float_to_color(float aR, float aG, float aB);
+
+
 // used to avoid id collisions in ImGui
 int gUniqueValueCounter = 0;
 
@@ -185,14 +189,11 @@ public:
 	virtual void process()
 	{
 		int i;
-		if (mEnabled)
+		for (i = 0; i < 256 * 192; i++)
 		{
-			for (i = 0; i < 256 * 192; i++)
-			{
-				gBitmapProcFloat[i * 3 + 0] += mB;
-				gBitmapProcFloat[i * 3 + 1] += mG;
-				gBitmapProcFloat[i * 3 + 2] += mR;
-			}
+			gBitmapProcFloat[i * 3 + 0] += mB;
+			gBitmapProcFloat[i * 3 + 1] += mG;
+			gBitmapProcFloat[i * 3 + 2] += mR;
 		}
 	}
 	
@@ -247,33 +248,29 @@ public:
 	virtual void process()
 	{
 		int c;
-		if (mEnabled)
+		for (c = 0; c < 256 * 192; c++)
 		{
-			for (c = 0; c < 256 * 192; c++)
-			{
-				float r = gBitmapProcFloat[c * 3 + 2];
-				float g = gBitmapProcFloat[c * 3 + 1];
-				float b = gBitmapProcFloat[c * 3 + 0];
+			float r = gBitmapProcFloat[c * 3 + 2];
+			float g = gBitmapProcFloat[c * 3 + 1];
+			float b = gBitmapProcFloat[c * 3 + 0];
 				
-				float y = 0.299f * r + 0.587f * g + 0.114f * b;
-				float i = 0.596f * r - 0.274f * g - 0.322f * b;
-				float q = 0.211f * r - 0.523f * g + 0.312f * b;
+			float y = 0.299f * r + 0.587f * g + 0.114f * b;
+			float i = 0.596f * r - 0.274f * g - 0.322f * b;
+			float q = 0.211f * r - 0.523f * g + 0.312f * b;
 				
-				y += mY;
-				i += mI;
-				q += mQ;
+			y += mY;
+			i += mI;
+			q += mQ;
 				
-				r = y + 0.956f * i + 0.621f * q;
-				g = y - 0.272f * i - 0.647f * q;
-				b = y - 1.106f * i + 1.703f * q;
+			r = y + 0.956f * i + 0.621f * q;
+			g = y - 0.272f * i - 0.647f * q;
+			b = y - 1.106f * i + 1.703f * q;
 
-				gBitmapProcFloat[c * 3 + 0] = b;
-				gBitmapProcFloat[c * 3 + 1] = g;
-				gBitmapProcFloat[c * 3 + 2] = r;
-			}
+			gBitmapProcFloat[c * 3 + 0] = b;
+			gBitmapProcFloat[c * 3 + 1] = g;
+			gBitmapProcFloat[c * 3 + 2] = r;
 		}
 	}
-
 };
 
 
@@ -334,23 +331,20 @@ public:
 	{
 
 		int i;
-		if (mEnabled)
+		srand(mSeed);
+		for (i = 0; i < 256 * 192; i++)
 		{
-			srand(mSeed);
-			for (i = 0; i < 256 * 192; i++)
-			{
 
-				float r = (((rand() % 1024) - 512) / 512.0f) * mV;
-				float g = (((rand() % 1024) - 512) / 512.0f) * mV;
-				float b = (((rand() % 1024) - 512) / 512.0f) * mV;
-				if (!mColornoise)
-				{
-					r = g = b;
-				}
-				if (mB_en) gBitmapProcFloat[i * 3 + 0] += b;
-				if (mG_en) gBitmapProcFloat[i * 3 + 1] += g;
-				if (mR_en) gBitmapProcFloat[i * 3 + 2] += r;
+			float r = (((rand() % 1024) - 512) / 512.0f) * mV;
+			float g = (((rand() % 1024) - 512) / 512.0f) * mV;
+			float b = (((rand() % 1024) - 512) / 512.0f) * mV;
+			if (!mColornoise)
+			{
+				r = g = b;
 			}
+			if (mB_en) gBitmapProcFloat[i * 3 + 0] += b;
+			if (mG_en) gBitmapProcFloat[i * 3 + 1] += g;
+			if (mR_en) gBitmapProcFloat[i * 3 + 2] += r;
 		}
 	}
 };
@@ -417,93 +411,323 @@ public:
 	virtual void process()
 	{
 
-		if (mEnabled)
+		float matrix2x2[] =
 		{
+			1.0f,  3.0f,
+			4.0f,  2.0f
+		};
 
-			float matrix2x2[] =
-			{
-				1.0f,  3.0f,
-				4.0f,  2.0f
-			};
+		float matrix3x3[] =
+		{
+			8.0f,  3.0f,  4.0f,
+			6.0f,  1.0f,  2.0f,
+			7.0f,  5.0f,  9.0f
+		};
 
-			float matrix3x3[] =
-			{
-				8.0f,  3.0f,  4.0f,
-				6.0f,  1.0f,  2.0f,
-				7.0f,  5.0f,  9.0f
-			};
+		float matrix3x3alt[] =
+		{
+			1.0f,  7.0f,  4.0f,
+			5.0f,  8.0f,  3.0f,
+			6.0f,  2.0f,  9.0f
+		};
 
-			float matrix3x3alt[] =
-			{
-				1.0f,  7.0f,  4.0f,
-				5.0f,  8.0f,  3.0f,
-				6.0f,  2.0f,  9.0f
-			};
+		float matrix4x4[] =
+		{
+			1.0f,  9.0f,  3.0f, 11.0f,
+			13.0f,  5.0f, 15.0f,  7.0f,
+			4.0f, 12.0f,  2.0f, 10.0f,
+			16.0f,  8.0f, 14.0f,  6.0f
+		};
 
-			float matrix4x4[] =
-			{
-				1.0f,  9.0f,  3.0f, 11.0f,
-				13.0f,  5.0f, 15.0f,  7.0f,
-				4.0f, 12.0f,  2.0f, 10.0f,
-				16.0f,  8.0f, 14.0f,  6.0f
-			};
+		float matrix8x8[] =
+		{
+			0.0f, 32.0f, 8.0f, 40.0f, 2.0f, 34.0f, 10.0f, 42.0f,
+			48.0f, 16.0f, 56.0f, 24.0f, 50.0f, 18.0f, 58.0f, 26.0f,
+			12.0f, 44.0f, 4.0f, 36.0f, 14.0f, 46.0f, 6.0f, 38.0f,
+			60.0f, 28.0f, 52.0f, 20.0f, 62.0f, 30.0f, 54.0f, 22.0f,
+			3.0f, 35.0f, 11.0f, 43.0f, 1.0f, 33.0f, 9.0f, 41.0f,
+			51.0f, 19.0f, 59.0f, 27.0f, 49.0f, 17.0f, 57.0f, 25.0f,
+			15.0f, 47.0f, 7.0f, 39.0f, 13.0f, 45.0f, 5.0f, 37.0f,
+			63.0f, 31.0f, 55.0f, 23.0f, 61.0f, 29.0f, 53.0f, 21.0f
+		};
 
-			float matrix8x8[] =
-			{
-				0.0f, 32.0f, 8.0f, 40.0f, 2.0f, 34.0f, 10.0f, 42.0f,
-				48.0f, 16.0f, 56.0f, 24.0f, 50.0f, 18.0f, 58.0f, 26.0f,
-				12.0f, 44.0f, 4.0f, 36.0f, 14.0f, 46.0f, 6.0f, 38.0f,
-				60.0f, 28.0f, 52.0f, 20.0f, 62.0f, 30.0f, 54.0f, 22.0f,
-				3.0f, 35.0f, 11.0f, 43.0f, 1.0f, 33.0f, 9.0f, 41.0f,
-				51.0f, 19.0f, 59.0f, 27.0f, 49.0f, 17.0f, 57.0f, 25.0f,
-				15.0f, 47.0f, 7.0f, 39.0f, 13.0f, 45.0f, 5.0f, 37.0f,
-				63.0f, 31.0f, 55.0f, 23.0f, 61.0f, 29.0f, 53.0f, 21.0f
-			};
+		float *matrix;
+		int matsize;
+		float matdiv;
 
-			float *matrix;
-			int matsize;
-			float matdiv;
-
-			switch (mMatrix)
+		switch (mMatrix)
+		{
+		case 0:
+			matrix = matrix2x2;
+			matsize = 2;
+			matdiv = 4.0f;
+			break;
+		case 1:
+			matrix = matrix3x3;
+			matsize = 3;
+			matdiv = 9.0f;
+			break;
+		case 2:
+			matrix = matrix3x3alt;
+			matsize = 3;
+			matdiv = 9.0f;
+			break;
+		case 3:
+			matrix = matrix4x4;
+			matsize = 4;
+			matdiv = 16.0f;
+			break;
+		case 4:
+			matrix = matrix8x8;
+			matsize = 8;
+			matdiv = 63.0f;
+			break;
+		}
+		int i, j;
+		for (i = 0; i < 192; i++)
+		{
+			for (j = 0; j < 256; j++)
 			{
-			case 0:
-				matrix = matrix2x2;
-				matsize = 2;
-				matdiv = 4.0f;
-				break;
-			case 1:
-				matrix = matrix3x3;
-				matsize = 3;
-				matdiv = 9.0f;
-				break;
-			case 2:
-				matrix = matrix3x3alt;
-				matsize = 3;
-				matdiv = 9.0f;
-				break;
-			case 3:
-				matrix = matrix4x4;
-				matsize = 4;
-				matdiv = 16.0f;
-				break;
-			case 4:
-				matrix = matrix8x8;
-				matsize = 8;
-				matdiv = 63.0f;
-				break;
-			}
-			int i, j;
-			for (i = 0; i < 192; i++)
-			{
-				for (j = 0; j < 256; j++)
-				{
-					if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0] * mV;
-					if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1] * mV;
-					if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2] * mV;
-				}
+				if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0] * mV;
+				if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1] * mV;
+				if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2] * mV;
 			}
 		}
 	}
+};
+
+class ErrorDiffusionDitherModifier : public Modifier
+{
+public:
+	bool mR_en, mG_en, mB_en;
+	float mV;
+	int mModel;
+	int mDirection;
+	int mOnce;
+
+	ErrorDiffusionDitherModifier()
+	{
+		mV = 1;
+		mModel = 0;
+		mOnce = 0;
+		mDirection = 0;
+	}
+
+	virtual int ui()
+	{
+		int ret = 0;
+		ImGui::PushID(mUnique);
+
+		if (!mOnce)
+		{
+			ImGui::OpenNextNode(1);
+			mOnce = 1;
+		}
+
+		if (ImGui::CollapsingHeader("Error Diffusion Dither Modifier"))
+		{
+			ret = common();
+
+			ImGui::Combo("##Model  ", &mModel, "Floyd-Steinberg\0Jarvis-Judice-Ninke\0Stucki\0Burkes\0Sierra3\0Sierra2\0Sierra2-4A\0"); ImGui::SameLine();
+			if (ImGui::Button("Reset##model     ")) mModel = 0; ImGui::SameLine();
+			ImGui::Text("Model");
+
+			ImGui::Combo("##Direction  ", &mDirection, "Left-right\0Right-left\0Bidirectional, left-right first\0Bidirectional, right-left first\0"); ImGui::SameLine();
+			if (ImGui::Button("Reset##Direction     ")) mDirection = 0; ImGui::SameLine();
+			ImGui::Text("Direction");
+
+			ImGui::SliderFloat("##Strength", &mV, 0, 2);	ImGui::SameLine();
+			if (ImGui::Button("Reset##strength   ")) mV = 1.0f; ImGui::SameLine();
+			ImGui::Text("Strength");
+
+			ImGui::Checkbox("Red enable", &mR_en); ImGui::SameLine();
+			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine();
+			ImGui::Checkbox("Blue enable", &mB_en);
+		}
+		ImGui::PopID();
+		return ret;
+	}
+
+	virtual void process()
+	{
+		float data[256 * 192 * 3];
+		memcpy(data, gBitmapProcFloat, sizeof(float) * 256 * 192 * 3);
+		int i, j;
+
+		float floyd_steinberg[] =
+		{
+			0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 7.0f / 16.0f, 0.0f / 16.0f,
+			0.0f / 16.0f, 3.0f / 16.0f, 5.0f / 16.0f, 1.0f / 16.0f, 0.0f / 16.0f,
+			0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f
+		};
+		
+		float jarvis_judice_ninke[] =
+		{
+			0.0f / 48.0f, 0.0f / 48.0f, 0.0f / 48.0f, 7.0f / 48.0f, 5.0f / 48.0f,
+			3.0f / 48.0f, 5.0f / 48.0f, 7.0f / 48.0f, 5.0f / 48.0f, 3.0f / 48.0f,
+			1.0f / 48.0f, 3.0f / 48.0f, 5.0f / 48.0f, 3.0f / 48.0f, 1.0f / 48.0f
+		};
+
+		float stucki[] =
+		{
+			0.0f / 42.0f, 0.0f / 42.0f, 0.0f / 42.0f, 8.0f / 42.0f, 4.0f / 42.0f,
+			2.0f / 42.0f, 4.0f / 42.0f, 8.0f / 42.0f, 4.0f / 42.0f, 2.0f / 42.0f,
+			1.0f / 42.0f, 2.0f / 42.0f, 4.0f / 42.0f, 2.0f / 42.0f, 1.0f / 42.0f
+		};
+
+		float burkes[] =
+		{
+			0.0f / 32.0f, 0.0f / 32.0f, 0.0f / 32.0f, 8.0f / 32.0f, 4.0f / 32.0f,
+			2.0f / 32.0f, 4.0f / 32.0f, 8.0f / 32.0f, 4.0f / 32.0f, 2.0f / 32.0f,
+			0.0f / 32.0f, 0.0f / 32.0f, 0.0f / 32.0f, 0.0f / 32.0f, 0.0f / 32.0f
+		};
+
+		float sierra3[] =
+		{
+			0.0f / 32.0f, 0.0f / 32.0f, 0.0f / 32.0f, 5.0f / 32.0f, 3.0f / 32.0f,
+			2.0f / 32.0f, 4.0f / 32.0f, 5.0f / 32.0f, 4.0f / 32.0f, 2.0f / 32.0f,
+			0.0f / 32.0f, 2.0f / 32.0f, 3.0f / 32.0f, 2.0f / 32.0f, 0.0f / 32.0f
+		};
+
+		float sierra2[] =
+		{
+			0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 4.0f / 16.0f, 3.0f / 16.0f,
+			1.0f / 16.0f, 2.0f / 16.0f, 3.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f,
+			0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f, 0.0f / 16.0f
+		};
+
+		float sierra2_4a[] =
+		{
+			0.0f / 4.0f, 0.0f / 4.0f, 0.0f / 4.0f, 2.0f / 4.0f, 0.0f / 4.0f,
+			0.0f / 4.0f, 1.0f / 4.0f, 1.0f / 4.0f, 0.0f / 4.0f, 0.0f / 4.0f,
+			0.0f / 4.0f, 0.0f / 4.0f, 0.0f / 4.0f, 0.0f / 4.0f, 0.0f / 4.0f
+		};
+		
+		float *matrix = floyd_steinberg;
+
+		switch (mModel)
+		{
+		case 0:
+			matrix = floyd_steinberg;
+			break;
+		case 1:
+			matrix = jarvis_judice_ninke;
+			break;
+		case 2:
+			matrix = stucki;
+			break;
+		case 3:
+			matrix = burkes;
+			break;
+		case 4:
+			matrix = sierra3;
+			break;
+		case 5:
+			matrix = sierra2;
+			break;
+		case 6:
+			matrix = sierra2_4a;
+			break;
+		}
+
+		int xpos, ypos;
+		int xpos0 = 0, ypos0 = 0;
+		int xposi = 1, yposi = 1;
+		int dir = 0;
+		switch (mDirection)
+		{
+		case 0:
+		case 2:
+			xpos0 = 0;
+			ypos0 = 0;
+			xposi = 1;
+			yposi = 1;
+			dir = 0;
+			break;
+		case 1:
+		case 3:
+			xpos0 = 255;
+			ypos0 = 0;
+			xposi = -1;
+			yposi = 1;
+			dir = 1;
+			break;
+		}
+
+		for (i = 0, ypos = ypos0; i < 192; i++, ypos+=yposi)
+		{			
+			for (j = 0, xpos = xpos0; j < 256; j++, xpos+=xposi)
+			{
+				int pos = (ypos * 256 + xpos);
+				
+				int col = float_to_color(
+					data[pos * 3 + 0], 
+					data[pos * 3 + 1], 
+					data[pos * 3 + 2]);
+
+				int approx = gSpeccyPalette[rgb_to_speccy_pal(col, 0, 16)];
+				
+				float r = data[pos * 3 + 2] - ((approx >> 0) & 0xff) / 255.0f;
+				float g = data[pos * 3 + 1] - ((approx >> 8) & 0xff) / 255.0f;
+				float b = data[pos * 3 + 0] - ((approx >> 16) & 0xff) / 255.0f;
+
+				int x, y;
+				for (y = 0; y < 3; y++)
+				{					
+					for (x = 0; x < 5; x++)
+					{
+						if (ypos + y < 192 && x + xpos - 2 >= 0 && x + xpos - 2 < 256)
+						{
+							int pos = ((ypos + y) * 256 + xpos + x - 2);
+							float m;
+							if (dir)
+							{
+								m = matrix[y * 5 + 4 - x];
+							}							
+							else
+							{
+								m = matrix[y * 5 + x];
+							}
+							
+							data[pos * 3 + 2] += r * m;
+							data[pos * 3 + 1] += g * m;
+							data[pos * 3 + 0] += b * m;
+						}
+					}
+				}
+
+			}
+			if (mDirection > 1)
+			{
+				switch (dir)
+				{
+				case 0:
+					xpos0 = 255;
+					ypos0 = 0;
+					xposi = -1;
+					yposi = 1;
+					dir = 1;
+					break;
+				case 1:
+					xpos0 = 0;
+					ypos0 = 0;
+					xposi = 1;
+					yposi = 1;
+					dir = 0;
+					break;
+				}
+			}
+		}
+
+		// Apply (with strength)
+		for (i = 0; i < 256 * 192; i++)
+		{				
+			if (mB_en) gBitmapProcFloat[i * 3 + 0] += (data[i * 3 + 0] - gBitmapProcFloat[i * 3 + 0]) * mV;
+			if (mG_en) gBitmapProcFloat[i * 3 + 1] += (data[i * 3 + 1] - gBitmapProcFloat[i * 3 + 1]) * mV;
+			if (mR_en) gBitmapProcFloat[i * 3 + 2] += (data[i * 3 + 2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+		}
+	}
+
 };
 
 
@@ -555,12 +779,9 @@ public:
 	{
 
 		int i;
-		if (mEnabled)
+		for (i = 0; i < 256 * 192 * 3; i++)
 		{
-			for (i = 0; i < 256 * 192 * 3; i++)
-			{
-				gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
-			}
+			gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
 		}
 	}
 };
@@ -714,21 +935,18 @@ public:
 	{
 
 		int i;
-		if (mEnabled)
+		for (i = 0; i < 256 * 192; i++)
 		{
-			for (i = 0; i < 256 * 192; i++)
-			{
-				rgb2hsv(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
+			rgb2hsv(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
 				
-				gBitmapProcFloat[i * 3 + 0] += mH;
-				gBitmapProcFloat[i * 3 + 1] += mS;
-				gBitmapProcFloat[i * 3 + 2] += mV;
+			gBitmapProcFloat[i * 3 + 0] += mH;
+			gBitmapProcFloat[i * 3 + 1] += mS;
+			gBitmapProcFloat[i * 3 + 2] += mV;
 				
-				if (gBitmapProcFloat[i * 3 + 0] < 0) gBitmapProcFloat[i * 3 + 0] += 360;
-				if (gBitmapProcFloat[i * 3 + 0] > 360) gBitmapProcFloat[i * 3 + 0] -= 360;
+			if (gBitmapProcFloat[i * 3 + 0] < 0) gBitmapProcFloat[i * 3 + 0] += 360;
+			if (gBitmapProcFloat[i * 3 + 0] > 360) gBitmapProcFloat[i * 3 + 0] -= 360;
 				
-				hsv2rgb(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
-			}
+			hsv2rgb(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
 		}
 	}
 };
@@ -749,6 +967,17 @@ void bitmap_to_float(unsigned int *aBitmap)
 	}
 }
 
+int float_to_color(float aR, float aG, float aB)
+{
+	aR = (aR < 0) ? 0 : (aR > 1) ? 1 : aR;
+	aG = (aG < 0) ? 0 : (aG > 1) ? 1 : aG;
+	aB = (aB < 0) ? 0 : (aB > 1) ? 1 : aB;
+
+	return ((int)floor(aR * 255) << 16) |
+		   ((int)floor(aG * 255) << 8) |
+		   ((int)floor(aB * 255) << 0);
+}
+
 void float_to_bitmap()
 {
 	int i;
@@ -758,15 +987,7 @@ void float_to_bitmap()
 		float g = gBitmapProcFloat[i * 3 + 1];
 		float b = gBitmapProcFloat[i * 3 + 2];
 
-		r = (r < 0) ? 0 : (r > 1) ? 1 : r;
-		g = (g < 0) ? 0 : (g > 1) ? 1 : g;
-		b = (b < 0) ? 0 : (b > 1) ? 1 : b;
-
-		gBitmapProc[i] =
-			((int)floor(r * 255) << 16) |
-			((int)floor(g * 255) << 8) |
-			((int)floor(b * 255) << 0) |
-			0xff000000;
+		gBitmapProc[i] = float_to_color(r, g, b) | 0xff000000;
 	}
 }
 
@@ -848,7 +1069,8 @@ void process_image()
 	Modifier *walker = gModifierApplyStack;
 	while (walker)
 	{
-		walker->process();
+		if (walker->mEnabled)
+			walker->process();
 		walker = walker->mApplyNext;
 	}
 
@@ -1497,6 +1719,7 @@ int main(int, char**)
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
+				if (ImGui::MenuItem("Add Error Diffusion Dither modifier")) { addModifier(new ErrorDiffusionDitherModifier); } 
 				ImGui::EndMenu();
 			}		
 			if (ImGui::BeginMenu("Help"))
@@ -1509,6 +1732,23 @@ int main(int, char**)
 			}
 			ImGui::EndMainMenuBar();
 		}
+
+		if (gWindowModifierPalette)
+		{
+			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				if (ImGui::Button("RGB", ImVec2(-1, 0))) { addModifier(new RGBModifier); }
+				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
+				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
+				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
+				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
+				if (ImGui::Button("Ordered Dither", ImVec2(-1, 0))) { addModifier(new OrderedDitherModifier); }
+				// widest button defines the window width, so we can't set it to "auto size"
+				if (ImGui::Button("Error Diffusion Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new ErrorDiffusionDitherModifier); }
+			}
+			ImGui::End();
+		}
+
 
 		if (gWindowAbout)
 		{
@@ -1612,21 +1852,6 @@ int main(int, char**)
 					".inc is assember .db lines.\n"
 					"\n"
 					);
-			}
-			ImGui::End();
-		}
-
-		if (gWindowModifierPalette)
-		{
-			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
-			{
-				if (ImGui::Button("RGB", ImVec2(-1,0))) { addModifier(new RGBModifier); }
-				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
-				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
-				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
-				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
-				// widest button defines the window width, so we can't set it to "auto size"
-				if (ImGui::Button("Ordered Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new OrderedDitherModifier); }
 			}
 			ImGui::End();
 		}
