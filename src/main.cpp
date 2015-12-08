@@ -886,7 +886,7 @@ int main(int, char**)
                 done = true;
         }
         ImGui_ImplSdl_NewFrame(window);
-		ImGui::ShowTestWindow();
+		//ImGui::ShowTestWindow();
 
 
 		if (ImGui::BeginMainMenuBar())
