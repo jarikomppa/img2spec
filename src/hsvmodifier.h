@@ -127,16 +127,16 @@ public:
 		{
 			ret = common();
 
-			ImGui::SliderFloat("##Hue       ", &mH, -360, 360); ImGui::SameLine();
-			if (ImGui::Button("Reset##hue        ")) mH = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Hue       ", &mH, -360, 360)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##hue        ")) { gDirty = 1; mH = 0; } ImGui::SameLine();
 			ImGui::Text("Hue (color)");
 
-			ImGui::SliderFloat("##Saturation", &mS, -2, 2);     ImGui::SameLine();
-			if (ImGui::Button("Reset##saturation ")) mS = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Saturation", &mS, -2, 2)) { gDirty = 1; }     ImGui::SameLine();
+			if (ImGui::Button("Reset##saturation ")) { gDirty = 1; mS = 0; } ImGui::SameLine();
 			ImGui::Text("Saturation (richness)");
 
-			ImGui::SliderFloat("##Value     ", &mV, -2, 2);     ImGui::SameLine();
-			if (ImGui::Button("Reset##value      ")) mV = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Value     ", &mV, -2, 2)) { gDirty = 1; }     ImGui::SameLine();
+			if (ImGui::Button("Reset##value      ")) { gDirty = 1; mV = 0; } ImGui::SameLine();
 			ImGui::Text("Value (brightness)");
 		}
 		ImGui::PopID();

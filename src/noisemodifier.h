@@ -32,20 +32,20 @@ public:
 		if (ImGui::CollapsingHeader("Noise Modifier"))
 		{
 			ret = common();
-			ImGui::SliderFloat("##Strength", &mV, 0, 0.25f);	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) mV = 0; ImGui::SameLine();
-			if (ImGui::Button("Randomize##strength")) mV = 0.25f * ((SDL_GetTicks() * 74531) % 65535) / 65535.0f; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Strength", &mV, 0, 0.25f)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 0; } ImGui::SameLine();
+			if (ImGui::Button("Randomize##strength")) { gDirty = 1; mV = 0.25f * ((SDL_GetTicks() * 74531) % 65535) / 65535.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
 
-			ImGui::SliderInt("##Seed    ", &mSeed, 0, 65535); ImGui::SameLine();
-			if (ImGui::Button("Reset##seed       ")) mSeed = 0; ImGui::SameLine();
-			if (ImGui::Button("Randomize")) mSeed = (SDL_GetTicks() * 74531) % 65535; ImGui::SameLine();
+			if (ImGui::SliderInt("##Seed    ", &mSeed, 0, 65535)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##seed       ")) { gDirty = 1; mSeed = 0; } ImGui::SameLine();
+			if (ImGui::Button("Randomize")) { gDirty = 1; mSeed = (SDL_GetTicks() * 74531) % 65535; } ImGui::SameLine();
 			ImGui::Text("Seed");
 
-			ImGui::Checkbox("Color noise", &mColornoise);   ImGui::SameLine();
-			ImGui::Checkbox("Red enable", &mR_en); ImGui::SameLine();
-			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine();
-			ImGui::Checkbox("Blue enable", &mB_en);
+			if (ImGui::Checkbox("Color noise", &mColornoise)) { gDirty = 1; };   ImGui::SameLine();
+			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;

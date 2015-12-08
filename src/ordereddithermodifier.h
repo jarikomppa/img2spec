@@ -33,25 +33,25 @@ public:
 		if (ImGui::CollapsingHeader("Ordered Dither Modifier"))
 		{
 			ret = common();
-			ImGui::Combo("##Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0"); ImGui::SameLine();
-			if (ImGui::Button("Reset##matrix     ")) mMatrix = 4; ImGui::SameLine();
+			if (ImGui::Combo("##Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0")) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##matrix     ")) { gDirty = 1; mMatrix = 4; } ImGui::SameLine();
 			ImGui::Text("Matrix");
 
-			ImGui::SliderInt("##X offset", &mXOfs, 0, 8);	ImGui::SameLine();
-			if (ImGui::Button("Reset##X offset   ")) mXOfs = 0; ImGui::SameLine();
+			if (ImGui::SliderInt("##X offset", &mXOfs, 0, 8)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##X offset   ")) { gDirty = 1; mXOfs = 0; } ImGui::SameLine();
 			ImGui::Text("X Offset");
 
-			ImGui::SliderInt("##Y offset", &mYOfs, 0, 8);	ImGui::SameLine();
-			if (ImGui::Button("Reset##Y offset   ")) mYOfs = 0; ImGui::SameLine();
+			if (ImGui::SliderInt("##Y offset", &mYOfs, 0, 8)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##Y offset   ")) { gDirty = 1; mYOfs = 0; } ImGui::SameLine();
 			ImGui::Text("Y Offset");
 
-			ImGui::SliderFloat("##Strength", &mV, 0, 2);	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) mV = 1.0f; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
 
-			ImGui::Checkbox("Red enable", &mR_en); ImGui::SameLine();
-			ImGui::Checkbox("Green enable", &mG_en); ImGui::SameLine();
-			ImGui::Checkbox("Blue enable", &mB_en);
+			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;

@@ -38,6 +38,9 @@ Still, if you find it useful, great!
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize.h"
+
 #define VERSION "1.2"
 
 #define SPEC_Y(y)  ((((y>>0)&7)<< 3) | (((y >> 3)&7) <<0) | ((y >> 6) & 3) << 6)
@@ -66,6 +69,8 @@ int gSpeccyPalette[]
 int rgb_to_speccy_pal(int c, int first, int count);
 int float_to_color(float aR, float aG, float aB);
 
+// Do we need to recalculate?
+int gDirty = 1;
 
 // used to avoid id collisions in ImGui
 int gUniqueValueCounter = 0;
@@ -484,6 +489,7 @@ void addModifier(Modifier *aNewModifier)
 {
 	aNewModifier->mNext = gModifierRoot;
 	gModifierRoot = aNewModifier;
+	gDirty = 1;
 }
 
 
@@ -522,25 +528,43 @@ void loadimg()
 	if (GetOpenFileNameA(&ofn))
 	{
 		int x, y, n;
-		unsigned int *data = (unsigned int*)stbi_load(szFileName, &x, &y, &n, 4);
+		unsigned int *indata = (unsigned int*)stbi_load(szFileName, &x, &y, &n, 4);
+		unsigned int *data = 0;
+
+		if (x <= 256 && y <= 192)
+		{
+			data = indata;
+		}
+		else
+		{
+			data = new unsigned int[192 * 256];
+			stbir_resize_uint8((unsigned char*)indata, x, y, 0,
+				(unsigned char*)data, 256, 192, 0, 4);
+			x = 256;
+			y = 192;
+		}
 
 		int i, j;
 		for (i = 0; i < 192; i++)
 		{
 			for (j = 0; j < 256; j++)
 			{
-				int pix = 0;
+				int pix = 0xff000000;
 				if (j < x && i < y)
 					pix = data[i * x + j] | 0xff000000;
 				gBitmapOrig[i * 256 + j] = pix;
 			}
 		}
 
-		stbi_image_free(data);
+		if (data != indata)
+			delete[] data;
+		stbi_image_free(indata);
 
 		glBindTexture(GL_TEXTURE_2D, gTextureOrig);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
 	}
+
+	gDirty = 1;
 }
 
 
@@ -563,12 +587,13 @@ void savepng()
 	ofn.lpstrFile = szFileName;
 
 	ofn.lpstrTitle = "Save png";
+	ofn.lpstrDefExt = "png";
 
 	FILE * f = NULL;
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		stbi_write_png(szFileName, 256, 192, 4, gBitmapProc, 256*4);
+		stbi_write_png(szFileName, 256, 192, 4, gBitmapSpec, 256*4);
 	}
 }
 
@@ -624,6 +649,7 @@ void savescr()
 	ofn.lpstrFile = szFileName;
 
 	ofn.lpstrTitle = "Save scr";
+	ofn.lpstrDefExt = "scr";
 
 	FILE * f = NULL;
 
@@ -658,6 +684,7 @@ void saveh()
 	ofn.lpstrFile = szFileName;
 
 	ofn.lpstrTitle = "Save h";
+	ofn.lpstrDefExt = "h";
 
 	FILE * f = NULL;
 
@@ -712,6 +739,7 @@ void saveinc()
 	ofn.lpstrFile = szFileName;
 
 	ofn.lpstrTitle = "Save inc";
+	ofn.lpstrDefExt = "inc";
 
 	FILE * f = NULL;
 
@@ -858,7 +886,7 @@ int main(int, char**)
                 done = true;
         }
         ImGui_ImplSdl_NewFrame(window);
-		//ImGui::ShowTestWindow();
+		ImGui::ShowTestWindow();
 
 
 		if (ImGui::BeginMainMenuBar())
@@ -1034,10 +1062,10 @@ int main(int, char**)
 		{
 			if (ImGui::Begin("Options", &gWindowOptions, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
-				ImGui::Combo("Attribute order", &gOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0");
-				ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0");
-				ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0");
-				ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0");
+				if (ImGui::Combo("Attribute order", &gOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
+				if (ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0")) gDirty = 1;
+				if (ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
+				if (ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) gDirty = 1;
 				ImGui::Separator();
 				ImGui::SliderInt("Zoomed window zoom factor", &gOptZoom, 1, 8);
 				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
@@ -1168,14 +1196,18 @@ int main(int, char**)
 		ImGui::EndChild();
 		ImGui::End();	
 
-		process_image();
-		spectrumize_image();
+		if (gDirty)
+		{
+			process_image();
+			spectrumize_image();
 
-		glBindTexture(GL_TEXTURE_2D, gTextureProc);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
-		glBindTexture(GL_TEXTURE_2D, gTextureSpec);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
-
+			glBindTexture(GL_TEXTURE_2D, gTextureProc);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
+			glBindTexture(GL_TEXTURE_2D, gTextureSpec);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
+			
+			gDirty = 0;
+		}
 
         // Rendering
         glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);

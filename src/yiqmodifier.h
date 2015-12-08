@@ -27,16 +27,16 @@ public:
 		{
 			ret = common();
 
-			ImGui::SliderFloat("##Y  ", &mY, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset##Y   ")) mY = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Y  ", &mY, -1, 1)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##Y   ")) { gDirty = 1; mY = 0; } ImGui::SameLine();
 			ImGui::Text("Y (brightness)");
 
-			ImGui::SliderFloat("##I", &mI, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset##I ")) mI = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##I", &mI, -1, 1)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##I ")) { gDirty = 1; mI = 0; } ImGui::SameLine();
 			ImGui::Text("I (blue-red)");
 
-			ImGui::SliderFloat("##Q ", &mQ, -1, 1); ImGui::SameLine();
-			if (ImGui::Button("Reset##Q  ")) mQ = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Q ", &mQ, -1, 1)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##Q  ")) { gDirty = 1; mQ = 0; } ImGui::SameLine();
 			ImGui::Text("Q (green-purple)");
 		}
 		ImGui::PopID();

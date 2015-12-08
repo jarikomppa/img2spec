@@ -27,16 +27,16 @@ public:
 		{
 			ret = common();
 
-			ImGui::SliderFloat("##Contrast  ", &mC, 0, 5);  ImGui::SameLine();
-			if (ImGui::Button("Reset##contrast   ")) mC = 1; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Contrast  ", &mC, 0, 5)) { gDirty = 1; }  ImGui::SameLine();
+			if (ImGui::Button("Reset##contrast   ")) { gDirty = 1; mC = 1; }ImGui::SameLine();
 			ImGui::Text("Contrast");
 
-			ImGui::SliderFloat("##Brightness", &mB, -2, 2); ImGui::SameLine();
-			if (ImGui::Button("Reset##brightness ")) mB = 0; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Brightness", &mB, -2, 2)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##brightness ")) { gDirty = 1; mB = 0; }ImGui::SameLine();
 			ImGui::Text("Brightness");
 
-			ImGui::SliderFloat("##Pivot     ", &mP, -2, 2); ImGui::SameLine();
-			if (ImGui::Button("Reset##pivot      ")) mB = 0.5f; ImGui::SameLine();
+			if (ImGui::SliderFloat("##Pivot     ", &mP, -2, 2)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##pivot      ")) { gDirty = 1; mB = 0.5f; }ImGui::SameLine();
 			ImGui::Text("Pivot");
 		}
 		ImGui::PopID();
