@@ -36,7 +36,7 @@ public:
 			ImGui::Text("Brightness");
 
 			if (ImGui::SliderFloat("##Pivot     ", &mP, -2, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##pivot      ")) { gDirty = 1; mB = 0.5f; }ImGui::SameLine();
+			if (ImGui::Button("Reset##pivot      ")) { gDirty = 1; mP = 0.5f; }ImGui::SameLine();
 			ImGui::Text("Pivot");
 		}
 		ImGui::PopID();
