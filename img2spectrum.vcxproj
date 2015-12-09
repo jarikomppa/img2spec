@@ -26,6 +26,7 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\blurmodifier.h" />
     <ClInclude Include="src\contrastmodifier.h" />
     <ClInclude Include="src\errordiffusiondithermodifier.h" />
     <ClInclude Include="src\hsvmodifier.h" />
@@ -112,7 +113,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>\libraries\sdl2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +129,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>\libraries\sdl2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

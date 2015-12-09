@@ -124,6 +124,7 @@ Modifier *gModifierApplyStack = 0;
 #include "yiqmodifier.h"
 #include "hsvmodifier.h"
 #include "noisemodifier.h"
+#include "blurmodifier.h"
 #include "ordereddithermodifier.h"
 #include "errordiffusiondithermodifier.h"
 #include "contrastmodifier.h"
@@ -919,6 +920,7 @@ int main(int, char**)
 				if (ImGui::MenuItem("Add YIQ modifier")) { addModifier(new YIQModifier); }
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
+				if (ImGui::MenuItem("Add Blur modifier")) { addModifier(new BlurModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
 				if (ImGui::MenuItem("Add Error Diffusion Dither modifier")) { addModifier(new ErrorDiffusionDitherModifier); } 
 				ImGui::EndMenu();
@@ -943,6 +945,7 @@ int main(int, char**)
 				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
 				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
 				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
+				if (ImGui::Button("Blur", ImVec2(-1, 0))) { addModifier(new BlurModifier); }
 				if (ImGui::Button("Ordered Dither", ImVec2(-1, 0))) { addModifier(new OrderedDitherModifier); }
 				// widest button defines the window width, so we can't set it to "auto size"
 				if (ImGui::Button("Error Diffusion Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new ErrorDiffusionDitherModifier); }
