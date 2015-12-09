@@ -43,7 +43,7 @@ Still, if you find it useful, great!
 
 #define VERSION "1.3"
 
-#define SPEC_Y(y)  ((((y>>0)&7)<< 3) | (((y >> 3)&7) <<0) | ((y >> 6) & 3) << 6)
+#define SPEC_Y(y)  (((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
 
 int gSpeccyPalette[]
 {
@@ -652,8 +652,8 @@ void spectrumize_image()
 				{
 					int loc = (y * cellht + i) * 256 + x * 8 + j;					
 					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
-					gSpectrumBitmap[(y * cellht + i) * 32 + x] <<= 1;
-					gSpectrumBitmap[(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] <<= 1;
+					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 				}
 			}					
 
@@ -805,8 +805,8 @@ void spectrumize_image_3x64()
 				{
 					int loc = (y * cellht + i) * 256 + x * 8 + j;
 					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
-					gSpectrumBitmap[(y * cellht + i) * 32 + x] <<= 1;
-					gSpectrumBitmap[(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] <<= 1;
+					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 				}
 			}
 
@@ -1167,7 +1167,7 @@ void gen_attr_bitm()
 				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 			}
 			gBitmapAttr[i * 256 + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[i * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr);
