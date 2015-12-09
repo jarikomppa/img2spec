@@ -839,8 +839,20 @@ void spectrumize_image_3x64()
 			int col1bri = palofs >= 16 + 64 * 1;
 			int col2bri = palofs >= 16 + 64 * 2;
 
-			gSpectrumAttributes[y * 32 + x] = (col1ink << 0) | (col1pap << 3) | (col1bri ? 64 : 0);
-			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = (col2ink << 0) | (col2pap << 3) | (col2bri ? 64 : 0);
+			int v1 = (col1ink << 0) | (col1pap << 3) | (col1bri ? 64 : 0);
+			int v2 = (col2ink << 0) | (col2pap << 3) | (col2bri ? 64 : 0);
+
+			/* // This makes things look a bit better on emulators, but worse on actual device.
+			if ((x & 1) ^ (y & 1))
+			{
+				int t = v1;
+				v1 = v2;
+				v2 = t;				
+			}
+			*/
+
+			gSpectrumAttributes[y * 32 + x] = v1;
+			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = v2;
 
 		}
 	}
@@ -1118,25 +1130,27 @@ void saveh()
 	if (GetSaveFileNameA(&ofn))
 	{
 		FILE * f = fopen(szFileName, "w");
-		int i, w = 0;
+		int i, c = 0;
 		for (i = 0; i < 32 * 192; i++)
 		{
-			w += fprintf(f, "%3d,", gSpectrumBitmap[i]);
-			if (w > 75)
+			fprintf(f, "%3d,", gSpectrumBitmap[i]);
+			c++;
+			if (c >= 32)
 			{
 				fprintf(f, "\n");
-				w = 0;
+				c = 0;
 			}				
 		}
 		fprintf(f,"\n\n");
-		w = 0;
+		c = 0;
 		for (i = 0; i < 32 * 24 * attrib_size_multiplier; i++)
 		{
-			w += fprintf(f, "%3d%s", gSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier)-1?",":"");
-			if (w > 75)
+			fprintf(f, "%3d%s", gSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier)-1?",":"");
+			c++;
+			if (c >= 32)
 			{
 				fprintf(f, "\n");
-				w = 0;
+				c = 0;
 			}
 		}
 		fclose(f);
