@@ -63,8 +63,207 @@ int gSpeccyPalette[]
 	0x00ff00,
 	0xffff00,
 	0x00ffff,
-	0xffffff
+	0xffffff,
+
+	// 3x64 mode palettes
+
+	0x000000, // dark+dark
+	0x600000,
+	0x000060,
+	0x600060,
+	0x006000,
+	0x606000,
+	0x006060,
+	0x606060,
+	0x600000,
+	0xc00000,
+	0x600060,
+	0xc00060,
+	0x606000,
+	0xc06000,
+	0x606060,
+	0xc06060,
+	0x000060,
+	0x600060,
+	0x0000c0,
+	0x6000c0,
+	0x006060,
+	0x606060,
+	0x0060c0,
+	0x6060c0,
+	0x600060,
+	0xc00060,
+	0x6000c0,
+	0xc000c0,
+	0x606060,
+	0xc06060,
+	0x6060c0,
+	0xc060c0,
+	0x006000,
+	0x606000,
+	0x006060,
+	0x606060,
+	0x00c000,
+	0x60c000,
+	0x00c060,
+	0x60c060,
+	0x606000,
+	0xc06000,
+	0x606060,
+	0xc06060,
+	0x60c000,
+	0xc0c000,
+	0x60c060,
+	0xc0c060,
+	0x006060,
+	0x606060,
+	0x0060c0,
+	0x6060c0,
+	0x00c060,
+	0x60c060,
+	0x00c0c0,
+	0x60c0c0,
+	0x606060,
+	0xc06060,
+	0x6060c0,
+	0xc060c0,
+	0x60c060,
+	0xc0c060,
+	0x60c0c0,
+	0xc0c0c0,
+
+	0x000000, // dark+bright
+	0x7f0000,
+	0x00007f,
+	0x7f007f,
+	0x007f00,
+	0x7f7f00,
+	0x007f7f,
+	0x7f7f7f,
+	0x600000,
+	0xdf0000,
+	0x60007f,
+	0xdf007f,
+	0x607f00,
+	0xdf7f00,
+	0x607f7f,
+	0xdf7f7f,
+	0x000060,
+	0x7f0060,
+	0x0000df,
+	0x7f00df,
+	0x007f60,
+	0x7f7f60,
+	0x007fdf,
+	0x7f7fdf,
+	0x600060,
+	0xdf0060,
+	0x6000df,
+	0xdf00df,
+	0x607f60,
+	0xdf7f60,
+	0x607fdf,
+	0xdf7fdf,
+	0x006000,
+	0x7f6000,
+	0x00607f,
+	0x7f607f,
+	0x00df00,
+	0x7fdf00,
+	0x00df7f,
+	0x7fdf7f,
+	0x606000,
+	0xdf6000,
+	0x60607f,
+	0xdf607f,
+	0x60df00,
+	0xdfdf00,
+	0x60df7f,
+	0xdfdf7f,
+	0x006060,
+	0x7f6060,
+	0x0060df,
+	0x7f60df,
+	0x00df60,
+	0x7fdf60,
+	0x00dfdf,
+	0x7fdfdf,
+	0x606060,
+	0xdf6060,
+	0x6060df,
+	0xdf60df,
+	0x60df60,
+	0xdfdf60,
+	0x60dfdf,
+	0xdfdfdf,
+
+	0x000000, // bright+bright
+	0x7f0000,
+	0x00007f,
+	0x7f007f,
+	0x007f00,
+	0x7f7f00,
+	0x007f7f,
+	0x7f7f7f,
+	0x7f0000,
+	0xff0000,
+	0x7f007f,
+	0xff007f,
+	0x7f7f00,
+	0xff7f00,
+	0x7f7f7f,
+	0xff7f7f,
+	0x00007f,
+	0x7f007f,
+	0x0000ff,
+	0x7f00ff,
+	0x007f7f,
+	0x7f7f7f,
+	0x007fff,
+	0x7f7fff,
+	0x7f007f,
+	0xff007f,
+	0x7f00ff,
+	0xff00ff,
+	0x7f7f7f,
+	0xff7f7f,
+	0x7f7fff,
+	0xff7fff,
+	0x007f00,
+	0x7f7f00,
+	0x007f7f,
+	0x7f7f7f,
+	0x00ff00,
+	0x7fff00,
+	0x00ff7f,
+	0x7fff7f,
+	0x7f7f00,
+	0xff7f00,
+	0x7f7f7f,
+	0xff7f7f,
+	0x7fff00,
+	0xffff00,
+	0x7fff7f,
+	0xffff7f,
+	0x007f7f,
+	0x7f7f7f,
+	0x007fff,
+	0x7f7fff,
+	0x00ff7f,
+	0x7fff7f,
+	0x00ffff,
+	0x7fffff,
+	0x7f7f7f,
+	0xff7f7f,
+	0x7f7fff,
+	0xff7fff,
+	0x7fff7f,
+	0xffff7f,
+	0x7fffff,
+	0xffffff,
 };
+
+
 
 int rgb_to_speccy_pal(int c, int first, int count);
 int float_to_color(float aR, float aG, float aB);
@@ -89,6 +288,7 @@ int gOptBright = 2;
 int gOptPaper = 0;
 int gOptCellSize = 0;
 int gOptScreenOrder = 1;
+int gOptColorMode = 0;
 
 // Texture handles
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
@@ -104,7 +304,7 @@ unsigned int gBitmapBitm[256 * 192];
 float gBitmapProcFloat[256 * 192 * 3];
 
 // Spectrum format data
-unsigned char gSpectrumAttributes[32 * 24 * 8]; // big enough for 8x1 attribs
+unsigned char gSpectrumAttributes[32 * 24 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode
 unsigned char gSpectrumBitmap[32 * 192];
 
 // Histogram arrays
@@ -434,16 +634,6 @@ void spectrumize_image()
 			// Make sure we're using bright black
 			if (col2 == 0 && col1 > 7) col2 = 8;
 
-			// Final pass on cell, select which of two colors we can use
-			for (i = 0; i < cellht; i++)
-			{
-				for (j = 0; j < 8; j++)
-				{
-					int loc = (y * cellht + i) * 256 + x * 8 + j;					
-					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
-				}
-			}		
-			
 			if (gOptPaper == 0)
 			{
 				// Make the "brighter" color the ink to make bitmap pretty (if wanted)
@@ -455,6 +645,18 @@ void spectrumize_image()
 				}
 			}
 
+			// Final pass on cell, select which of two colors we can use
+			for (i = 0; i < cellht; i++)
+			{
+				for (j = 0; j < 8; j++)
+				{
+					int loc = (y * cellht + i) * 256 + x * 8 + j;					
+					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
+					gSpectrumBitmap[(y * cellht + i) * 32 + x] <<= 1;
+					gSpectrumBitmap[(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+				}
+			}					
+
 			// Store the cell's attribute
 			gSpectrumAttributes[y * 32 + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
 		}
@@ -465,7 +667,171 @@ void spectrumize_image()
 	{
 		gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 	}
+}
 
+
+
+
+void spectrumize_image_3x64()
+{
+	int x, y, i, j;
+
+	// Find closest colors in the 3x64 palette
+	for (i = 0; i < 256 * 192; i++)
+	{
+		gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 16, 16+3*64);
+	}
+	
+	int ymax;
+	int cellht;
+	switch (gOptCellSize)
+	{
+	case 0:
+		ymax = 24;
+		cellht = 8;
+		break;
+	case 1:
+		ymax = 48;
+		cellht = 4;
+		break;
+	case 2:
+		ymax = 96;
+		cellht = 2;
+		break;
+	case 3:
+		ymax = 192;
+		cellht = 1;
+		break;
+	}
+
+	for (y = 0; y < ymax; y++)
+	{
+		for (x = 0; x < 32; x++)
+		{
+			// Count pixel brightnesses in cell
+			int darks = 0;
+			int brights = 0;
+			int midbrights = 0;
+			int blacks = 0;
+			for (i = 0; i < cellht; i++)
+			{
+				for (j = 0; j < 8; j++)
+				{
+					int loc = (y * cellht + i) * 256 + x * 8 + j;
+					if (gSpeccyPalette[gBitmapSpec[loc]] == 0)
+					{
+						blacks++;
+					}
+					else
+					if (gBitmapSpec[loc] < (16 + 64))
+					{
+						darks++;
+					}
+					else
+					if (gBitmapSpec[loc] < (16 + 64 * 2))
+					{
+						midbrights++;
+					}
+					else
+					{
+						brights++;
+					}
+				}
+			}
+
+			int palofs = 16;
+			if (midbrights >= darks && midbrights >= brights)
+			{
+				palofs = 16 + 64;
+			}
+			else
+			if (brights >= darks && brights >= midbrights)
+			{
+				palofs = 16 + 64 * 2;
+			}
+
+			int counts[16+3*64];
+			for (i = 0; i < 16+3*64; i++)
+				counts[i] = 0;
+
+			// Remap with just the set of colors we have in the cell
+			for (i = 0; i < cellht; i++)
+			{
+				for (j = 0; j < 8; j++)
+				{
+					int loc = (y * cellht + i) * 256 + x * 8 + j;
+					int r = rgb_to_speccy_pal(gBitmapProc[loc], palofs, 64);
+					gBitmapSpec[loc] = r;
+					counts[r]++;
+				}
+			}
+
+			// Find two most common colors in cell
+			int col1 = 0, col2 = 0;
+			int best = 0;
+			if (gOptPaper == 0)
+			{
+				for (i = 0; i < 16+3*64; i++)
+				{
+					if (counts[i] > best)
+					{
+						best = counts[i];
+						col1 = i;
+					}
+				}
+			}
+			else
+			{
+				col1 = (gOptPaper - 1) + palofs;
+			}
+
+			// reset count of selected color to zero so we don't pick it twice
+			counts[col1] = 0;
+
+			best = 0;
+			for (i = 0; i < 16+3*64; i++)
+			{
+				if (counts[i] > best)
+				{
+					best = counts[i];
+					col2 = i;
+				}
+			}
+
+			// Final pass on cell, select which of two colors we can use
+			for (i = 0; i < cellht; i++)
+			{
+				for (j = 0; j < 8; j++)
+				{
+					int loc = (y * cellht + i) * 256 + x * 8 + j;
+					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
+					gSpectrumBitmap[(y * cellht + i) * 32 + x] <<= 1;
+					gSpectrumBitmap[(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+				}
+			}
+
+			if (gOptPaper == 0)
+			{
+				// Make the "brighter" color the ink to make bitmap pretty (if wanted)
+				if (gOptAttribOrder == 0 && col2 < col1)
+				{
+					int tmp = col2;
+					col2 = col1;
+					col1 = tmp;
+				}
+			}
+
+			// Store the cell's attributes
+			gSpectrumAttributes[y * 32 + x] = (((col1 - 16) & 7) << 3) | ((((col1 - 16) / 8) & 7) << 0) | ((col1 >= 16 + 64) ? 64 : 0);
+			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = (((col2 - 16) & 7) << 3) | ((((col2 - 16) / 8) & 7) << 0) | ((col2 >= 16 + 64 * 2) ? 64 : 0);
+		}
+	}
+	
+	// Map color indices to palette
+	for (i = 0; i < 256 * 192; i++)
+	{
+		gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
+	}
 }
 
 void calc_histogram(unsigned int *src)
@@ -632,38 +998,6 @@ void savepng()
 }
 
 
-// When converting to speccy format we process stuff cell by cell..
-// easier to just analyze the result to generate the bitmap than to
-// mess up the conversion further.
-void grab_speccy_bitmap(int aScreenOrder)
-{	
-	int i, j;
-	if (aScreenOrder)
-	{
-		for (i = 0; i < 192; i++)
-		{
-			for (j = 0; j < 256; j++)
-			{
-				gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] <<= 1;
-				int v = ((gBitmapSpec[i * 256 + j] & 0xffffff) != gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | ((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) << 3)]);
-				gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] |= v;
-			}
-		}
-	}
-	else
-	{
-		for (i = 0; i < 192; i++)
-		{
-			for (j = 0; j < 256; j++)
-			{
-				gSpectrumBitmap[i * 32 + j / 8] <<= 1;
-				int v = ((gBitmapSpec[i * 256 + j] & 0xffffff) != gSpeccyPalette[((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 3) & 7) | ((gSpectrumAttributes[(i / 8) * 32 + j / 8] >> 6) << 3)]);
-				gSpectrumBitmap[i * 32 + j / 8] |= v;
-			}
-		}
-	}
-}
-
 void savescr()
 {
 	OPENFILENAMEA ofn;
@@ -687,11 +1021,10 @@ void savescr()
 
 	FILE * f = NULL;
 
-	int attrib_size_multiplier = 1 << gOptCellSize;
+	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "wb");
 		fwrite(gSpectrumBitmap, 32 * 192, 1, f);
 		fwrite(gSpectrumAttributes, 32 * 24 * attrib_size_multiplier, 1, f);
@@ -722,11 +1055,10 @@ void saveh()
 
 	FILE * f = NULL;
 
-	int attrib_size_multiplier = 1 << gOptCellSize;
+	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "w");
 		int i, w = 0;
 		for (i = 0; i < 32 * 192; i++)
@@ -777,11 +1109,10 @@ void saveinc()
 
 	FILE * f = NULL;
 
-	int attrib_size_multiplier = 1 << gOptCellSize;
+	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		grab_speccy_bitmap(gOptScreenOrder);
 		FILE * f = fopen(szFileName, "w");
 		int i;
 		for (i = 0; i < 32 * 192; i++)
@@ -816,17 +1147,26 @@ void gen_attr_bitm()
 		cellht = 1;
 		break;
 	}
-
-	grab_speccy_bitmap(0);
+	static int flip = 0; flip = !flip;
 	int i, j;
 	for (i = 0; i < 192; i++)
 	{
 		for (j = 0; j < 256; j++)
 		{
-			int attr = gSpectrumAttributes[(i / cellht) * 32 + j / 8];
-			int fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
-			int bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
-			gBitmapAttr[i * 256 + j] = (j % 8 < (((8-cellht)/2) + i % cellht)) ? fg : bg;
+			int fg, bg;
+			if (gOptColorMode)
+			{
+				int attr = gSpectrumAttributes[(i / cellht) * 32 + j / 8 + 32 * (24 << gOptCellSize) * flip];
+				fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+			}
+			else
+			{
+				int attr = gSpectrumAttributes[(i / cellht) * 32 + j / 8];
+				fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+			}
+			gBitmapAttr[i * 256 + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
 			gBitmapBitm[i * 256 + j] = (gSpectrumBitmap[i * 32 + j / 8] & (1 << (7-(j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 		}
 	}
@@ -837,8 +1177,51 @@ void gen_attr_bitm()
 
 }
 
+/*
+int mix(int a, int b)
+{
+	int red = (((a >> 0) & 0xff) + ((b >> 0) & 0xff)) / 2;
+	int green = (((a >> 8) & 0xff) + ((b >> 8) & 0xff)) / 2;
+	int blue = (((a >> 16) & 0xff) + ((b >> 16) & 0xff)) / 2;
+	return ((red << 0) | (green << 8) | (blue << 16));
+}
+
+void calccrap()
+{
+	FILE * f = fopen("test.h", "w");
+	int i, j;
+	for (i = 0; i < 8; i++)
+	{
+		for (j = 0; j < 8; j++)
+		{
+			fprintf(f, "0x%06x,\n", mix(gSpeccyPalette[i], gSpeccyPalette[j]));
+		}
+	}
+	fprintf(f, "\n");
+	for (i = 0; i < 8; i++)
+	{
+		for (j = 0; j < 8; j++)
+		{
+			fprintf(f, "0x%06x,\n", mix(gSpeccyPalette[i], gSpeccyPalette[j + 8]));
+		}
+	}
+	fprintf(f, "\n");
+	for (i = 0; i < 8; i++)
+	{
+		for (j = 0; j < 8; j++)
+		{
+			fprintf(f, "0x%06x,\n", mix(gSpeccyPalette[i + 8], gSpeccyPalette[j + 8]));
+		}
+	}
+	fclose(f);
+	exit(0);
+}
+*/
+
 int main(int aParamc, char**aParams)
 {
+
+
 
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -1096,6 +1479,13 @@ int main(int aParamc, char**aParams)
 					"\n"
 					".inc is assember .db lines.\n"
 					"\n"
+					"3x64 mode\n"
+					"---------\n"
+					"In this mode, two sets of attributes are calculated, and the application is expected to "
+					"swap between the two every frame. This creates approximately 3*64 colors (due to double "
+					"blacks, the actual number of colors is quite much lower). The effect flickers on emulators "
+					"but works fine on CRTs. (Why 3x64 and not 192? because there's three sets of (about) 64 "
+					"color palettes, and each cell can use 2 from one of those).\n"
 					);
 			}
 			ImGui::End();
@@ -1110,6 +1500,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::Combo("Bright attributes", &gOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0")) gDirty = 1;
 				if (ImGui::Combo("Paper attribute", &gOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
 				if (ImGui::Combo("Attribute cell size", &gOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) gDirty = 1;
+				if (ImGui::Combo("Color mode", &gOptColorMode, "Standard 16c\0" "3x64c (2x attrib swap)\0")) gDirty = 1;
 				ImGui::Separator();
 				ImGui::SliderInt("Zoomed window zoom factor", &gOptZoom, 1, 8);
 				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
@@ -1243,7 +1634,15 @@ int main(int aParamc, char**aParams)
 		if (gDirty)
 		{
 			process_image();
-			spectrumize_image();
+			switch (gOptColorMode)
+			{
+			case 0:
+				spectrumize_image();
+				break;
+			case 1:
+				spectrumize_image_3x64();
+				break;
+			}
 
 			glBindTexture(GL_TEXTURE_2D, gTextureProc);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
