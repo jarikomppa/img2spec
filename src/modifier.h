@@ -16,11 +16,11 @@ public:
 	int common()
 	{
 		int ret = 0;
-		ImGui::Checkbox("Enabled", &mEnabled);
+		if (ImGui::Checkbox("Enabled", &mEnabled)) { gDirty = 1; }
 		ImGui::SameLine();
-		if (ImGui::Button("Remove")) ret = -1;
+		if (ImGui::Button("Remove")) ) { gDirty = 1; ret = -1; }
 		ImGui::SameLine();
-		if (ImGui::Button("Move down")) ret = 1;
+		if (ImGui::Button("Move down")) ) { gDirty = 1; ret = 1; }
 		return ret;
 	}
 
