@@ -686,7 +686,7 @@ void spectrumize_image_3x64()
 	// Find closest colors in the 3x64 palette
 	for (i = 0; i < 256 * 192; i++)
 	{
-		gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 16, 16+3*64);
+		gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 16, 3*64);
 	}
 	
 	int ymax;
@@ -710,7 +710,6 @@ void spectrumize_image_3x64()
 		cellht = 1;
 		break;
 	}
-
 	for (y = 0; y < ymax; y++)
 	{
 		for (x = 0; x < 32; x++)
@@ -748,18 +747,23 @@ void spectrumize_image_3x64()
 
 			int palofs = 16 + 64 * 0;
 			
-			if (midbrights >= darks)
+			if (midbrights > darks)
 			{
 				palofs = 16 + 64 * 1;
 			}
 			
-			if (brights >= darks && brights >= midbrights)
+			if (brights > darks && brights > midbrights)
 			{
 				palofs = 16 + 64 * 2;
-			}			
+			}
+			
+			if (brights == 0 && midbrights == 0 && darks == 0)
+			{
+				palofs = 16 + 64 * 0;
+			}
 
-			int counts[16+3*64];
-			for (i = 0; i < 16+3*64; i++)
+			int counts[16 + 3 * 64];
+			for (i = 0; i < 16 + 3 * 64; i++)
 				counts[i] = 0;
 
 			// Remap with just the set of colors we have in the cell
@@ -779,7 +783,7 @@ void spectrumize_image_3x64()
 			int best = 0;
 			if (gOptPaper == 0)
 			{
-				for (i = 16; i < 3*64; i++)
+				for (i = 16; i < 16+3*64; i++)
 				{
 					if (counts[i] > best)
 					{
@@ -797,7 +801,7 @@ void spectrumize_image_3x64()
 			counts[paper] = 0;
 
 			best = 0;
-			for (i = 16; i < 3*64; i++)
+			for (i = 16; i < 16+3*64; i++)
 			{
 				if (counts[i] > best)
 				{
@@ -805,7 +809,7 @@ void spectrumize_image_3x64()
 					ink = i;
 				}
 			}
-			
+
 			// Final pass on cell, select which of two colors we can use
 			for (i = 0; i < cellht; i++)
 			{
@@ -837,16 +841,16 @@ void spectrumize_image_3x64()
 
 			gSpectrumAttributes[y * 32 + x] = (col1ink << 0) | (col1pap << 3) | (col1bri ? 64 : 0);
 			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = (col2ink << 0) | (col2pap << 3) | (col2bri ? 64 : 0);
+
 		}
 	}
-	
 	// Map color indices to palette
 	for (i = 0; i < 256 * 192; i++)
 	{
 		gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 	}
 
-#if 1
+#if 0
 	for (i = 0; i < 192; i++)
 	{
 		for (j = 0; j < 256; j++)
@@ -1013,7 +1017,7 @@ void generateimg()
 
 				if ((re2 * re2 + im2 * im2) > 4) break;
 			}
-			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter==100)?0:((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
+			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
 		}
 	}
 
