@@ -41,7 +41,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "1.2"
+#define VERSION "1.3"
 
 #define SPEC_Y(y)  ((((y>>0)&7)<< 3) | (((y >> 3)&7) <<0) | ((y >> 6) & 3) << 6)
 
@@ -494,7 +494,7 @@ void addModifier(Modifier *aNewModifier)
 }
 
 
-void loadimg()
+void loadimg(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -526,10 +526,10 @@ void loadimg()
 
 	FILE * f = NULL;
 
-	if (GetOpenFileNameA(&ofn))
+	if (aFilename || GetOpenFileNameA(&ofn))
 	{
 		int x, y, n;
-		unsigned int *indata = (unsigned int*)stbi_load(szFileName, &x, &y, &n, 4);
+		unsigned int *indata = (unsigned int*)stbi_load(aFilename?aFilename:szFileName, &x, &y, &n, 4);
 		unsigned int *data = 0;
 
 		if (x <= 256 && y <= 192)
@@ -566,6 +566,39 @@ void loadimg()
 	}
 
 	gDirty = 1;
+}
+
+void generateimg()
+{
+	int x, y;
+	float re0 = -0.7f;
+	float im0 = 0.27f;
+
+	for (x = 0; x < 256; x++)
+	{
+		for (y = 0; y < 192; y++)
+		{
+			float re2 = 1.5f * (x - 256 / 2) / (0.5f * 256);
+			float im2 = (y - 192 / 2) / (0.5f * 192);
+			int iter = 0;
+			while (iter < 100)
+			{
+				iter++;
+
+				float re1 = re2;
+				float im1 = im2;
+
+				re2 = re1 * re1 - im1 * im1 + re0;
+				im2 = 2 * re1 * im1 + im0;
+
+				if ((re2 * re2 + im2 * im2) > 4) break;
+			}
+			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter==100)?0:((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, gTextureOrig);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
 }
 
 
@@ -804,7 +837,7 @@ void gen_attr_bitm()
 
 }
 
-int main(int, char**)
+int main(int aParamc, char**aParams)
 {
 
 	// Setup SDL
@@ -872,6 +905,14 @@ int main(int, char**)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	if (aParamc > 1)
+	{
+		loadimg(aParams[1]);
+	}
+	else
+	{
+		generateimg();
+	}
 
     // Main loop
 	bool done = false;
