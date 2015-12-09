@@ -670,6 +670,13 @@ void spectrumize_image()
 }
 
 
+int mix(int a, int b)
+{
+	int red = (((a >> 0) & 0xff) + ((b >> 0) & 0xff)) / 2;
+	int green = (((a >> 8) & 0xff) + ((b >> 8) & 0xff)) / 2;
+	int blue = (((a >> 16) & 0xff) + ((b >> 16) & 0xff)) / 2;
+	return ((red << 0) | (green << 8) | (blue << 16));
+}
 
 
 void spectrumize_image_3x64()
@@ -723,7 +730,7 @@ void spectrumize_image_3x64()
 						blacks++;
 					}
 					else
-					if (gBitmapSpec[loc] < (16 + 64))
+					if (gBitmapSpec[loc] < (16 + 64 * 1))
 					{
 						darks++;
 					}
@@ -739,16 +746,17 @@ void spectrumize_image_3x64()
 				}
 			}
 
-			int palofs = 16;
-			if (midbrights >= darks && midbrights >= brights)
+			int palofs = 16 + 64 * 0;
+			
+			if (midbrights >= darks)
 			{
-				palofs = 16 + 64;
+				palofs = 16 + 64 * 1;
 			}
-			else
+			
 			if (brights >= darks && brights >= midbrights)
 			{
 				palofs = 16 + 64 * 2;
-			}
+			}			
 
 			int counts[16+3*64];
 			for (i = 0; i < 16+3*64; i++)
@@ -767,63 +775,68 @@ void spectrumize_image_3x64()
 			}
 
 			// Find two most common colors in cell
-			int col1 = 0, col2 = 0;
+			int paper = 0, ink = 0;
 			int best = 0;
 			if (gOptPaper == 0)
 			{
-				for (i = 0; i < 16+3*64; i++)
+				for (i = 16; i < 3*64; i++)
 				{
 					if (counts[i] > best)
 					{
 						best = counts[i];
-						col1 = i;
+						paper = i;
 					}
 				}
 			}
 			else
 			{
-				col1 = (gOptPaper - 1) + palofs;
+				paper = (gOptPaper - 1) + palofs;
 			}
 
 			// reset count of selected color to zero so we don't pick it twice
-			counts[col1] = 0;
+			counts[paper] = 0;
 
 			best = 0;
-			for (i = 0; i < 16+3*64; i++)
+			for (i = 16; i < 3*64; i++)
 			{
 				if (counts[i] > best)
 				{
 					best = counts[i];
-					col2 = i;
+					ink = i;
 				}
 			}
-
+			
 			// Final pass on cell, select which of two colors we can use
 			for (i = 0; i < cellht; i++)
 			{
 				for (j = 0; j < 8; j++)
 				{
 					int loc = (y * cellht + i) * 256 + x * 8 + j;
-					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
+					gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], paper, ink);
 					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] <<= 1;
-					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+					gSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == ink ? 1 : 0);
 				}
 			}
 
-			if (gOptPaper == 0)
-			{
-				// Make the "brighter" color the ink to make bitmap pretty (if wanted)
-				if (gOptAttribOrder == 0 && col2 < col1)
-				{
-					int tmp = col2;
-					col2 = col1;
-					col1 = tmp;
-				}
-			}
+			// Make sure col2 is within range..
+			if (paper == 0)
+				paper = 16;
+			if (ink == 0)
+				ink = 16;
 
 			// Store the cell's attributes
-			gSpectrumAttributes[y * 32 + x] = (((col1 - 16) & 7) << 3) | ((((col1 - 16) / 8) & 7) << 0) | ((col1 >= 16 + 64) ? 64 : 0);
-			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = (((col2 - 16) & 7) << 3) | ((((col2 - 16) / 8) & 7) << 0) | ((col2 >= 16 + 64 * 2) ? 64 : 0);
+
+			int col1ink = (((ink - 16) & 63) / 1) & 7;
+			int col2ink = (((ink - 16) & 63) / 8) & 7;
+
+			int col1pap = (((paper - 16) & 63) / 1) & 7;
+			int col2pap = (((paper - 16) & 63) / 8) & 7;
+
+			int col1bri = palofs >= 16 + 64 * 1;
+			int col2bri = palofs >= 16 + 64 * 2;
+
+			gSpectrumAttributes[y * 32 + x] = (col1ink << 0) | (col1pap << 3) | (col1bri ? 64 : 0);
+			gSpectrumAttributes[y * 32 + x + (24 << gOptCellSize) * 32] = (col2ink << 0) | (col2pap << 3) | (col2bri ? 64 : 0);
 		}
 	}
 	
@@ -832,6 +845,47 @@ void spectrumize_image_3x64()
 	{
 		gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 	}
+
+#if 1
+	for (i = 0; i < 192; i++)
+	{
+		for (j = 0; j < 256; j++)
+		{
+			int bm = ((gSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] >> (7 - (j & 7))) & 1);
+
+			int ax = j / 8;
+			int ay = i / 8;
+
+			int a1 = gSpectrumAttributes[ay * 32 + ax];
+			int a2 = gSpectrumAttributes[ay * 32 + ax + 32 * 24];
+			
+			int c1ink = gSpeccyPalette[((a1 >> 0) & 7) | ((a1 & 64) ? 8 : 0)];
+			int c1pap = gSpeccyPalette[((a1 >> 3) & 7) | ((a1 & 64) ? 8 : 0)];
+			
+			int c2ink = gSpeccyPalette[((a2 >> 0) & 7) | ((a2 & 64) ? 8 : 0)];
+			int c2pap = gSpeccyPalette[((a2 >> 3) & 7) | ((a2 & 64) ? 8 : 0)];
+			
+			int c1 = bm ? c1ink : c1pap;
+			int c2 = bm ? c2ink : c2pap;
+			
+			int c = mix(c1, c2) | 0xff000000;
+			
+			int ref = gBitmapSpec[i * 256 + j];
+
+			if (a1 & 128 || a2 & 128)
+			{
+				c = c;
+			}
+
+			if (ref != c)
+			{
+				c = c;
+			}
+
+			gBitmapSpec[i * 256 + j] = c | 0xff000000;
+		}
+	}
+#endif
 }
 
 void calc_histogram(unsigned int *src)
@@ -1178,13 +1232,6 @@ void gen_attr_bitm()
 }
 
 /*
-int mix(int a, int b)
-{
-	int red = (((a >> 0) & 0xff) + ((b >> 0) & 0xff)) / 2;
-	int green = (((a >> 8) & 0xff) + ((b >> 8) & 0xff)) / 2;
-	int blue = (((a >> 16) & 0xff) + ((b >> 16) & 0xff)) / 2;
-	return ((red << 0) | (green << 8) | (blue << 16));
-}
 
 void calccrap()
 {
