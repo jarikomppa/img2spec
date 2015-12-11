@@ -11,6 +11,8 @@ public:
 		gUniqueValueCounter++;
 		mUnique = gUniqueValueCounter;
 		mEnabled = true;
+		mNext = 0;
+		mApplyNext = 0;
 	}
 
 	int common()

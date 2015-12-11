@@ -13,6 +13,9 @@ public:
 		mModel = 0;
 		mOnce = 0;
 		mDirection = 0;
+		mR_en = true;
+		mG_en = true;
+		mB_en = true;
 	}
 
 	virtual int ui()
@@ -52,7 +55,7 @@ public:
 
 	virtual void process()
 	{
-		float data[256 * 192 * 3];
+		float *data = new float[256 * 192 * 3];
 		memcpy(data, gBitmapProcFloat, sizeof(float) * 256 * 192 * 3);
 		int i, j;
 
@@ -188,7 +191,7 @@ public:
 					{
 						if (ypos + y < 192 && x + xpos - 2 >= 0 && x + xpos - 2 < 256)
 						{
-							int pos = ((ypos + y) * 256 + xpos + x - 2);
+							pos = ((ypos + y) * 256 + xpos + x - 2);
 							float m;
 							if (dir)
 							{
@@ -236,6 +239,7 @@ public:
 			if (mG_en) gBitmapProcFloat[i * 3 + 1] += (data[i * 3 + 1] - gBitmapProcFloat[i * 3 + 1]) * mV;
 			if (mR_en) gBitmapProcFloat[i * 3 + 2] += (data[i * 3 + 2] - gBitmapProcFloat[i * 3 + 2]) * mV;
 		}
+		delete[] data;
 	}
 
 };

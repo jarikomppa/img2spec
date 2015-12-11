@@ -126,7 +126,8 @@ public:
 			matsize = 4;
 			matdiv = 16.0f;
 			break;
-		case 4:
+//		case 4:
+		default:
 			matrix = matrix8x8;
 			matsize = 8;
 			matdiv = 63.0f;

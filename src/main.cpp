@@ -527,7 +527,8 @@ void spectrumize_image()
 	int cellht;
 	switch (gOptCellSize)
 	{
-	case 0:
+	//case 0:
+	default:
 		ymax = 24;
 		cellht = 8;
 		break;
@@ -693,7 +694,8 @@ void spectrumize_image_3x64()
 	int cellht;
 	switch (gOptCellSize)
 	{
-	case 0:
+	default:
+	//case 0:
 		ymax = 24;
 		cellht = 8;
 		break;
@@ -1089,8 +1091,6 @@ void savescr()
 	ofn.lpstrTitle = "Save scr";
 	ofn.lpstrDefExt = "scr";
 
-	FILE * f = NULL;
-
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
@@ -1123,8 +1123,6 @@ void saveh()
 	ofn.lpstrTitle = "Save h";
 	ofn.lpstrDefExt = "h";
 
-	FILE * f = NULL;
-
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
@@ -1133,7 +1131,7 @@ void saveh()
 		int i, c = 0;
 		for (i = 0; i < 32 * 192; i++)
 		{
-			fprintf(f, "%3d,", gSpectrumBitmap[i]);
+			fprintf(f, "%3u,", gSpectrumBitmap[i]);
 			c++;
 			if (c >= 32)
 			{
@@ -1145,7 +1143,7 @@ void saveh()
 		c = 0;
 		for (i = 0; i < 32 * 24 * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "%3d%s", gSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier)-1?",":"");
+			fprintf(f, "%3u%s", gSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier)-1?",":"");
 			c++;
 			if (c >= 32)
 			{
@@ -1179,8 +1177,6 @@ void saveinc()
 	ofn.lpstrTitle = "Save inc";
 	ofn.lpstrDefExt = "inc";
 
-	FILE * f = NULL;
-
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
 	if (GetSaveFileNameA(&ofn))
@@ -1206,7 +1202,8 @@ void gen_attr_bitm()
 	int cellht;
 	switch (gOptCellSize)
 	{
-	case 0:
+	//case 0:
+	default:
 		cellht = 8;
 		break;
 	case 1:
