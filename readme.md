@@ -14,7 +14,7 @@ Output can be saved as a PNG, or in raw, C header, or assembler include file.
 
 # Binaries
 
-http://iki.fi/sol/zip/img2spec_13.zip
+http://iki.fi/sol/zip/img2spec_14.zip
 
 # Source
 
