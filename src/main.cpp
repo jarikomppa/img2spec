@@ -267,6 +267,7 @@ int gSpeccyPalette[]
 char *gSourceImageName = 0;
 unsigned int *gSourceImageData = 0;
 int gSourceImageX = 0, gSourceImageY = 0;
+int gSourceImageDate = 0;
 
 
 int rgb_to_speccy_pal(int c, int first, int count);
@@ -294,6 +295,7 @@ int gOptPaper = 0;
 int gOptCellSize = 0;
 int gOptScreenOrder = 1;
 int gOptColorMode = 0;
+int gOptTrackFile = 1;
 
 // Texture handles
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
@@ -335,6 +337,25 @@ Modifier *gModifierApplyStack = 0;
 #include "errordiffusiondithermodifier.h"
 #include "contrastmodifier.h"
 
+int getFileDate(char *aFilename)
+{
+	FILETIME ft;
+	HANDLE f = 0;
+	int iters = 0;
+	while (f == 0 && iters < 16)
+	{
+		f = CreateFileA(aFilename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		if (!f)
+			SDL_Delay(20);
+		iters++;
+	}
+	if (f)
+	{
+		GetFileTime(f, 0, 0, &ft);
+		CloseHandle(f);
+	}
+	return ft.dwHighDateTime ^ ft.dwLowDateTime;
+}
 
 void bitmap_to_float(unsigned int *aBitmap)
 {
@@ -971,14 +992,25 @@ void loadimg(char *aFilename = 0)
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
+		// gSourceImageName may be the same pointer as aFilename, so freeing it first
+		// and then trying to duplicate it to itself might... well..
+		char *name = strdup(aFilename ? aFilename : szFileName);
 		if (gSourceImageName)
 			free(gSourceImageName);
-		gSourceImageName = strdup(aFilename ? aFilename : szFileName);
+		gSourceImageName = name;
 		if (gSourceImageData)
 			stbi_image_free(gSourceImageData);
 		gSourceImageData = 0;
-		int n;
-		gSourceImageData = (unsigned int*)stbi_load(aFilename ? aFilename : szFileName, &gSourceImageX, &gSourceImageY, &n, 4);
+		gSourceImageX = 0;
+		gSourceImageY = 0;
+		int n, iters = 0;
+		while (gSourceImageData == 0 && iters < 16)
+		{
+			gSourceImageData = (unsigned int*)stbi_load(gSourceImageName, &gSourceImageX, &gSourceImageY, &n, 4);
+			if (gSourceImageData == 0)
+				SDL_Delay(20);
+			iters++;
+		}
 
 
 		int i, j;
@@ -995,8 +1027,8 @@ void loadimg(char *aFilename = 0)
 
 		glBindTexture(GL_TEXTURE_2D, gTextureOrig);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+		gSourceImageDate = getFileDate(gSourceImageName);
 	}
-
 	gDirty = 1;
 }
 
@@ -1366,6 +1398,15 @@ int main(int aParamc, char**aParams)
             if (event.type == SDL_QUIT)
                 done = true;
         }
+
+		if (gOptTrackFile && gSourceImageData)
+		{
+			int fd = getFileDate(gSourceImageName);
+			if (fd != gSourceImageDate)
+				loadimg(gSourceImageName);
+		}
+
+
         ImGui_ImplSdl_NewFrame(window);
 		//ImGui::ShowTestWindow();
 
@@ -1568,6 +1609,7 @@ int main(int aParamc, char**aParams)
 				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
 				ImGui::Separator();
 				ImGui::Combo("Bitmap order when saving", &gOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
+				ImGui::Combo("Track changes to source image", &gOptTrackFile, "Do not track\0Reload when changed\0");
 			}
 			ImGui::End();
 		}
