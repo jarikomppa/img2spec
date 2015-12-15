@@ -1546,11 +1546,12 @@ int main(int aParamc, char**aParams)
 					"In this mode, two sets of attributes are calculated, and the application is expected to "
 					"swap between the two every frame. This creates approximately 3*64 colors (due to double "
 					"blacks, the actual number of colors is quite much lower). The effect flickers on emulators "
-					"but works fine on CRTs. (Why 3x64 and not 192? because there's three sets of (about) 64 "
+					"but works \"fine\" on CRTs. (Why 3x64 and not 192? because there's three sets of (about) 64 "
 					"color palettes, and each cell can use 2 from one of those).\n"
 					"\n"
 					"Note that the color reproduction results in real hardware will differ from the simulated, "
-					"depending on the capabilities of the display device, and may be a flickering nightmare. "
+					"depending on the capabilities of the display device, and may be a flickering nightmare.\n "
+					"\n"
 					);
 			}
 			ImGui::End();
