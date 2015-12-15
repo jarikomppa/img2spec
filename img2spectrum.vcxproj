@@ -36,6 +36,7 @@
     <ClInclude Include="src\noisemodifier.h" />
     <ClInclude Include="src\ordereddithermodifier.h" />
     <ClInclude Include="src\rgbmodifier.h" />
+    <ClInclude Include="src\scaleposmodifier.h" />
     <ClInclude Include="src\yiqmodifier.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -90,6 +91,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

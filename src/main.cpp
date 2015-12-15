@@ -41,7 +41,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 #define SPEC_Y(y)  (((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
 
@@ -264,9 +264,14 @@ int gSpeccyPalette[]
 };
 
 
+char *gSourceImageName = 0;
+unsigned int *gSourceImageData = 0;
+int gSourceImageX = 0, gSourceImageY = 0;
+
 
 int rgb_to_speccy_pal(int c, int first, int count);
 int float_to_color(float aR, float aG, float aB);
+void bitmap_to_float(unsigned int *aBitmap);
 
 // Do we need to recalculate?
 int gDirty = 1;
@@ -320,6 +325,7 @@ Modifier *gModifierRoot = 0;
 Modifier *gModifierApplyStack = 0;
 
 #include "modifier.h"
+#include "scaleposmodifier.h"
 #include "rgbmodifier.h"
 #include "yiqmodifier.h"
 #include "hsvmodifier.h"
@@ -961,27 +967,19 @@ void loadimg(char *aFilename = 0)
 
 	ofn.lpstrTitle = "Load image";
 
-
 	FILE * f = NULL;
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
-		int x, y, n;
-		unsigned int *indata = (unsigned int*)stbi_load(aFilename?aFilename:szFileName, &x, &y, &n, 4);
-		unsigned int *data = 0;
+		if (gSourceImageName)
+			free(gSourceImageName);
+		gSourceImageName = strdup(aFilename ? aFilename : szFileName);
+		if (gSourceImageData)
+			stbi_image_free(gSourceImageData);
+		gSourceImageData = 0;
+		int n;
+		gSourceImageData = (unsigned int*)stbi_load(aFilename ? aFilename : szFileName, &gSourceImageX, &gSourceImageY, &n, 4);
 
-		if (x <= 256 && y <= 192)
-		{
-			data = indata;
-		}
-		else
-		{
-			data = new unsigned int[192 * 256];
-			stbir_resize_uint8((unsigned char*)indata, x, y, 0,
-				(unsigned char*)data, 256, 192, 0, 4);
-			x = 256;
-			y = 192;
-		}
 
 		int i, j;
 		for (i = 0; i < 192; i++)
@@ -989,15 +987,11 @@ void loadimg(char *aFilename = 0)
 			for (j = 0; j < 256; j++)
 			{
 				int pix = 0xff000000;
-				if (j < x && i < y)
-					pix = data[i * x + j] | 0xff000000;
+				if (j < gSourceImageX && i < gSourceImageY)
+					pix = gSourceImageData[i * gSourceImageX + j] | 0xff000000;
 				gBitmapOrig[i * 256 + j] = pix;
 			}
 		}
-
-		if (data != indata)
-			delete[] data;
-		stbi_image_free(indata);
 
 		glBindTexture(GL_TEXTURE_2D, gTextureOrig);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
@@ -1401,6 +1395,7 @@ int main(int aParamc, char**aParams)
 			{
 				if (ImGui::MenuItem("Open modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
 				ImGui::Separator();
+				if (ImGui::MenuItem("Add Scale/Position modifier")) { addModifier(new ScalePosModifier); }
 				if (ImGui::MenuItem("Add RGB modifier")) { addModifier(new RGBModifier); }
 				if (ImGui::MenuItem("Add HSV modifier")) { addModifier(new HSVModifier); }
 				if (ImGui::MenuItem("Add YIQ modifier")) { addModifier(new YIQModifier); }
@@ -1426,6 +1421,7 @@ int main(int aParamc, char**aParams)
 		{
 			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
+				if (ImGui::Button("Scale/Position", ImVec2(-1, 0))) { addModifier(new ScalePosModifier); }
 				if (ImGui::Button("RGB", ImVec2(-1, 0))) { addModifier(new RGBModifier); }
 				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
 				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
