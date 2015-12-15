@@ -1548,6 +1548,9 @@ int main(int aParamc, char**aParams)
 					"blacks, the actual number of colors is quite much lower). The effect flickers on emulators "
 					"but works fine on CRTs. (Why 3x64 and not 192? because there's three sets of (about) 64 "
 					"color palettes, and each cell can use 2 from one of those).\n"
+					"\n"
+					"Note that the color reproduction results in real hardware will differ from the simulated, "
+					"depending on the capabilities of the display device, and may be a flickering nightmare. "
 					);
 			}
 			ImGui::End();
