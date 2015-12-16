@@ -1183,7 +1183,7 @@ void loadimg(char *aFilename = 0)
 		unsigned int *data = 0;
 		while (gSourceImageData == 0 && iters < 16)
 		{
-			data = (unsigned int*)stbi_load(gSourceImageName, &x, &y, &n, 4);
+			data = (unsigned int*)stbi_load(aFilename ? aFilename : szFileName, &x, &y, &n, 4);
 			if (data == 0)
 				SDL_Delay(20);
 			iters++;
@@ -1688,8 +1688,14 @@ int main(int aParamc, char**aParams)
 			}
 			if (gSourceImageName)
 			{
-				ImGui::BeginMenu(gSourceImageName);
-				ImGui::EndMenu();
+				if (ImGui::BeginMenu(gSourceImageName))
+				{
+					if (ImGui::MenuItem("Reload")) loadimg(gSourceImageName);
+					ImGui::Separator();
+					if (ImGui::MenuItem("Reload automatically", 0, (bool*)&gOptTrackFile)) {};
+
+					ImGui::EndMenu();
+				}
 			}
 			ImGui::EndMainMenuBar();
 		}
