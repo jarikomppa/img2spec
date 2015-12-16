@@ -1516,7 +1516,7 @@ int main(int aParamc, char**aParams)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
-	SDL_Window *window = SDL_CreateWindow("Image Spectrumizer " VERSION " - http://iki.fi/sol", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateWindow("Image Spectrumizer " VERSION " - http://iki.fi/sol", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
 	SDL_GLContext glcontext = SDL_GL_CreateContext(window);
 
     // Setup ImGui binding
@@ -1595,6 +1595,9 @@ int main(int aParamc, char**aParams)
 		}
 	}
 
+	if (aParamc < commandline_export_fn)
+		return 0;
+
 	if (commandline_export)
 	{
 		process_image();
@@ -1621,6 +1624,9 @@ int main(int aParamc, char**aParams)
 
 	if (!gSourceImageName)
 		generateimg();
+
+	if (!done)
+		SDL_ShowWindow(window);
 
     // Main loop
     while (!done)
@@ -1828,6 +1834,25 @@ int main(int aParamc, char**aParams)
 					"  };\n"
 					"\n"
 					".inc is assember .db lines.\n"
+					"\n"
+					"Command line arguments\n"
+					"----------------------\n"
+					"Any image or workspace filenames given as arguments are loaded (in the order given). If "
+					"multiple loadable images or workspaces are given, the last ones are the ones that are used. \n"
+					"\n"
+					"(Well, all of them do get loaded, they just replace the earlier ones in memory).\n"
+					"\n"
+					"To save results on commandline, use the following flags:\n"
+					"-p pngfilename.png\n"
+					"-h headerfilename.h\n"
+					"-i incfilename.inc\n"
+					"-s scrfilename.scr\n"
+					"\n"
+					"Example:\n"
+					"\n"
+					"img2spec cat.png mush.isw -h cat.h\n"
+					"\n"
+					"Output files are overwritten without a warning, but I trust you know what you're doing.\n"
 					"\n"
 					"3x64 mode\n"
 					"---------\n"
