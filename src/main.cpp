@@ -993,8 +993,6 @@ void loadworkspace(char *aFilename = 0)
 
 	ofn.lpstrTitle = "Load workspace";
 
-	FILE * f = NULL;
-
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
 		FILE * f;
@@ -1091,8 +1089,6 @@ void saveworkspace()
 	ofn.lpstrTitle = "Save workspace";
 	ofn.lpstrDefExt = "isw";
 
-	FILE * f = NULL;
-
 	if (GetSaveFileNameA(&ofn))
 	{
 		FILE * f;
@@ -1173,11 +1169,9 @@ void loadimg(char *aFilename = 0)
 
 	ofn.lpstrTitle = "Load image";
 
-	FILE * f = NULL;
-
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
-		f = fopen(aFilename ? aFilename : szFileName, "rb");
+		File *f = fopen(aFilename ? aFilename : szFileName, "rb");
 		if (!f)
 			return;
 		fclose(f);
@@ -1282,8 +1276,6 @@ void savepng(char *aFilename = 0)
 
 	ofn.lpstrTitle = "Save png";
 	ofn.lpstrDefExt = "png";
-
-	FILE * f = NULL;
 
 	if (aFilename || GetSaveFileNameA(&ofn))
 	{
@@ -1525,8 +1517,6 @@ int main(int aParamc, char**aParams)
     // Setup ImGui binding
     ImGui_ImplSdl_Init(window);
 
-    bool show_test_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImColor(114, 144, 154);
 
 	glGenTextures(1, &gTextureOrig);

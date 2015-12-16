@@ -76,7 +76,6 @@ public:
 
 	virtual void process()
 	{
-		float ra = 0, ga = 0, ba = 0;
 		int i, j, c;
 		float * buf = new float[192 * 256 * 3 * 3];
 		float * rbuf = buf + (256 * 192 * 0);
@@ -85,7 +84,7 @@ public:
 
 		for (j = 0, c = 0; j < 192; j++)
 		{
-			ra = ga = ba = 0;
+			float ra = 0, ga = 0, ba = 0;
 			for (i = 0; i < 256; i++, c++)
 			{
 				ra += gBitmapProcFloat[c * 3 + 2];
