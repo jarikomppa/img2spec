@@ -41,7 +41,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "1.4"
+#define VERSION "2.0"
 
 #define SPEC_Y(y)  (((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
 
@@ -1592,7 +1592,6 @@ int main(int aParamc, char**aParams)
         ImGui_ImplSdl_NewFrame(window);
 		//ImGui::ShowTestWindow();
 
-
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -1600,13 +1599,14 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Load image")) { loadimg(); }
 				if (ImGui::MenuItem("Reload changed image", 0, (bool*)&gOptTrackFile)) {};
 				ImGui::Separator();
-				if (ImGui::MenuItem("Save workspace")) { saveworkspace(); }
 				if (ImGui::MenuItem("Load workspace")) { loadworkspace(); }
 				ImGui::Separator();
-				if (ImGui::MenuItem("Save .png")) { savepng(); }
-				if (ImGui::MenuItem("Save .scr")) { savescr(); }
-				if (ImGui::MenuItem("Save .h")) { saveh(); }
-				if (ImGui::MenuItem("Save .inc")) { saveinc(); }
+				if (ImGui::MenuItem("Save workspace")) { saveworkspace(); }
+				ImGui::Separator();
+				if (ImGui::MenuItem("Export .png")) { savepng(); }
+				if (ImGui::MenuItem("Export .scr")) { savescr(); }
+				if (ImGui::MenuItem("Export .h")) { saveh(); }
+				if (ImGui::MenuItem("Export .inc")) { saveinc(); }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Window"))
