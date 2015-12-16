@@ -1177,25 +1177,36 @@ void loadimg(char *aFilename = 0)
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
+		f = fopen(aFilename ? aFilename : szFileName, "rb");
+		if (!f)
+			return;
+		fclose(f);
+
 		// gSourceImageName may be the same pointer as aFilename, so freeing it first
 		// and then trying to duplicate it to itself might... well..
 		char *name = mystrdup(aFilename ? aFilename : szFileName);
+		int n, iters = 0, x, y;
+		unsigned int *data = 0;
+		while (gSourceImageData == 0 && iters < 16)
+		{
+			data = (unsigned int*)stbi_load(gSourceImageName, &x, &y, &n, 4);
+			if (data == 0)
+				SDL_Delay(20);
+			iters++;
+		}
+
+		if (data == 0)
+			return;
+
+		gSourceImageX = x;
+		gSourceImageY = y;
+
 		if (gSourceImageName)
 			delete[] gSourceImageName;
 		gSourceImageName = name;
 		if (gSourceImageData)
 			stbi_image_free(gSourceImageData);
-		gSourceImageData = 0;
-		gSourceImageX = 0;
-		gSourceImageY = 0;
-		int n, iters = 0;
-		while (gSourceImageData == 0 && iters < 16)
-		{
-			gSourceImageData = (unsigned int*)stbi_load(gSourceImageName, &gSourceImageX, &gSourceImageY, &n, 4);
-			if (gSourceImageData == 0)
-				SDL_Delay(20);
-			iters++;
-		}
+		gSourceImageData = data;
 
 
 		int i, j;
@@ -1251,7 +1262,7 @@ void generateimg()
 }
 
 
-void savepng()
+void savepng(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -1274,14 +1285,14 @@ void savepng()
 
 	FILE * f = NULL;
 
-	if (GetSaveFileNameA(&ofn))
+	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		stbi_write_png(szFileName, 256, 192, 4, gBitmapSpec, 256*4);
+		stbi_write_png(aFilename?aFilename:szFileName, 256, 192, 4, gBitmapSpec, 256*4);
 	}
 }
 
 
-void savescr()
+void savescr(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -1304,16 +1315,16 @@ void savescr()
 
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
-	if (GetSaveFileNameA(&ofn))
+	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		FILE * f = fopen(szFileName, "wb");
+		FILE * f = fopen(aFilename?aFilename:szFileName, "wb");
 		fwrite(gSpectrumBitmap, 32 * 192, 1, f);
 		fwrite(gSpectrumAttributes, 32 * 24 * attrib_size_multiplier, 1, f);
 		fclose(f);
 	}
 }
 
-void saveh()
+void saveh(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -1336,9 +1347,9 @@ void saveh()
 
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
-	if (GetSaveFileNameA(&ofn))
+	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		FILE * f = fopen(szFileName, "w");
+		FILE * f = fopen(aFilename ? aFilename : szFileName, "w");
 		int i, c = 0;
 		for (i = 0; i < 32 * 192; i++)
 		{
@@ -1367,7 +1378,7 @@ void saveh()
 }
 
 
-void saveinc()
+void saveinc(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
@@ -1390,9 +1401,9 @@ void saveinc()
 
 	int attrib_size_multiplier = 1 << (gOptCellSize + gOptColorMode);
 
-	if (GetSaveFileNameA(&ofn))
+	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		FILE * f = fopen(szFileName, "w");
+		FILE * f = fopen(aFilename ? aFilename : szFileName, "w");
 		int i;
 		for (i = 0; i < 32 * 192; i++)
 		{
@@ -1558,17 +1569,61 @@ int main(int aParamc, char**aParams)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	bool done = false;
+
+	int commandline_export = 0;	
+	int commandline_export_fn = 0;
 	if (aParamc > 1)
 	{
-		loadimg(aParams[1]);
+		int i;
+		for (i = 1; i < aParamc; i++)
+		{
+			if (aParams[i][0] == '-')
+			{
+				// option
+				switch (aParams[i][1])
+				{
+				case 'p': commandline_export = 1; break;
+				case 'h': commandline_export = 2; break;
+				case 'i': commandline_export = 3; break;
+				case 's': commandline_export = 4; break;
+				}
+				commandline_export_fn = i + 1;
+				i++;
+			}
+			else
+			{
+				// image or workspace. Just try both!
+				loadimg(aParams[i]);
+				loadworkspace(aParams[i]);
+			}
+		}
 	}
-	else
+
+	if (commandline_export)
 	{
-		generateimg();
+		process_image();
+		switch (gOptColorMode)
+		{
+		case 0:
+			spectrumize_image();
+			break;
+		case 1:
+			spectrumize_image_3x64();
+			break;
+		}
+		switch (commandline_export)
+		{
+		case 1:	savepng(aParams[commandline_export_fn]); break;
+		case 2:	saveh(aParams[commandline_export_fn]); break;
+		case 3:	saveinc(aParams[commandline_export_fn]); break;
+		case 4:	savescr(aParams[commandline_export_fn]); break;
+		}
+
+		done = true;
 	}
 
     // Main loop
-	bool done = false;
     while (!done)
     {
 		ImVec2 picsize(256, 192);
@@ -1639,6 +1694,11 @@ int main(int aParamc, char**aParams)
 				ImGui::Separator();
 				if (ImGui::MenuItem("Show help")) { gWindowHelp= !gWindowHelp; }
 
+				ImGui::EndMenu();
+			}
+			if (gSourceImageName)
+			{
+				ImGui::BeginMenu(gSourceImageName);
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
