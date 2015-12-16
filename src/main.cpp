@@ -414,7 +414,7 @@ void modifier_ui()
 {
 	Modifier *walker = gModifierRoot;
 	Modifier *prev = 0;
-	
+
 	while (walker)
 	{
 		int ret = walker->ui();
@@ -465,13 +465,16 @@ void modifier_ui()
 				walker = walker->mNext;
 			}
 	}
+}
 
+void build_applystack()
+{
 	gModifierApplyStack = gModifierRoot;
 	if (gModifierApplyStack)
 	{
 		gModifierApplyStack->mApplyNext = 0;
 
-		walker = gModifierRoot->mNext;
+		Modifier *walker = gModifierRoot->mNext;
 		while (walker)
 		{
 			walker->mApplyNext = gModifierApplyStack;
@@ -483,6 +486,8 @@ void modifier_ui()
 
 void process_image()
 {
+	build_applystack();
+
 	bitmap_to_float(gBitmapOrig);
 
 	Modifier *walker = gModifierApplyStack;
@@ -996,7 +1001,7 @@ void loadworkspace(char *aFilename = 0)
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
 		FILE * f;
-		f = fopen(szFileName, "rb");
+		f = fopen(aFilename ? aFilename : szFileName, "rb");
 		if (f)
 		{
 			unsigned int t;
@@ -1602,6 +1607,7 @@ int main(int aParamc, char**aParams)
 			spectrumize_image_3x64();
 			break;
 		}
+
 		switch (commandline_export)
 		{
 		case 1:	savepng(aParams[commandline_export_fn]); break;
@@ -1612,6 +1618,9 @@ int main(int aParamc, char**aParams)
 
 		done = true;
 	}
+
+	if (!gSourceImageName)
+		generateimg();
 
     // Main loop
     while (!done)
