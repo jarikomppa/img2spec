@@ -1186,9 +1186,9 @@ void loadimg(char *aFilename = 0)
 		char *name = mystrdup(aFilename ? aFilename : szFileName);
 		int n, iters = 0, x, y;
 		unsigned int *data = 0;
-		while (gSourceImageData == 0 && iters < 16)
+		while (data == 0 && iters < 16)
 		{
-			data = (unsigned int*)stbi_load(aFilename ? aFilename : szFileName, &x, &y, &n, 4);
+			data = (unsigned int*)stbi_load(name, &x, &y, &n, 4);
 			if (data == 0)
 				SDL_Delay(20);
 			iters++;
