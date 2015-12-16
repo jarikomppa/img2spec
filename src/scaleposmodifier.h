@@ -52,11 +52,11 @@ public:
 			if (ImGui::Button("Reset##s   ")) { gDirty = 1; mDirtyPic = 1; mScale = 1; } ImGui::SameLine();
 			ImGui::Text("Scale");
 
-			if (ImGui::SliderInt("##x  ", &mX, -255, gSourceImageX * mScale)) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::SliderInt("##x  ", &mX, -255, (int)floor(gSourceImageX * mScale))) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##x   ")) { gDirty = 1; mDirtyPic = 1; mX = 0; } ImGui::SameLine();
 			ImGui::Text("X Offset");
 
-			if (ImGui::SliderInt("##y  ", &mY, -192, gSourceImageY * mScale)) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::SliderInt("##y  ", &mY, -192, (int)floor(gSourceImageY * mScale))) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##y   ")) { gDirty = 1; mDirtyPic = 1; mY = 0; } ImGui::SameLine();
 			ImGui::Text("Y Offset");
 
@@ -73,8 +73,8 @@ public:
 		{
 			mDirtyPic = 0;
 			int i, j;
-			int h = gSourceImageY * mScale;
-			int w = gSourceImageX * mScale;
+			int h = (int)floor(gSourceImageY * mScale);
+			int w = (int)floor(gSourceImageX * mScale);
 			unsigned int *temp = new unsigned int[h * w];
 			if (mHQ)
 			{

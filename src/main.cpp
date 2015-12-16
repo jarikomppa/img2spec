@@ -958,6 +958,75 @@ void addModifier(Modifier *aNewModifier)
 	gDirty = 1;
 }
 
+void loadworkspace(char *aFilename = 0)
+{
+	OPENFILENAMEA ofn;
+	char szFileName[1024] = "";
+
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = 0;
+	ofn.lpstrFilter =
+		"All supported types\0*.isw\0"
+		"Image Spectrumizer Workspace (*.isw)\0*.isw\0"
+		"All Files (*.*)\0*.*\0\0";
+
+	ofn.nMaxFile = 1024;
+
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrFile = szFileName;
+
+	ofn.lpstrTitle = "Load workspace";
+
+	FILE * f = NULL;
+
+	if (aFilename || GetOpenFileNameA(&ofn))
+	{
+		// TODO
+	}
+	gDirty = 1;
+}
+
+
+void saveworkspace()
+{
+	OPENFILENAMEA ofn;
+	char szFileName[1024] = "";
+
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = 0;
+	ofn.lpstrFilter =
+		"Image Spectrumizer Workspace (*.isw)\0*.isw\0"
+		"All Files (*.*)\0*.*\0\0";
+
+	ofn.nMaxFile = 1024;
+
+	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+	ofn.lpstrFile = szFileName;
+
+	ofn.lpstrTitle = "Save workspace";
+	ofn.lpstrDefExt = "isw";
+
+	FILE * f = NULL;
+
+	if (GetSaveFileNameA(&ofn))
+	{
+		// TODO
+	}
+}
+
+char * mystrdup(char * aString)
+{
+	int len = 0;
+	while (aString[len]) len++;
+	char * data = new char[len + 1];
+	memcpy(data, aString, len);
+	data[len] = 0;
+	return data;
+}
 
 void loadimg(char *aFilename = 0)
 {
@@ -994,9 +1063,9 @@ void loadimg(char *aFilename = 0)
 	{
 		// gSourceImageName may be the same pointer as aFilename, so freeing it first
 		// and then trying to duplicate it to itself might... well..
-		char *name = strdup(aFilename ? aFilename : szFileName);
+		char *name = mystrdup(aFilename ? aFilename : szFileName);
 		if (gSourceImageName)
-			free(gSourceImageName);
+			delete[] gSourceImageName;
 		gSourceImageName = name;
 		if (gSourceImageData)
 			stbi_image_free(gSourceImageData);
@@ -1308,9 +1377,6 @@ void calccrap()
 
 int main(int aParamc, char**aParams)
 {
-
-
-
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 	{
@@ -1416,6 +1482,10 @@ int main(int aParamc, char**aParams)
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("Load image")) { loadimg(); }
+				if (ImGui::MenuItem("Reload changed image", 0, (bool*)&gOptTrackFile)) {};
+				ImGui::Separator();
+				if (ImGui::MenuItem("Save workspace")) { saveworkspace(); }
+				if (ImGui::MenuItem("Load workspace")) { loadworkspace(); }
 				ImGui::Separator();
 				if (ImGui::MenuItem("Save .png")) { savepng(); }
 				if (ImGui::MenuItem("Save .scr")) { savescr(); }
