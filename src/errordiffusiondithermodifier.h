@@ -27,6 +27,10 @@ public:
 		read(f, mDirection);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_ERRORDIFFUSION;
+	}
 
 	ErrorDiffusionDitherModifier()
 	{

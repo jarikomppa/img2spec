@@ -18,6 +18,10 @@ public:
 		read(f, mQ);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_YIQ;
+	}
 
 	YIQModifier()
 	{

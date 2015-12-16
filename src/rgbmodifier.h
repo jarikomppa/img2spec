@@ -18,6 +18,12 @@ public:
 		read(f, mB);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_RGB;
+	}
+
+
 	RGBModifier()
 	{
 		mR = mG = mB = 0;

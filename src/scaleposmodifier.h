@@ -23,6 +23,11 @@ public:
 		read(f, mScale);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_SCALEPOS;
+	}
+
 	ScalePosModifier()
 	{
 		mHQ = false;

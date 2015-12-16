@@ -27,6 +27,10 @@ public:
 		read(f, mNegate);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_BLUR;
+	}
 
 	BlurModifier()
 	{

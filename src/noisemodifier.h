@@ -27,6 +27,10 @@ public:
 		read(f, mB_en);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_NOISE;
+	}
 
 	NoiseModifier()
 	{

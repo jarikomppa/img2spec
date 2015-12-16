@@ -29,6 +29,11 @@ public:
 		read(f, mMatrix);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_ORDEREDDITHER;
+	}
+
 
 	OrderedDitherModifier()
 	{

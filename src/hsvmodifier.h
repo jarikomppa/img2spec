@@ -19,6 +19,11 @@ public:
 		read(f, mV);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_HSV;
+	}
+
 
 	HSVModifier()
 	{

@@ -326,6 +326,19 @@ Modifier *gModifierRoot = 0;
 // Modifiers are applied in reverse order
 Modifier *gModifierApplyStack = 0;
 
+enum MODIFIERS
+{
+	MOD_SCALEPOS = 1,
+	MOD_RGB,
+	MOD_YIQ,
+	MOD_HSV,
+	MOD_NOISE,
+	MOD_ORDEREDDITHER,
+	MOD_ERRORDIFFUSION,
+	MOD_CONTRAST,
+	MOD_BLUR
+};
+
 #include "modifier.h"
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
@@ -960,6 +973,8 @@ void addModifier(Modifier *aNewModifier)
 
 void loadworkspace(char *aFilename = 0)
 {
+	gDirty = 1;
+
 	OPENFILENAMEA ofn;
 	char szFileName[1024] = "";
 
@@ -968,7 +983,6 @@ void loadworkspace(char *aFilename = 0)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = 0;
 	ofn.lpstrFilter =
-		"All supported types\0*.isw\0"
 		"Image Spectrumizer Workspace (*.isw)\0*.isw\0"
 		"All Files (*.*)\0*.*\0\0";
 
@@ -983,9 +997,76 @@ void loadworkspace(char *aFilename = 0)
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
-		// TODO
+		FILE * f;
+		f = fopen(szFileName, "rb");
+		if (f)
+		{
+			unsigned int t;
+			Modifier::read(f, t);
+			if (t != 0x50534D49) // "IMSP"
+			{
+				fclose(f);
+				return;
+			}
+			Modifier::read(f, t);
+			if (t != 1) // version 1
+			{
+				fclose(f);
+				return;
+			}
+			Modifier::read(f, gOptAttribOrder);
+			Modifier::read(f, gOptBright);
+			Modifier::read(f, gOptCellSize);
+			Modifier::read(f, gOptColorMode);
+			Modifier::read(f, gOptPaper);
+			Modifier::read(f, gOptScreenOrder);
+			Modifier::read(f, gOptTrackFile);
+			Modifier::read(f, gOptZoom);
+			Modifier::read(f, gOptZoomStyle);
+			Modifier::read(f, gWindowAbout);
+			Modifier::read(f, gWindowAttribBitmap);
+			Modifier::read(f, gWindowHelp);
+			Modifier::read(f, gWindowHistograms);
+			Modifier::read(f, gWindowModifierPalette);
+			Modifier::read(f, gWindowOptions);
+			Modifier::read(f, gWindowZoomedOutput);
+
+			Modifier *walker = gModifierRoot;
+			while (walker)
+			{
+				Modifier *last = walker;
+				walker = walker->mNext;
+				delete last;
+			}
+
+			while (!feof(f))
+			{
+				int m;
+				Modifier::read(f, m);
+				Modifier *n = 0;
+				switch (m)
+				{
+				case MOD_SCALEPOS: n = new ScalePosModifier; break;
+				case MOD_RGB: n = new RGBModifier; break;
+				case MOD_YIQ: n = new YIQModifier; break;
+				case MOD_HSV: n = new HSVModifier; break;
+				case MOD_NOISE: n = new NoiseModifier; break;
+				case MOD_ORDEREDDITHER: n = new OrderedDitherModifier; break;
+				case MOD_ERRORDIFFUSION: n = new ErrorDiffusionDitherModifier; break;
+				case MOD_CONTRAST: n = new ContrastModifier; break;
+				case MOD_BLUR: n = new BlurModifier; break;
+				default:
+					fclose(f);
+					return;
+				}
+				addModifier(n);
+				n->deserialize_common(f);
+				n->deserialize(f);
+			}
+
+			fclose(f);
+		}
 	}
-	gDirty = 1;
 }
 
 
@@ -1014,7 +1095,42 @@ void saveworkspace()
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		// TODO
+		FILE * f;
+		f = fopen(szFileName, "wb");
+		if (f)
+		{
+			unsigned int t = 0x50534D49;
+			Modifier::write(f, t); // "IMSP"
+			t = 1; // version
+			Modifier::write(f, t);
+			Modifier::write(f, gOptAttribOrder);
+			Modifier::write(f, gOptBright);
+			Modifier::write(f, gOptCellSize);
+			Modifier::write(f, gOptColorMode);
+			Modifier::write(f, gOptPaper);
+			Modifier::write(f, gOptScreenOrder);
+			Modifier::write(f, gOptTrackFile);
+			Modifier::write(f, gOptZoom);
+			Modifier::write(f, gOptZoomStyle);
+			Modifier::write(f, gWindowAbout);
+			Modifier::write(f, gWindowAttribBitmap);
+			Modifier::write(f, gWindowHelp);
+			Modifier::write(f, gWindowHistograms);
+			Modifier::write(f, gWindowModifierPalette);
+			Modifier::write(f, gWindowOptions);
+			Modifier::write(f, gWindowZoomedOutput);
+
+			Modifier *walker = gModifierApplyStack;
+			while (walker)
+			{
+				Modifier::write(f, walker->gettype());
+				walker->serialize_common(f);
+				walker->serialize(f);
+				walker = walker->mApplyNext;
+			}
+			
+			fclose(f);
+		}
 	}
 }
 

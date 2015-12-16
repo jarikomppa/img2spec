@@ -26,8 +26,8 @@ public:
 		return ret;
 	}
 
-	template <typename T> void write(FILE * f, T v) { fwrite(&v, sizeof(T), 1, f); }
-	template <typename T> void read(FILE * f, T &v) { fread(&v, sizeof(T), 1, f); }
+	template <typename T> static void write(FILE * f, T v) { fwrite(&v, sizeof(T), 1, f); }
+	template <typename T> static void read(FILE * f, T &v) { fread(&v, sizeof(T), 1, f); }
 
 	virtual int ui() = 0;
 	virtual void process() = 0;
@@ -35,4 +35,5 @@ public:
 	virtual void deserialize(FILE * f) = 0;
 	void serialize_common(FILE * f) { write(f, mEnabled); }
 	void deserialize_common(FILE * f) { read(f, mEnabled); }
+	virtual int gettype() = 0;
 };

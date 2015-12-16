@@ -19,6 +19,11 @@ public:
 		read(f, mP);
 	}
 
+	virtual int gettype()
+	{
+		return MOD_CONTRAST;
+	}
+
 	ContrastModifier()
 	{
 		mB = 0;
