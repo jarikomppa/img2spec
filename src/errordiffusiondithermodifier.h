@@ -7,6 +7,27 @@ public:
 	int mDirection;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mR_en);
+		write(f, mG_en);
+		write(f, mB_en);
+		write(f, mV);
+		write(f, mModel);
+		write(f, mDirection);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mR_en);
+		read(f, mG_en);
+		read(f, mB_en);
+		read(f, mV);
+		read(f, mModel);
+		read(f, mDirection);
+	}
+
+
 	ErrorDiffusionDitherModifier()
 	{
 		mV = 1;

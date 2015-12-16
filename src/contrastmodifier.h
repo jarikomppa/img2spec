@@ -5,6 +5,20 @@ public:
 	float mC, mB, mP;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mC);
+		write(f, mB);
+		write(f, mP);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mC);
+		read(f, mB);
+		read(f, mP);
+	}
+
 	ContrastModifier()
 	{
 		mB = 0;

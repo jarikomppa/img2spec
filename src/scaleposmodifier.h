@@ -7,6 +7,22 @@ public:
 	float mScale;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mX);
+		write(f, mY);
+		write(f, mHQ);
+		write(f, mScale);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mX);
+		read(f, mY);
+		read(f, mHQ);
+		read(f, mScale);
+	}
+
 	ScalePosModifier()
 	{
 		mHQ = false;

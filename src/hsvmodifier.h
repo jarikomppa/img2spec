@@ -5,6 +5,21 @@ public:
 	float mH, mS, mV;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mH);
+		write(f, mS);
+		write(f, mV);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mH);
+		read(f, mS);
+		read(f, mV);
+	}
+
+
 	HSVModifier()
 	{
 		mH = 0;

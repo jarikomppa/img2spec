@@ -7,6 +7,29 @@ public:
 	int mXOfs, mYOfs;
 	int mMatrix;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mV);
+		write(f, mR_en);
+		write(f, mG_en);
+		write(f, mB_en);
+		write(f, mXOfs);
+		write(f, mYOfs);
+		write(f, mMatrix);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mV);
+		read(f, mR_en);
+		read(f, mG_en);
+		read(f, mB_en);
+		read(f, mXOfs);
+		read(f, mYOfs);
+		read(f, mMatrix);
+	}
+
+
 	OrderedDitherModifier()
 	{
 		mV = 1.0f;

@@ -4,6 +4,20 @@ public:
 	float mR, mG, mB;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mR);
+		write(f, mG);
+		write(f, mB);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mR);
+		read(f, mG);
+		read(f, mB);
+	}
+
 	RGBModifier()
 	{
 		mR = mG = mB = 0;

@@ -7,6 +7,27 @@ public:
 	bool mNegate;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mV);
+		write(f, mArea);
+		write(f, mR_en);
+		write(f, mG_en);
+		write(f, mB_en);
+		write(f, mNegate);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mV);
+		read(f, mArea);
+		read(f, mR_en);
+		read(f, mG_en);
+		read(f, mB_en);
+		read(f, mNegate);
+	}
+
+
 	BlurModifier()
 	{
 		mNegate = false;

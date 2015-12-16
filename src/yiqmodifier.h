@@ -4,6 +4,21 @@ public:
 	float mY, mI, mQ;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mY);
+		write(f, mI);
+		write(f, mQ);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mY);
+		read(f, mI);
+		read(f, mQ);
+	}
+
+
 	YIQModifier()
 	{
 		mY = mI = mQ = 0;

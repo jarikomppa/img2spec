@@ -7,6 +7,27 @@ public:
 	bool mR_en, mG_en, mB_en;
 	int mOnce;
 
+	virtual void serialize(FILE * f)
+	{
+		write(f, mV);
+		write(f, mSeed);
+		write(f, mColornoise);
+		write(f, mR_en);
+		write(f, mG_en);
+		write(f, mB_en);
+	}
+
+	virtual void deserialize(FILE * f)
+	{
+		read(f, mV);
+		read(f, mSeed);
+		read(f, mColornoise);
+		read(f, mR_en);
+		read(f, mG_en);
+		read(f, mB_en);
+	}
+
+
 	NoiseModifier()
 	{
 		mV = 0;
