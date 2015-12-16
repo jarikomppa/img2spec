@@ -1171,7 +1171,7 @@ void loadimg(char *aFilename = 0)
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
-		File *f = fopen(aFilename ? aFilename : szFileName, "rb");
+		FILE *f = fopen(aFilename ? aFilename : szFileName, "rb");
 		if (!f)
 			return;
 		fclose(f);
