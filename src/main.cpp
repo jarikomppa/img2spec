@@ -19,7 +19,7 @@
  */
 
 /*
-Note that this is (mostly) one evening hack, so the
+Note that this is (mostly) a quick hack, so the
 code quality leaves a lot to be desired..
 Still, if you find it useful, great!
 */
