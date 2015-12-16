@@ -56,6 +56,8 @@ public:
 			if (ImGui::SliderFloat("##s  ", &mScale, 0, 1)) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##s   ")) { gDirty = 1; mDirtyPic = 1; mScale = 1; } ImGui::SameLine();
 			ImGui::Text("Scale");
+			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = 256.0f / gSourceImageX; mDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = 192.0f / gSourceImageY; mDirtyPic = 1; gDirty = 1; } 
 
 			if (ImGui::SliderInt("##x  ", &mX, -255, (int)floor(gSourceImageX * mScale))) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##x   ")) { gDirty = 1; mDirtyPic = 1; mX = 0; } ImGui::SameLine();
