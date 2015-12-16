@@ -63,6 +63,8 @@ public:
 			ret = common();
 			if (ImGui::Combo("##Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0")) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##matrix     ")) { gDirty = 1; mMatrix = 4; } ImGui::SameLine();
+			if (ImGui::Button("-##matrix")) { gDirty = 1;  mMatrix = (mMatrix + 5 - 1) % 5; } ImGui::SameLine();
+			if (ImGui::Button("+##matrix")) { gDirty = 1;  mMatrix = (mMatrix + 5 + 1) % 5; } ImGui::SameLine();
 			ImGui::Text("Matrix");
 
 			if (ImGui::SliderInt("##X offset", &mXOfs, 0, 8)) { gDirty = 1; }	ImGui::SameLine();
