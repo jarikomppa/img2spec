@@ -24,7 +24,7 @@ https://github.com/jarikomppa/img2spec
 
 - The window can be resized.
 - Various helper windows can be opened from the window menu.
-- Don't hesistate to play with conversion options.
+- Don't hesitate to play with conversion options.
 
 ##Typical workflow:
 
@@ -34,9 +34,9 @@ https://github.com/jarikomppa/img2spec
 4. Tweak modifiers until result is acceptable
 5. Export result (file->export ...)
 
-##Image editor interopration
+##Image editor interoperation
 If you keep the image file open in image spectrumizer and the image editor of your 
-choise (such as photoshop), image spectrumizer can detect when the file has changed 
+choice (such as photoshop), image spectrumizer can detect when the file has changed 
 and reloads the image automatically. This way you can keep editing the source image 
 with (potentially) better tools than image spectrumizer can offer, and see the 
 results relatively quickly.
@@ -58,16 +58,16 @@ change that from the options.
 .h is C array, only data is included, so typical use would be:
 
 ```
-    const myimagedata[]= {
+    const char myimagedata[]= {
     #include "myimagedata.h"
     };
 ```
 
-.inc is assember .db lines.
+.inc is assembler .db lines.
 
 ##Command line arguments
 
-Any image or workspace filenames given as arguments are loaded (in the order given). If 
+Any image or workspace file names given as arguments are loaded (in the order given). If 
 multiple loadable images or workspaces are given, the last ones are the ones that are used. 
 
 (Well, all of them do get loaded, they just replace the earlier ones in memory).
