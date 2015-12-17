@@ -32,7 +32,7 @@ https://github.com/jarikomppa/img2spec
 2. Add modifiers (modifiers->...)
 3. (optionally) open options (window->options) and change conversion options
 4. Tweak modifiers until result is acceptable
-5. Save result (file->save ...)
+5. Export result (file->export ...)
 
 ##Image editor interopration
 If you keep the image file open in image spectrumizer and the image editor of your 
@@ -56,9 +56,12 @@ change that from the options.
 .scr is a binary format, basically memory dump of the spectrum screen.
 
 .h is C array, only data is included, so typical use would be:
+
+```
     const myimagedata[]= {
     #include "myimagedata.h"
     };
+```
 
 .inc is assember .db lines.
 
@@ -70,10 +73,10 @@ multiple loadable images or workspaces are given, the last ones are the ones tha
 (Well, all of them do get loaded, they just replace the earlier ones in memory).
 
 To save results on commandline, use the following flags:
--p pngfilename.png
--h headerfilename.h
--i incfilename.inc
--s scrfilename.scr
+- -p pngfilename.png
+- -h headerfilename.h
+- -i incfilename.inc
+- -s scrfilename.scr
 
 Example:
 
