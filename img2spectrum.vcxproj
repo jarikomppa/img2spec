@@ -35,6 +35,8 @@
     <ClInclude Include="src\modifier.h" />
     <ClInclude Include="src\noisemodifier.h" />
     <ClInclude Include="src\ordereddithermodifier.h" />
+    <ClInclude Include="src\pal3x64.h" />
+    <ClInclude Include="src\pal3x64_measured.h" />
     <ClInclude Include="src\rgbmodifier.h" />
     <ClInclude Include="src\scaleposmodifier.h" />
     <ClInclude Include="src\yiqmodifier.h" />

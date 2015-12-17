@@ -65,202 +65,9 @@ int gSpeccyPalette[]
 	0x00ffff,
 	0xffffff,
 
-	// 3x64 mode palettes
+//#include "pal3x64.h"
+#include "pal3x64_measured.h"
 
-	0x000000, // dark+dark
-	0x600000,
-	0x000060,
-	0x600060,
-	0x006000,
-	0x606000,
-	0x006060,
-	0x606060,
-	0x600000,
-	0xc00000,
-	0x600060,
-	0xc00060,
-	0x606000,
-	0xc06000,
-	0x606060,
-	0xc06060,
-	0x000060,
-	0x600060,
-	0x0000c0,
-	0x6000c0,
-	0x006060,
-	0x606060,
-	0x0060c0,
-	0x6060c0,
-	0x600060,
-	0xc00060,
-	0x6000c0,
-	0xc000c0,
-	0x606060,
-	0xc06060,
-	0x6060c0,
-	0xc060c0,
-	0x006000,
-	0x606000,
-	0x006060,
-	0x606060,
-	0x00c000,
-	0x60c000,
-	0x00c060,
-	0x60c060,
-	0x606000,
-	0xc06000,
-	0x606060,
-	0xc06060,
-	0x60c000,
-	0xc0c000,
-	0x60c060,
-	0xc0c060,
-	0x006060,
-	0x606060,
-	0x0060c0,
-	0x6060c0,
-	0x00c060,
-	0x60c060,
-	0x00c0c0,
-	0x60c0c0,
-	0x606060,
-	0xc06060,
-	0x6060c0,
-	0xc060c0,
-	0x60c060,
-	0xc0c060,
-	0x60c0c0,
-	0xc0c0c0,
-
-	0x000000, // dark+bright
-	0x7f0000,
-	0x00007f,
-	0x7f007f,
-	0x007f00,
-	0x7f7f00,
-	0x007f7f,
-	0x7f7f7f,
-	0x600000,
-	0xdf0000,
-	0x60007f,
-	0xdf007f,
-	0x607f00,
-	0xdf7f00,
-	0x607f7f,
-	0xdf7f7f,
-	0x000060,
-	0x7f0060,
-	0x0000df,
-	0x7f00df,
-	0x007f60,
-	0x7f7f60,
-	0x007fdf,
-	0x7f7fdf,
-	0x600060,
-	0xdf0060,
-	0x6000df,
-	0xdf00df,
-	0x607f60,
-	0xdf7f60,
-	0x607fdf,
-	0xdf7fdf,
-	0x006000,
-	0x7f6000,
-	0x00607f,
-	0x7f607f,
-	0x00df00,
-	0x7fdf00,
-	0x00df7f,
-	0x7fdf7f,
-	0x606000,
-	0xdf6000,
-	0x60607f,
-	0xdf607f,
-	0x60df00,
-	0xdfdf00,
-	0x60df7f,
-	0xdfdf7f,
-	0x006060,
-	0x7f6060,
-	0x0060df,
-	0x7f60df,
-	0x00df60,
-	0x7fdf60,
-	0x00dfdf,
-	0x7fdfdf,
-	0x606060,
-	0xdf6060,
-	0x6060df,
-	0xdf60df,
-	0x60df60,
-	0xdfdf60,
-	0x60dfdf,
-	0xdfdfdf,
-
-	0x000000, // bright+bright
-	0x7f0000,
-	0x00007f,
-	0x7f007f,
-	0x007f00,
-	0x7f7f00,
-	0x007f7f,
-	0x7f7f7f,
-	0x7f0000,
-	0xff0000,
-	0x7f007f,
-	0xff007f,
-	0x7f7f00,
-	0xff7f00,
-	0x7f7f7f,
-	0xff7f7f,
-	0x00007f,
-	0x7f007f,
-	0x0000ff,
-	0x7f00ff,
-	0x007f7f,
-	0x7f7f7f,
-	0x007fff,
-	0x7f7fff,
-	0x7f007f,
-	0xff007f,
-	0x7f00ff,
-	0xff00ff,
-	0x7f7f7f,
-	0xff7f7f,
-	0x7f7fff,
-	0xff7fff,
-	0x007f00,
-	0x7f7f00,
-	0x007f7f,
-	0x7f7f7f,
-	0x00ff00,
-	0x7fff00,
-	0x00ff7f,
-	0x7fff7f,
-	0x7f7f00,
-	0xff7f00,
-	0x7f7f7f,
-	0xff7f7f,
-	0x7fff00,
-	0xffff00,
-	0x7fff7f,
-	0xffff7f,
-	0x007f7f,
-	0x7f7f7f,
-	0x007fff,
-	0x7f7fff,
-	0x00ff7f,
-	0x7fff7f,
-	0x00ffff,
-	0x7fffff,
-	0x7f7f7f,
-	0xff7f7f,
-	0x7f7fff,
-	0xff7fff,
-	0x7fff7f,
-	0xffff7f,
-	0x7fffff,
-	0xffffff,
 };
 
 
@@ -1252,7 +1059,7 @@ void generateimg()
 
 				if ((re2 * re2 + im2 * im2) > 4) break;
 			}
-			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
+			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));			
 		}
 	}
 
@@ -1331,7 +1138,7 @@ void saveh(char *aFilename = 0)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = 0;
 	ofn.lpstrFilter =
-		"h (*.h)\0*.h\0"
+		"C header (*.h)\0*.h\0"
 		"All Files (*.*)\0*.*\0\0";
 
 	ofn.nMaxFile = 1024;
@@ -1497,10 +1304,39 @@ void calccrap()
 	fclose(f);
 	exit(0);
 }
+
+void measurecrap()
+{
+	int x, y, n;
+	unsigned char *data = stbi_load("grid.png", &x, &y, &n, 4);
+	FILE * f = fopen("test.h", "w");
+	int i, j, k, l;
+	for (i = 0; i < 12; i++)
+	{
+		for (j = 0; j < 16; j++)
+		{
+			float r = 0, g = 0, b = 0;
+			for (k = 1; k < y/12-2; k++)
+			{
+				for (l = 1; l < x/16-2; l++)
+				{
+					r += (float)data[((i * (y / 12) + k)*x + j*(x / 16) + l) * 4 + 2] / (((y / 12)-2) * ((x / 16)-2));
+					g += (float)data[((i * (y / 12) + k)*x + j*(x / 16) + l) * 4 + 1] / (((y / 12)-2) * ((x / 16)-2));
+					b += (float)data[((i * (y / 12) + k)*x + j*(x / 16) + l) * 4 + 0] / (((y / 12)-2) * ((x / 16)-2));
+				}
+			}
+			int color = ((int)floor(r * 1) << 16) | ((int)floor(g * 1) << 8) | ((int)floor(b * 1) << 0);
+			fprintf(f, "0x%06x, // %d\n", color, i * 16 + j);
+		}
+	}
+	fclose(f);
+	exit(0);
+}
 */
 
 int main(int aParamc, char**aParams)
 {
+
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
 	{
