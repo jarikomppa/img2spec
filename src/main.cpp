@@ -108,11 +108,11 @@ int gOptTrackFile = 1;
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureBitm; 
 
 // Bitmaps for the textures
-unsigned int gBitmapOrig[256 * 192];
-unsigned int gBitmapProc[256 * 192];
-unsigned int gBitmapSpec[256 * 192];
-unsigned int gBitmapAttr[256 * 192];
-unsigned int gBitmapBitm[256 * 192];
+unsigned int gBitmapOrig[256 * 256/*192*/];
+unsigned int gBitmapProc[256 * 256/*192*/];
+unsigned int gBitmapSpec[256 * 256/*192*/];
+unsigned int gBitmapAttr[256 * 256/*192*/];
+unsigned int gBitmapBitm[256 * 256/*192*/];
 
 // Floating point version of the processed bitmap, for processing
 float gBitmapProcFloat[256 * 192 * 3];
@@ -1028,7 +1028,7 @@ void loadimg(char *aFilename = 0)
 		}
 
 		glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
 		gSourceImageDate = getFileDate(gSourceImageName);
 	}
 	gDirty = 1;
@@ -1064,7 +1064,7 @@ void generateimg()
 	}
 
 	glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
 }
 
 
@@ -1091,7 +1091,7 @@ void savepng(char *aFilename = 0)
 
 	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		stbi_write_png(aFilename?aFilename:szFileName, 256, 192, 4, gBitmapSpec, 256*4);
+		stbi_write_png(aFilename ? aFilename : szFileName, 256, 256/*192*/, 4, gBitmapSpec, 256 * 4);
 	}
 }
 
@@ -1266,9 +1266,9 @@ void gen_attr_bitm()
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapAttr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapAttr);
 	glBindTexture(GL_TEXTURE_2D, gTextureBitm);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapBitm);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapBitm);
 
 }
 
@@ -1362,7 +1362,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureOrig);
 	glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1370,7 +1370,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureProc);
 	glBindTexture(GL_TEXTURE_2D, gTextureProc);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1378,7 +1378,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureSpec);
 	glBindTexture(GL_TEXTURE_2D, gTextureSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1386,7 +1386,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureAttr);
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1394,7 +1394,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureBitm);
 	glBindTexture(GL_TEXTURE_2D, gTextureBitm);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1767,8 +1767,8 @@ int main(int aParamc, char**aParams)
 							ImGui::Image(
 								(ImTextureID)gTextureSpec, 
 								ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
-								ImVec2((8 / 256.0f) * (j + 0), (cellht / 192.0f) * (i + 0)),
-								ImVec2((8 / 256.0f) * (j + 1), (cellht / 192.0f) * (i + 1)));
+								ImVec2((8 / 256.0f) * (j + 0), (cellht / 192.0f) * (i + 0) * (192 / 256.0f)),
+								ImVec2((8 / 256.0f) * (j + 1), (cellht / 192.0f) * (i + 1) * (192 / 256.0f)));
 							
 							if (j != 31)
 							{
@@ -1780,7 +1780,7 @@ int main(int aParamc, char**aParams)
 				}
 				else
 				{
-					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(256.0f * gOptZoom, 192.0f * gOptZoom));
+					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(256.0f * gOptZoom, 192.0f * gOptZoom), ImVec2(0, 0), ImVec2(1, 192 / 256.0f));
 				}
 
 			}
@@ -1813,7 +1813,7 @@ int main(int aParamc, char**aParams)
 		
 		ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
 
-		ImGui::Image((ImTextureID)gTextureSpec, picsize);
+		ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0,0), ImVec2(1,192/256.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
@@ -1827,7 +1827,7 @@ int main(int aParamc, char**aParams)
 		}
 		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureProc, picsize); 
+		ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
@@ -1841,7 +1841,7 @@ int main(int aParamc, char**aParams)
 		}
 		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureOrig, picsize);
+		ImGui::Image((ImTextureID)gTextureOrig, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
@@ -1874,9 +1874,9 @@ int main(int aParamc, char**aParams)
 			}
 
 			glBindTexture(GL_TEXTURE_2D, gTextureProc);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
 			glBindTexture(GL_TEXTURE_2D, gTextureSpec);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
 			
 			gDirty = 0;
 		}
