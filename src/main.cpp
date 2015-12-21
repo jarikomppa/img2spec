@@ -29,6 +29,7 @@ Still, if you find it useful, great!
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include <stdio.h>
+#include <math.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 
@@ -143,7 +144,9 @@ enum MODIFIERS
 	MOD_ORDEREDDITHER,
 	MOD_ERRORDIFFUSION,
 	MOD_CONTRAST,
-	MOD_BLUR
+	MOD_BLUR,
+	MOD_EDGE,
+	MOD_MINMAX
 };
 
 #include "modifier.h"
@@ -153,6 +156,8 @@ enum MODIFIERS
 #include "hsvmodifier.h"
 #include "noisemodifier.h"
 #include "blurmodifier.h"
+#include "edgemodifier.h"
+#include "minmaxmodifier.h"
 #include "ordereddithermodifier.h"
 #include "errordiffusiondithermodifier.h"
 #include "contrastmodifier.h"
@@ -865,6 +870,8 @@ void loadworkspace(char *aFilename = 0)
 				case MOD_ERRORDIFFUSION: n = new ErrorDiffusionDitherModifier; break;
 				case MOD_CONTRAST: n = new ContrastModifier; break;
 				case MOD_BLUR: n = new BlurModifier; break;
+				case MOD_EDGE: n = new EdgeModifier; break;
+				case MOD_MINMAX: n = new MinmaxModifier; break;
 				default:
 					fclose(f);
 					return;
@@ -1525,6 +1532,8 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Blur modifier")) { addModifier(new BlurModifier); }
+				if (ImGui::MenuItem("Add Edge modifier")) { addModifier(new EdgeModifier); }
+				if (ImGui::MenuItem("Add Min/max modifier")) { addModifier(new MinmaxModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
 				if (ImGui::MenuItem("Add Error Diffusion Dither modifier")) { addModifier(new ErrorDiffusionDitherModifier); } 
 				ImGui::EndMenu();
@@ -1562,6 +1571,8 @@ int main(int aParamc, char**aParams)
 				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
 				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				if (ImGui::Button("Blur", ImVec2(-1, 0))) { addModifier(new BlurModifier); }
+				if (ImGui::Button("Edge", ImVec2(-1, 0))) { addModifier(new EdgeModifier); }
+				if (ImGui::Button("Min/max", ImVec2(-1, 0))) { addModifier(new MinmaxModifier); }
 				if (ImGui::Button("Ordered Dither", ImVec2(-1, 0))) { addModifier(new OrderedDitherModifier); }
 				// widest button defines the window width, so we can't set it to "auto size"
 				if (ImGui::Button("Error Diffusion Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new ErrorDiffusionDitherModifier); }

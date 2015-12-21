@@ -28,10 +28,12 @@
   <ItemGroup>
     <ClInclude Include="src\blurmodifier.h" />
     <ClInclude Include="src\contrastmodifier.h" />
+    <ClInclude Include="src\edgemodifier.h" />
     <ClInclude Include="src\errordiffusiondithermodifier.h" />
     <ClInclude Include="src\hsvmodifier.h" />
     <ClInclude Include="src\imgui\imgui_impl_sdl.h" />
     <ClInclude Include="src\imgui\imgui_internal.h" />
+    <ClInclude Include="src\minmaxmodifier.h" />
     <ClInclude Include="src\modifier.h" />
     <ClInclude Include="src\noisemodifier.h" />
     <ClInclude Include="src\ordereddithermodifier.h" />
