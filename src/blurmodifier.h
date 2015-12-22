@@ -2,7 +2,7 @@ class BlurModifier : public Modifier
 {
 public:
 	float mV;
-	int mArea;
+	int mAreaX, mAreaY;
 	bool mR_en, mG_en, mB_en;
 	bool mNegate;
 	int mOnce;
@@ -10,7 +10,8 @@ public:
 	virtual void serialize(FILE * f)
 	{
 		write(f, mV);
-		write(f, mArea);
+		write(f, mAreaX);
+		write(f, mAreaY);
 		write(f, mR_en);
 		write(f, mG_en);
 		write(f, mB_en);
@@ -20,7 +21,8 @@ public:
 	virtual void deserialize(FILE * f)
 	{
 		read(f, mV);
-		read(f, mArea);
+		read(f, mAreaX);
+		read(f, mAreaY);
 		read(f, mR_en);
 		read(f, mG_en);
 		read(f, mB_en);
@@ -37,7 +39,8 @@ public:
 		mNegate = false;
 		mV = 1;
 		mOnce = 0;
-		mArea = 3;
+		mAreaX = 3;
+		mAreaY = 3;
 		mR_en = true;
 		mG_en = true;
 		mB_en = true;
@@ -61,10 +64,13 @@ public:
 			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1; } ImGui::SameLine();
 			ImGui::Text("Strength");
 
-			if (ImGui::SliderInt("##kernel area", &mArea, 2, 32)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##kernel area   ")) { gDirty = 1; mArea = 2; } ImGui::SameLine();
-			ImGui::Text("Kernel area");
-			
+			if (ImGui::SliderInt("##kernel areaX", &mAreaX, 1, 32)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##kernel areaX   ")) { gDirty = 1; mAreaX = 2; } ImGui::SameLine();
+			ImGui::Text("Kernel width");
+			if (ImGui::SliderInt("##kernel areaY", &mAreaY, 1, 32)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##kernel areaY   ")) { gDirty = 1; mAreaY = 2; } ImGui::SameLine();
+			ImGui::Text("Kernel height");
+
 			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; } ImGui::SameLine();
@@ -110,10 +116,22 @@ public:
 		{
 			for (i = 0; i < 256; i++, c++)
 			{
-				int x1 = i - mArea / 2;
-				int y1 = j - mArea / 2;
-				int x2 = x1 + mArea - 1;
-				int y2 = y1 + mArea - 1;
+				int x1 = i - mAreaX / 2;
+				int y1 = j - mAreaY / 2;
+				int x2 = x1 + mAreaX - 1;
+				int y2 = y1 + mAreaY - 1;
+
+				if (mAreaX == 1)
+				{
+					x1 = x2 = i;
+					x2++;
+				}
+				if (mAreaY == 1)
+				{
+					y1 = y2 = j;
+					y2++;
+				}
+
 				int div = (x2 - x1) * (y2 - y1);
 				if (x1 < 0) x1 = 0;
 				if (x1 > 255) x1 = 255;
