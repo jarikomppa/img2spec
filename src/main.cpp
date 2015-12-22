@@ -1514,11 +1514,13 @@ int main(int aParamc, char**aParams)
 			}
 			if (ImGui::BeginMenu("Window"))
 			{
-				if (ImGui::MenuItem("Attribute/bitmap")) { gWindowAttribBitmap = !gWindowAttribBitmap; }
-				if (ImGui::MenuItem("Histogram")) { gWindowHistograms = !gWindowHistograms; }
-				if (ImGui::MenuItem("Modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
-				if (ImGui::MenuItem("Zoomed output")) { gWindowZoomedOutput = !gWindowZoomedOutput;  }
-				if (ImGui::MenuItem("Options")) { gWindowOptions = !gWindowOptions; }
+				if (ImGui::MenuItem("Open all windows")) { gWindowAttribBitmap = true; gWindowHistograms = true; gWindowModifierPalette = true; gWindowZoomedOutput = true; gWindowOptions = true; }
+				ImGui::Separator();
+				if (ImGui::MenuItem("Attribute/bitmap", 0, &gWindowAttribBitmap)) {}
+				if (ImGui::MenuItem("Histogram", 0, &gWindowHistograms)) {}
+				if (ImGui::MenuItem("Modifier palette", 0, &gWindowModifierPalette)) {}
+				if (ImGui::MenuItem("Zoomed output", 0, &gWindowZoomedOutput)) {}
+				if (ImGui::MenuItem("Options", 0, &gWindowOptions)) {}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Modifier"))
