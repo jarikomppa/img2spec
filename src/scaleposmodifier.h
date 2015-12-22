@@ -118,7 +118,7 @@ public:
 			delete[] temp;
 
 			glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 192, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
 
 			bitmap_to_float(gBitmapOrig);
 		}
