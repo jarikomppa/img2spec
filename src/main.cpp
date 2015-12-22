@@ -42,7 +42,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "2.0"
+#define VERSION "2.1"
 
 #define SPEC_Y(y)  (((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
 
