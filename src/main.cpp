@@ -1757,8 +1757,8 @@ int main(int aParamc, char**aParams)
 			if (ImGui::Begin("Attrib/bitmap", &gWindowAttribBitmap, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
 				gen_attr_bitm();
-				ImGui::Image((ImTextureID)gTextureAttr, picsize); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-				ImGui::Image((ImTextureID)gTextureBitm, picsize); ImGui::SameLine(); ImGui::Text(" ");
+				ImGui::Image((ImTextureID)gTextureAttr, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+				ImGui::Image((ImTextureID)gTextureBitm, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f)); ImGui::SameLine(); ImGui::Text(" ");
 			}
 			ImGui::End();
 		}
@@ -1833,8 +1833,8 @@ int main(int aParamc, char**aParams)
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 192.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 192.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
 			ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
@@ -1847,8 +1847,8 @@ int main(int aParamc, char**aParams)
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 192.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 192.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
 			ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
@@ -1861,8 +1861,8 @@ int main(int aParamc, char**aParams)
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 192.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 192.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
 			ImGui::Image((ImTextureID)gTextureOrig, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
