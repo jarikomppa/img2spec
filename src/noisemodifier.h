@@ -34,7 +34,7 @@ public:
 
 	NoiseModifier()
 	{
-		mV = 0;
+		mV = 0.1f;
 		mSeed = 0;
 		mColornoise = false;
 		mOnce = 0;
@@ -58,7 +58,7 @@ public:
 		{
 			ret = common();
 			if (ImGui::SliderFloat("##Strength", &mV, 0, 0.25f)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 0; } ImGui::SameLine();
+			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 0.1f; } ImGui::SameLine();
 			if (ImGui::Button("Randomize##strength")) { gDirty = 1; mV = 0.25f * ((SDL_GetTicks() * 74531) % 65535) / 65535.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
 
