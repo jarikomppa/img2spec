@@ -1,4 +1,4 @@
-#define SPEC_Y(y)  (((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
+#define SPEC_Y(y)  (((y) & 0xff00) | ((((y) >> 0) & 7) << 3) | ((((y) >> 3) & 7) << 0) | (((y) >> 6) & 3) << 6)
 
 int gSpeccyPalette[16 + 3 * 64]
 {
@@ -391,7 +391,7 @@ public:
 						ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
 						ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
 
-					if (j != 31)
+					if (j != (gDevice->mXRes / 8)-1)
 					{
 						ImGui::SameLine();
 					}
