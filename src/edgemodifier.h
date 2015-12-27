@@ -6,6 +6,7 @@ public:
 	bool mR_en, mG_en, mB_en;
 	bool mDirectional;
 	bool mSeparate;
+	bool mAntialias;
 	float mFillColor[3];
 	float mDirection;
 	int mOnce;
@@ -19,6 +20,7 @@ public:
 		write(f, mB_en);
 		write(f, mDirectional);
 		write(f, mSeparate);
+		write(f, mAntialias);
 		write(f, mDirection);
 		write(f, mFillColor[0]);
 		write(f, mFillColor[1]);
@@ -34,6 +36,7 @@ public:
 		read(f, mB_en);
 		read(f, mDirectional);
 		read(f, mSeparate);
+		read(f, mAntialias);
 		read(f, mDirection);
 		read(f, mFillColor[0]);
 		read(f, mFillColor[1]);
@@ -54,6 +57,7 @@ public:
 		mR_en = mG_en = mB_en = true;
 		mSeparate = false;
 		mDirectional = false;
+		mAntialias = false;
 		mFillColor[0] = 0;
 		mFillColor[1] = 0;
 		mFillColor[2] = 0;
@@ -93,6 +97,7 @@ public:
 
 			if (ImGui::Checkbox("Separate color", &mSeparate)) { gDirty = 1; }ImGui::SameLine();
 			if (ImGui::Checkbox("Directional", &mDirectional)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Antialiased", &mAntialias)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; } 
@@ -165,25 +170,82 @@ public:
 
 		}
 
-		if (mDirectional)
+		if (mAntialias)
 		{
-			float xdir = (float)sin(mDirection * 2 * M_PI);
-			float ydir = (float)cos(mDirection * 2 * M_PI);
-
-			for (i = 0; i < 256 * 192; i++)
+			if (mDirectional)
 			{
-				if (mB_en && (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
-				if (mG_en && (xedge[i * 3 + 1] * xdir + yedge[i * 3 + 1] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
-				if (mR_en && (xedge[i * 3 + 2] * xdir + yedge[i * 3 + 2] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+				float xdir = (float)sin(mDirection * 2 * M_PI);
+				float ydir = (float)cos(mDirection * 2 * M_PI);
+
+				for (i = 0; i < 256 * 192; i++)
+				{
+					if (mB_en && (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) > mThreshold)
+					{
+						float p = (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV * p;
+					}
+					if (mG_en && (xedge[i * 3 + 1] * xdir + yedge[i * 3 + 1] * ydir) > mThreshold)
+					{
+						float p = (xedge[i * 3 + 1] * xdir + yedge[i * 3 + 1] * ydir) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV * p;
+					}
+					if (mR_en && (xedge[i * 3 + 2] * xdir + yedge[i * 3 + 2] * ydir) > mThreshold)
+					{
+						float p = (xedge[i * 3 + 2] * xdir + yedge[i * 3 + 2] * ydir) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV * p;
+					}
+				}
+			}
+			else
+			{
+				for (i = 0; i < 256 * 192; i++)
+				{
+					if (mB_en && ((abs(xedge[i * 3 + 0]) + abs(yedge[i * 3 + 0])) > mThreshold))
+					{
+						float p = abs(yedge[i * 3 + 0]) + abs(xedge[i * 3 + 0]) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV * p;
+					}
+					if (mG_en && ((abs(xedge[i * 3 + 1]) + abs(yedge[i * 3 + 1])) > mThreshold))
+					{
+						float p = abs(yedge[i * 3 + 1]) + abs(xedge[i * 3 + 1]) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV * p;
+					}
+					if (mR_en && ((abs(xedge[i * 3 + 2]) + abs(yedge[i * 3 + 2])) > mThreshold))
+					{
+						float p = abs(yedge[i * 3 + 2]) + abs(xedge[i * 3 + 2]) - mThreshold;
+						if (p > 1) p = 1;
+						gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV * p;
+					}
+				}
 			}
 		}
 		else
 		{
-			for (i = 0; i < 256 * 192; i++)
+			if (mDirectional)
 			{
-				if (mB_en && (abs(xedge[i * 3 + 0]) > mThreshold || abs(yedge[i * 3 + 0]) > mThreshold)) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
-				if (mG_en && (abs(xedge[i * 3 + 1]) > mThreshold || abs(yedge[i * 3 + 1]) > mThreshold)) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
-				if (mR_en && (abs(xedge[i * 3 + 2]) > mThreshold || abs(yedge[i * 3 + 2]) > mThreshold)) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+				float xdir = (float)sin(mDirection * 2 * M_PI);
+				float ydir = (float)cos(mDirection * 2 * M_PI);
+
+				for (i = 0; i < 256 * 192; i++)
+				{
+					if (mB_en && (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
+					if (mG_en && (xedge[i * 3 + 1] * xdir + yedge[i * 3 + 1] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
+					if (mR_en && (xedge[i * 3 + 2] * xdir + yedge[i * 3 + 2] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+				}
+			}
+			else
+			{
+				for (i = 0; i < 256 * 192; i++)
+				{
+					if (mB_en && (abs(xedge[i * 3 + 0]) > mThreshold || abs(yedge[i * 3 + 0]) > mThreshold)) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
+					if (mG_en && (abs(xedge[i * 3 + 1]) > mThreshold || abs(yedge[i * 3 + 1]) > mThreshold)) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
+					if (mR_en && (abs(xedge[i * 3 + 2]) > mThreshold || abs(yedge[i * 3 + 2]) > mThreshold)) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+				}
 			}
 		}
 
