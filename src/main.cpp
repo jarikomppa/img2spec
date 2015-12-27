@@ -112,12 +112,12 @@ enum MODIFIERS
 };
 
 #include "device.h"
+#include "modifier.h"
 #include "zxspectrumdevice.h"
 #include "zx3x64device.h"
 
 Device *gDevice = 0;
 
-#include "modifier.h"
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
 #include "yiqmodifier.h"
@@ -365,6 +365,20 @@ void loadworkspace(char *aFilename = 0)
 			Modifier::read(f, gWindowModifierPalette);
 			Modifier::read(f, gWindowOptions);
 			Modifier::read(f, gWindowZoomedOutput);
+			Modifier::read(f, gDeviceId);
+			delete gDevice;
+			gDevice = 0;
+			switch(gDeviceId)
+			{
+			case 0:
+				gDevice = new ZXSpectrumDevice;
+				break;
+			case 1:
+				gDevice = new ZX3x64Device;
+				break;
+			}
+			gDevice->readOptions(f);
+
 
 			Modifier *walker = gModifierRoot;
 			while (walker)
@@ -446,6 +460,8 @@ void saveworkspace()
 			Modifier::write(f, gWindowModifierPalette);
 			Modifier::write(f, gWindowOptions);
 			Modifier::write(f, gWindowZoomedOutput);
+			Modifier::write(f, gDeviceId);
+			gDevice->writeOptions(f);
 
 			Modifier *walker = gModifierApplyStack;
 			while (walker)
