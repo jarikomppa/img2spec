@@ -28,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="src\blurmodifier.h" />
     <ClInclude Include="src\contrastmodifier.h" />
+    <ClInclude Include="src\device.h" />
     <ClInclude Include="src\edgemodifier.h" />
     <ClInclude Include="src\errordiffusiondithermodifier.h" />
     <ClInclude Include="src\hsvmodifier.h" />
@@ -43,6 +44,8 @@
     <ClInclude Include="src\rgbmodifier.h" />
     <ClInclude Include="src\scaleposmodifier.h" />
     <ClInclude Include="src\yiqmodifier.h" />
+    <ClInclude Include="src\zx3x64device.h" />
+    <ClInclude Include="src\zxspectrumdevice.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{04569741-95DF-42DC-9A5C-06F47684F3B2}</ProjectGuid>

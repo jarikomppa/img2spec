@@ -199,15 +199,7 @@ public:
 					data[pos * 3 + 1],
 					data[pos * 3 + 2]);
 
-				int approx;
-				if (gOptColorMode)
-				{
-					approx = gSpeccyPalette[rgb_to_speccy_pal(col, 16, 16 + 3 * 64)];
-				}
-				else
-				{
-					approx = gSpeccyPalette[rgb_to_speccy_pal(col, 0, 16)];
-				}
+				int approx = gDevice->estimate_rgb(col);
 
 				float r = data[pos * 3 + 2] - ((approx >> 0) & 0xff) / 255.0f;
 				float g = data[pos * 3 + 1] - ((approx >> 8) & 0xff) / 255.0f;
