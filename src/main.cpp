@@ -19,7 +19,7 @@
  */
 
 /*
-Note that this is (mostly) a quick hack, so the
+Note that this is (largely) a quick hack, so the
 code quality leaves a lot to be desired..
 Still, if you find it useful, great!
 */
@@ -628,7 +628,7 @@ void generateimg()
 
 				if ((re2 * re2 + im2 * im2) > 4) break;
 			}
-			gBitmapOrig[y * gDevice->mXRes + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
+			gBitmapOrig[y * gDevice->mXRes + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.179) * 120 + 120) << 16) | ((int)(sin(iter * 0.13) * 120 + 120) << 8) | ((int)(sin(iter * 0.1) * 120 + 120) << 0));
 		}
 	}
 
@@ -1340,11 +1340,16 @@ int main(int aParamc, char**aParams)
 		ImGui::EndChild();		
 		ImGui::End();
 
-		if ((gDirtyPic || gOptTrackFile) && gSourceImageData)
+		if (gOptTrackFile && gSourceImageData)
 		{
 			int fd = getFileDate(gSourceImageName);
 			if (fd != gSourceImageDate)
 				loadimg(gSourceImageName);
+		}
+
+		if (gDirtyPic && gSourceImageData)
+		{
+			loadimg(gSourceImageName);
 		}
 
 		if (gDirtyPic && !gSourceImageData)
@@ -1361,6 +1366,7 @@ int main(int aParamc, char**aParams)
 			update_texture(gTextureSpec, gBitmapSpec);
 			
 			gDirty = 0;
+			gDirtyPic = 0;
 		}
 
         // Rendering
