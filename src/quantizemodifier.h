@@ -113,7 +113,7 @@ public:
 			point[i] = pow(i / ((float)mLevels - 1), p) * mRange - (mRange - 1)/2 + mNudge;
 		}
 
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 			int c;
 			for (c = 0; c < 3; c++)

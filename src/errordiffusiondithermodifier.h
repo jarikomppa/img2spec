@@ -84,8 +84,8 @@ public:
 
 	virtual void process()
 	{
-		float *data = new float[256 * 192 * 3];
-		memcpy(data, gBitmapProcFloat, sizeof(float) * 256 * 192 * 3);
+		float *data = new float[gDevice->mXRes * gDevice->mYRes * 3];
+		memcpy(data, gBitmapProcFloat, sizeof(float) * gDevice->mXRes * gDevice->mYRes * 3);
 		int i, j;
 
 		float floyd_steinberg[] =
@@ -180,7 +180,7 @@ public:
 			break;
 		case 1:
 		case 3:
-			xpos0 = 255;
+			xpos0 = gDevice->mXRes-1;
 			ypos0 = 0;
 			xposi = -1;
 			yposi = 1;
@@ -188,11 +188,11 @@ public:
 			break;
 		}
 
-		for (i = 0, ypos = ypos0; i < 192; i++, ypos += yposi)
+		for (i = 0, ypos = ypos0; i < gDevice->mYRes; i++, ypos += yposi)
 		{
-			for (j = 0, xpos = xpos0; j < 256; j++, xpos += xposi)
+			for (j = 0, xpos = xpos0; j < gDevice->mXRes; j++, xpos += xposi)
 			{
-				int pos = (ypos * 256 + xpos);
+				int pos = (ypos * gDevice->mXRes + xpos);
 
 				int col = float_to_color(
 					data[pos * 3 + 0],
@@ -210,9 +210,9 @@ public:
 				{
 					for (x = 0; x < 5; x++)
 					{
-						if (ypos + y < 192 && x + xpos - 2 >= 0 && x + xpos - 2 < 256)
+						if (ypos + y < gDevice->mYRes && x + xpos - 2 >= 0 && x + xpos - 2 < gDevice->mXRes)
 						{
-							pos = ((ypos + y) * 256 + xpos + x - 2);
+							pos = ((ypos + y) * gDevice->mXRes + xpos + x - 2);
 							float m;
 							if (dir)
 							{
@@ -236,7 +236,7 @@ public:
 				switch (dir)
 				{
 				case 0:
-					xpos0 = 255;
+					xpos0 = gDevice->mXRes-1;
 					ypos0 = 0;
 					xposi = -1;
 					yposi = 1;
@@ -254,7 +254,7 @@ public:
 		}
 
 		// Apply (with strength)
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 			if (mB_en) gBitmapProcFloat[i * 3 + 0] += (data[i * 3 + 0] - gBitmapProcFloat[i * 3 + 0]) * mV;
 			if (mG_en) gBitmapProcFloat[i * 3 + 1] += (data[i * 3 + 1] - gBitmapProcFloat[i * 3 + 1]) * mV;

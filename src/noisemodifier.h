@@ -81,7 +81,7 @@ public:
 
 		int i;
 		srand(mSeed);
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 
 			float r = (((rand() % 1024) - 512) / 512.0f) * mV;

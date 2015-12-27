@@ -83,15 +83,15 @@ public:
 	virtual void process()
 	{
 		int i, j, c;
-		float * buf = new float[192 * 256 * 3 * 3];
-		float * rbuf = buf + (256 * 192 * 0);
-		float * gbuf = buf + (256 * 192 * 1);
-		float * bbuf = buf + (256 * 192 * 2);
+		float * buf = new float[gDevice->mYRes * gDevice->mXRes * 3 * 3];
+		float * rbuf = buf + (gDevice->mXRes * gDevice->mYRes * 0);
+		float * gbuf = buf + (gDevice->mXRes * gDevice->mYRes * 1);
+		float * bbuf = buf + (gDevice->mXRes * gDevice->mYRes * 2);
 
-		for (j = 0, c = 0; j < 192; j++)
+		for (j = 0, c = 0; j < gDevice->mYRes; j++)
 		{
 			float ra = 0, ga = 0, ba = 0;
-			for (i = 0; i < 256; i++, c++)
+			for (i = 0; i < gDevice->mXRes; i++, c++)
 			{
 				ra += gBitmapProcFloat[c * 3 + 2];
 				ga += gBitmapProcFloat[c * 3 + 1];
@@ -105,16 +105,16 @@ public:
 				}
 				else
 				{
-					rbuf[c] = ra + rbuf[c - 256];
-					gbuf[c] = ga + gbuf[c - 256];
-					bbuf[c] = ba + bbuf[c - 256];
+					rbuf[c] = ra + rbuf[c - gDevice->mXRes];
+					gbuf[c] = ga + gbuf[c - gDevice->mXRes];
+					bbuf[c] = ba + bbuf[c - gDevice->mXRes];
 				}
 			}
 		}
 
-		for (j = 0, c = 0; j < 192; j++)
+		for (j = 0, c = 0; j < gDevice->mYRes; j++)
 		{
-			for (i = 0; i < 256; i++, c++)
+			for (i = 0; i < gDevice->mXRes; i++, c++)
 			{
 				int x1 = i - mAreaX / 2;
 				int y1 = j - mAreaY / 2;
@@ -134,16 +134,16 @@ public:
 
 				int div = (x2 - x1) * (y2 - y1);
 				if (x1 < 0) x1 = 0;
-				if (x1 > 255) x1 = 255;
+				if (x1 >= gDevice->mXRes) x1 = gDevice->mXRes-1;
 				if (x2 < 0) x2 = 0;
-				if (x2 > 255) x2 = 255;
+				if (x2 >= gDevice->mXRes) x2 = gDevice->mXRes-1;
 				if (y1 < 0) y1 = 0;
-				if (y1 > 191) y1 = 191;
+				if (y1 >= gDevice->mYRes) y1 = gDevice->mYRes-1;
 				if (y2 < 0) y2 = 0;
-				if (y2 > 191) y2 = 191;
+				if (y2 >= gDevice->mYRes) y2 = gDevice->mYRes-1;
 
-				y1 *= 256;
-				y2 *= 256;
+				y1 *= gDevice->mXRes;
+				y2 *= gDevice->mXRes;
 				float r = rbuf[y2 + x2] - rbuf[y1 + x2] - rbuf[y2 + x1] + rbuf[y1 + x1];
 				float g = gbuf[y2 + x2] - gbuf[y1 + x2] - gbuf[y2 + x1] + gbuf[y1 + x1];
 				float b = bbuf[y2 + x2] - bbuf[y1 + x2] - bbuf[y2 + x1] + bbuf[y1 + x1];

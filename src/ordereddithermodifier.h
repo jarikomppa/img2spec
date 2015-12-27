@@ -164,13 +164,13 @@ public:
 			break;
 		}
 		int i, j;
-		for (i = 0; i < 192; i++)
+		for (i = 0; i < gDevice->mYRes; i++)
 		{
-			for (j = 0; j < 256; j++)
+			for (j = 0; j < gDevice->mXRes; j++)
 			{
-				if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 0] * mV;
-				if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 1] * mV;
-				if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * 256 + j) * 3 + 2] * mV;
+				if (mB_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0] * mV;
+				if (mG_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1] * mV;
+				if (mR_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2] += (matrix[((i + mYOfs) % matsize) * matsize + ((j + mXOfs) % matsize)] / matdiv - 0.5f) * gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2] * mV;
 			}
 		}
 	}

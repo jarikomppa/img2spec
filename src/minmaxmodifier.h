@@ -84,14 +84,14 @@ public:
 	virtual void process()
 	{
 		int i, j;
-		float * buf = new float[192 * 256 * 3];
-		memcpy(buf, gBitmapProcFloat, 192 * 256 * 3 * sizeof(float));
+		float * buf = new float[gDevice->mYRes * gDevice->mXRes * 3];
+		memcpy(buf, gBitmapProcFloat, gDevice->mYRes * gDevice->mXRes * 3 * sizeof(float));
 		
 		if (mMin)
 		{
-			for (i = 0; i < 192; i++)
+			for (i = 0; i < gDevice->mYRes; i++)
 			{
-				for (j = 0; j < 256; j++)
+				for (j = 0; j < gDevice->mXRes; j++)
 				{
 					int x, y;
 					float rmin = 1;
@@ -102,30 +102,30 @@ public:
 						for (y = 0; y < mAreaY; y++)
 						{
 							if ((j + x - mAreaX / 2) > 0 &&
-								(j + x - mAreaX / 2) < 256 &&
+								(j + x - mAreaX / 2) < gDevice->mXRes &&
 								(i + y - mAreaY / 2) > 0 &&
-								(i + y - mAreaY / 2) < 192)
+								(i + y - mAreaY / 2) < gDevice->mYRes)
 							{
-								float b = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 0];
-								float g = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 1];
-								float r = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 2];
+								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
+								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
+								float r = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 2];
 								if (b < bmin) bmin = b;
 								if (g < gmin) gmin = g;
 								if (r < rmin) rmin = r;
 							}
 						}
-						if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (bmin - gBitmapProcFloat[(i * 256 + j) * 3 + 0]) * mV;
-						if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (gmin - gBitmapProcFloat[(i * 256 + j) * 3 + 1]) * mV;
-						if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (rmin - gBitmapProcFloat[(i * 256 + j) * 3 + 2]) * mV;
+						if (mB_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0] += (bmin - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0]) * mV;
+						if (mG_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1] += (gmin - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1]) * mV;
+						if (mR_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2] += (rmin - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2]) * mV;
 					}
 				}
 			}
 		}
 		else
 		{
-			for (i = 0; i < 192; i++)
+			for (i = 0; i < gDevice->mYRes; i++)
 			{
-				for (j = 0; j < 256; j++)
+				for (j = 0; j < gDevice->mXRes; j++)
 				{
 					int x, y;
 					float rmax = 0;
@@ -136,21 +136,21 @@ public:
 						for (y = 0; y < mAreaY; y++)
 						{
 							if ((j + x - mAreaX / 2) > 0 &&
-								(j + x - mAreaX / 2) < 256 &&
+								(j + x - mAreaX / 2) < gDevice->mXRes &&
 								(i + y - mAreaY / 2) > 0 &&
-								(i + y - mAreaY / 2) < 192)
+								(i + y - mAreaY / 2) < gDevice->mYRes)
 							{
-								float b = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 0];
-								float g = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 1];
-								float r = buf[((i + y - mAreaY / 2) * 256 + j + x - mAreaX / 2) * 3 + 2];
+								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
+								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
+								float r = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 2];
 								if (b > bmax) bmax = b;
 								if (g > gmax) gmax = g;
 								if (r > rmax) rmax = r;
 							}
 						}
-						if (mB_en) gBitmapProcFloat[(i * 256 + j) * 3 + 0] += (bmax - gBitmapProcFloat[(i * 256 + j) * 3 + 0]) * mV;
-						if (mG_en) gBitmapProcFloat[(i * 256 + j) * 3 + 1] += (gmax - gBitmapProcFloat[(i * 256 + j) * 3 + 1]) * mV;
-						if (mR_en) gBitmapProcFloat[(i * 256 + j) * 3 + 2] += (rmax - gBitmapProcFloat[(i * 256 + j) * 3 + 2]) * mV;
+						if (mB_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0] += (bmax - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 0]) * mV;
+						if (mG_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1] += (gmax - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 1]) * mV;
+						if (mR_en) gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2] += (rmax - gBitmapProcFloat[(i * gDevice->mXRes + j) * 3 + 2]) * mV;
 					}
 				}
 			}

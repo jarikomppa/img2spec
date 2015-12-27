@@ -122,13 +122,13 @@ public:
 			 1,  2,  1
 		};
 
-		float *xedge = new float[3 * 256 * 192];
-		float *yedge = new float[3 * 256 * 192];
+		float *xedge = new float[3 * gDevice->mXRes * gDevice->mYRes];
+		float *yedge = new float[3 * gDevice->mXRes * gDevice->mYRes];
 
 		int i, j;
-		for (i = 0; i < 192; i++)
+		for (i = 0; i < gDevice->mYRes; i++)
 		{
-			for (j = 0; j < 256; j++)
+			for (j = 0; j < gDevice->mXRes; j++)
 			{
 				int c;
 				for (c = 0; c < 3; c++)
@@ -140,23 +140,23 @@ public:
 					{
 						for (x = -1; x < 2; x++, m++)
 						{
-							if (x + j > 0 && x + j < 256 && 
-								y + i > 0 && y + i < 192)
+							if (x + j > 0 && x + j < gDevice->mXRes &&
+								y + i > 0 && y + i < gDevice->mYRes)
 							{
-								ccx += matrix_x[m] * gBitmapProcFloat[((i + y) * 256 + j + x) * 3 + c];
-								ccy += matrix_y[m] * gBitmapProcFloat[((i + y) * 256 + j + x) * 3 + c];
+								ccx += matrix_x[m] * gBitmapProcFloat[((i + y) * gDevice->mXRes + j + x) * 3 + c];
+								ccy += matrix_y[m] * gBitmapProcFloat[((i + y) * gDevice->mXRes + j + x) * 3 + c];
 							}
 						}
 					}
-					xedge[(i * 256 + j) * 3 + c] = ccx;
-					yedge[(i * 256 + j) * 3 + c] = ccy;
+					xedge[(i * gDevice->mXRes + j) * 3 + c] = ccx;
+					yedge[(i * gDevice->mXRes + j) * 3 + c] = ccy;
 				}
 			}
 		}
 
 		if (!mSeparate)
 		{
-			for (i = 0; i < 256 * 192; i++)
+			for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 			{
 				float x = (xedge[i * 3 + 0] + xedge[i * 3 + 1] + xedge[i * 3 + 2]) / 3;
 				xedge[i * 3 + 0] = x;
@@ -177,7 +177,7 @@ public:
 				float xdir = (float)sin(mDirection * 2 * M_PI);
 				float ydir = (float)cos(mDirection * 2 * M_PI);
 
-				for (i = 0; i < 256 * 192; i++)
+				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
 					if (mB_en && (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) > mThreshold)
 					{
@@ -201,7 +201,7 @@ public:
 			}
 			else
 			{
-				for (i = 0; i < 256 * 192; i++)
+				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
 					if (mB_en && ((abs(xedge[i * 3 + 0]) + abs(yedge[i * 3 + 0])) > mThreshold))
 					{
@@ -231,7 +231,7 @@ public:
 				float xdir = (float)sin(mDirection * 2 * M_PI);
 				float ydir = (float)cos(mDirection * 2 * M_PI);
 
-				for (i = 0; i < 256 * 192; i++)
+				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
 					if (mB_en && (xedge[i * 3 + 0] * xdir + yedge[i * 3 + 0] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
 					if (mG_en && (xedge[i * 3 + 1] * xdir + yedge[i * 3 + 1] * ydir) > mThreshold) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
@@ -240,7 +240,7 @@ public:
 			}
 			else
 			{
-				for (i = 0; i < 256 * 192; i++)
+				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
 					if (mB_en && (abs(xedge[i * 3 + 0]) > mThreshold || abs(yedge[i * 3 + 0]) > mThreshold)) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
 					if (mG_en && (abs(xedge[i * 3 + 1]) > mThreshold || abs(yedge[i * 3 + 1]) > mThreshold)) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;

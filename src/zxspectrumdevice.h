@@ -35,8 +35,8 @@ public:
 	int mOptScreenOrder;
 
 	// Spectrum format data
-	unsigned char mSpectrumAttributes[32 * 24 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode
-	unsigned char mSpectrumBitmap[32 * 192];
+	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
+	unsigned char mSpectrumBitmap[128 * 512];
 
 	ZXSpectrumDevice()
 	{
@@ -115,7 +115,7 @@ public:
 		int x, y, i, j;
 
 		// Find closest colors in the speccy palette
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 			gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 0, 16);
 		}
@@ -126,26 +126,23 @@ public:
 		{
 			//case 0:
 		default:
-			ymax = 24;
 			cellht = 8;
 			break;
 		case 1:
-			ymax = 48;
 			cellht = 4;
 			break;
 		case 2:
-			ymax = 96;
 			cellht = 2;
 			break;
 		case 3:
-			ymax = 192;
 			cellht = 1;
 			break;
 		}
+		ymax = gDevice->mYRes / cellht;
 
 		for (y = 0; y < ymax; y++)
 		{
-			for (x = 0; x < 32; x++)
+			for (x = 0; x < (gDevice->mXRes / 8); x++)
 			{
 				// Count bright pixels in cell
 				int brights = 0;
@@ -154,7 +151,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * 256 + x * 8 + j;
+						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
 						if (gBitmapSpec[loc] > 7)
 							brights++;
 						if (gBitmapSpec[loc] == 0)
@@ -190,7 +187,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * 256 + x * 8 + j;
+						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
 						int r = rgb_to_speccy_pal(gBitmapProc[loc], brights, 8);
 						gBitmapSpec[loc] = r;
 						counts[r]++;
@@ -248,20 +245,20 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * 256 + x * 8 + j;
+						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
 						gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] <<= 1;
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * 32 + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
 				}
 
 				// Store the cell's attribute
-				mSpectrumAttributes[y * 32 + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
+				mSpectrumAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
 			}
 		}
 
 		// Map color indices to palette
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 			gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 		}
@@ -270,15 +267,15 @@ public:
 	virtual void savescr(FILE * f)
 	{
 		int attrib_size_multiplier = 1 << (mOptCellSize);
-		fwrite(mSpectrumBitmap, 32 * 192, 1, f);
-		fwrite(mSpectrumAttributes, 32 * 24 * attrib_size_multiplier, 1, f);
+		fwrite(mSpectrumBitmap, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
+		fwrite(mSpectrumAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
 	}
 
 	virtual void saveh(FILE * f)
 	{
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i, c = 0;
-		for (i = 0; i < 32 * 192; i++)
+		for (i = 0; i < (gDevice->mXRes / 8) * gDevice->mYRes; i++)
 		{
 			fprintf(f, "%3u,", mSpectrumBitmap[i]);
 			c++;
@@ -290,9 +287,9 @@ public:
 		}
 		fprintf(f, "\n\n");
 		c = 0;
-		for (i = 0; i < 32 * 24 * attrib_size_multiplier; i++)
+		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "%3u%s", mSpectrumAttributes[i], i != (32 * 24 * attrib_size_multiplier) - 1 ? "," : "");
+			fprintf(f, "%3u%s", mSpectrumAttributes[i], i != ((gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
 			c++;
 			if (c >= 32)
 			{
@@ -306,12 +303,12 @@ public:
 	{
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i;
-		for (i = 0; i < 32 * 192; i++)
+		for (i = 0; i < (gDevice->mYRes / 8) * gDevice->mYRes; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", mSpectrumBitmap[i]);
 		}
 		fprintf(f, "\n\n");
-		for (i = 0; i < 32 * 24 * attrib_size_multiplier; i++)
+		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", mSpectrumAttributes[i]);
 		}
@@ -338,18 +335,18 @@ public:
 		}
 
 		int i, j;
-		for (i = 0; i < 192; i++)
+		for (i = 0; i < gDevice->mYRes; i++)
 		{
-			for (j = 0; j < 256; j++)
+			for (j = 0; j < gDevice->mXRes; j++)
 			{
 				int fg, bg;
 
-				int attr = mSpectrumAttributes[(i / cellht) * 32 + j / 8];
+				int attr = mSpectrumAttributes[(i / cellht) * (gDevice->mXRes / 8) + j / 8];
 				fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 
-				gBitmapAttr[i * 256 + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-				gBitmapBitm[i * 256 + j] = (mSpectrumBitmap[SPEC_Y(i) * 32 + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+				gBitmapAttr[i * gDevice->mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
+				gBitmapBitm[i * gDevice->mXRes + j] = (mSpectrumBitmap[SPEC_Y(i) * (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 			}
 		}
 		update_texture(gTextureAttr, gBitmapAttr);
@@ -376,10 +373,10 @@ public:
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
 			int i, j;
 			int cellht = 8 >> mOptCellSize;
-			int ymax = 24 << mOptCellSize;
+			int ymax = (gDevice->mYRes / 8) << mOptCellSize;
 			for (i = 0; i < ymax; i++)
 			{
-				for (j = 0; j < 32; j++)
+				for (j = 0; j < (gDevice->mXRes / 8); j++)
 				{
 					ImGui::Image(
 						(ImTextureID)gTextureSpec,

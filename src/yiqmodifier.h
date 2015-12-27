@@ -66,7 +66,7 @@ public:
 	virtual void process()
 	{
 		int c;
-		for (c = 0; c < 256 * 192; c++)
+		for (c = 0; c < gDevice->mXRes * gDevice->mYRes; c++)
 		{
 			float r = gBitmapProcFloat[c * 3 + 2];
 			float g = gBitmapProcFloat[c * 3 + 1];

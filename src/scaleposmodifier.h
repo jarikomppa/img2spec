@@ -55,14 +55,14 @@ public:
 			if (ImGui::SliderFloat("##s  ", &mScale, 0, 1)) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##s   ")) { gDirty = 1; gDirtyPic = 1; mScale = 1; } ImGui::SameLine();
 			ImGui::Text("Scale");
-			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = 256.0f / gSourceImageX; gDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = 192.0f / gSourceImageY; gDirtyPic = 1; gDirty = 1; } 
+			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = (float)gDevice->mXRes / gSourceImageX; gDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = (float)gDevice->mYRes / gSourceImageY; gDirtyPic = 1; gDirty = 1; }
 
-			if (ImGui::SliderInt("##x  ", &mX, -255, (int)floor(gSourceImageX * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::SliderInt("##x  ", &mX, -gDevice->mXRes, (int)floor(gSourceImageX * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##x   ")) { gDirty = 1; gDirtyPic = 1; mX = 0; } ImGui::SameLine();
 			ImGui::Text("X Offset");
 
-			if (ImGui::SliderInt("##y  ", &mY, -192, (int)floor(gSourceImageY * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::SliderInt("##y  ", &mY, -gDevice->mYRes, (int)floor(gSourceImageY * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##y   ")) { gDirty = 1; gDirtyPic = 1; mY = 0; } ImGui::SameLine();
 			ImGui::Text("Y Offset");
 
@@ -99,9 +99,9 @@ public:
 				}
 			}
 
-			for (i = 0; i < 192; i++)
+			for (i = 0; i < gDevice->mYRes; i++)
 			{
-				for (j = 0; j < 256; j++)
+				for (j = 0; j < gDevice->mXRes; j++)
 				{
 					int pix = 0xff000000;
 					if (j - mX >= 0 &&
@@ -111,7 +111,7 @@ public:
 					{
 						pix = temp[(i - mY) * w + j - mX] | 0xff000000;
 					}
-					gBitmapOrig[i * 256 + j] = pix;
+					gBitmapOrig[i * gDevice->mXRes + j] = pix;
 				}
 			}
 			delete[] temp;

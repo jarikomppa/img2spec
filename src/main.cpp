@@ -176,7 +176,7 @@ int getFileDate(char *aFilename)
 void bitmap_to_float(unsigned int *aBitmap)
 {
 	int i;
-	for (i = 0; i < 256 * 192; i++)
+	for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 	{
 		int c = aBitmap[i];
 		int r = (c >> 16) & 0xff;
@@ -203,7 +203,7 @@ int float_to_color(float aR, float aG, float aB)
 void float_to_bitmap()
 {
 	int i;
-	for (i = 0; i < 256 * 192; i++)
+	for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 	{
 		float r = gBitmapProcFloat[i * 3 + 0];
 		float g = gBitmapProcFloat[i * 3 + 1];
@@ -323,7 +323,7 @@ void calc_histogram(unsigned int *src)
 		gHistogramG[i] = 0;
 		gHistogramB[i] = 0;
 	}
-	for (i = 0; i < 192 * 256; i++)
+	for (i = 0; i < gDevice->mYRes * gDevice->mXRes; i++)
 	{
 		gHistogramR[(src[i] >> 0) & 0xff]++;
 		gHistogramG[(src[i] >> 8) & 0xff]++;
@@ -573,14 +573,14 @@ void loadimg(char *aFilename = 0)
 
 
 		int i, j;
-		for (i = 0; i < 192; i++)
+		for (i = 0; i < gDevice->mYRes; i++)
 		{
-			for (j = 0; j < 256; j++)
+			for (j = 0; j < gDevice->mXRes; j++)
 			{
 				int pix = 0xff000000;
 				if (j < gSourceImageX && i < gSourceImageY)
 					pix = gSourceImageData[i * gSourceImageX + j] | 0xff000000;
-				gBitmapOrig[i * 256 + j] = pix;
+				gBitmapOrig[i * gDevice->mXRes + j] = pix;
 			}
 		}
 
@@ -597,12 +597,12 @@ void generateimg()
 	float re0 = -0.7f;
 	float im0 = 0.27f;
 
-	for (x = 0; x < 256; x++)
+	for (x = 0; x < gDevice->mXRes; x++)
 	{
-		for (y = 0; y < 192; y++)
+		for (y = 0; y < gDevice->mYRes; y++)
 		{
-			float re2 = 1.5f * (x - 256 / 2) / (0.5f * 256);
-			float im2 = (y - 192 / 2) / (0.5f * 192);
+			float re2 = 1.5f * (x - gDevice->mXRes / 2) / (0.5f * gDevice->mXRes);
+			float im2 = (y - gDevice->mYRes / 2) / (0.5f * gDevice->mYRes);
 			int iter = 0;
 			while (iter < 100)
 			{
@@ -616,7 +616,7 @@ void generateimg()
 
 				if ((re2 * re2 + im2 * im2) > 4) break;
 			}
-			gBitmapOrig[y * 256 + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));			
+			gBitmapOrig[y * gDevice->mXRes + x] = 0xff000000 | ((iter == 100) ? 0 : ((int)(sin(iter * 0.234) * 120 + 120) << 16) | ((int)(sin(iter * 0.123) * 120 + 120) << 8) | ((int)(sin(iter * 0.012) * 120 + 120) << 0));
 		}
 	}
 
@@ -647,7 +647,7 @@ void savepng(char *aFilename = 0)
 
 	if (aFilename || GetSaveFileNameA(&ofn))
 	{
-		stbi_write_png(aFilename ? aFilename : szFileName, 256, 256/*192*/, 4, gBitmapSpec, 256 * 4);
+		stbi_write_png(aFilename ? aFilename : szFileName, gDevice->mXRes, gDevice->mYRes, 4, gBitmapSpec, gDevice->mXRes * 4);
 	}
 }
 
@@ -1267,8 +1267,8 @@ int main(int aParamc, char**aParams)
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
+			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
 			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
 			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
@@ -1281,8 +1281,8 @@ int main(int aParamc, char**aParams)
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
+			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
 			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
 			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
@@ -1295,8 +1295,8 @@ int main(int aParamc, char**aParams)
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
+			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
 			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
 			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureOrig, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));

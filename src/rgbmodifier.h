@@ -63,7 +63,7 @@ public:
 	virtual void process()
 	{
 		int i;
-		for (i = 0; i < 256 * 192; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
 			gBitmapProcFloat[i * 3 + 0] += mB;
 			gBitmapProcFloat[i * 3 + 1] += mG;

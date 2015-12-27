@@ -66,7 +66,7 @@ public:
 	{
 
 		int i;
-		for (i = 0; i < 256 * 192 * 3; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes * 3; i++)
 		{
 			gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
 		}
