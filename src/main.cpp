@@ -146,7 +146,8 @@ enum MODIFIERS
 	MOD_CONTRAST,
 	MOD_BLUR,
 	MOD_EDGE,
-	MOD_MINMAX
+	MOD_MINMAX,
+	MOD_QUANTIZE
 };
 
 #include "modifier.h"
@@ -157,6 +158,7 @@ enum MODIFIERS
 #include "noisemodifier.h"
 #include "blurmodifier.h"
 #include "edgemodifier.h"
+#include "quantizemodifier.h"
 #include "minmaxmodifier.h"
 #include "ordereddithermodifier.h"
 #include "errordiffusiondithermodifier.h"
@@ -872,6 +874,7 @@ void loadworkspace(char *aFilename = 0)
 				case MOD_BLUR: n = new BlurModifier; break;
 				case MOD_EDGE: n = new EdgeModifier; break;
 				case MOD_MINMAX: n = new MinmaxModifier; break;
+				case MOD_QUANTIZE: n = new QuantizeModifier; break;
 				default:
 					fclose(f);
 					return;
@@ -1535,6 +1538,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Blur modifier")) { addModifier(new BlurModifier); }
 				if (ImGui::MenuItem("Add Edge modifier")) { addModifier(new EdgeModifier); }
+				if (ImGui::MenuItem("Add Quantize modifier")) { addModifier(new QuantizeModifier); }
 				if (ImGui::MenuItem("Add Min/max modifier")) { addModifier(new MinmaxModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
 				if (ImGui::MenuItem("Add Error Diffusion Dither modifier")) { addModifier(new ErrorDiffusionDitherModifier); } 
@@ -1574,6 +1578,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				if (ImGui::Button("Blur", ImVec2(-1, 0))) { addModifier(new BlurModifier); }
 				if (ImGui::Button("Edge", ImVec2(-1, 0))) { addModifier(new EdgeModifier); }
+				if (ImGui::Button("Quantize", ImVec2(-1, 0))) { addModifier(new QuantizeModifier); }
 				if (ImGui::Button("Min/max", ImVec2(-1, 0))) { addModifier(new MinmaxModifier); }
 				if (ImGui::Button("Ordered Dither", ImVec2(-1, 0))) { addModifier(new OrderedDitherModifier); }
 				// widest button defines the window width, so we can't set it to "auto size"
