@@ -33,6 +33,8 @@ public:
 	int mOptPaper;
 	int mOptCellSize;
 	int mOptScreenOrder;
+	int mOptWidthCells;
+	int mOptHeightCells;
 
 	// Spectrum format data
 	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
@@ -48,6 +50,9 @@ public:
 
 		mXRes = 256;
 		mYRes = 192;
+
+		mOptWidthCells = mXRes / 8;
+		mOptHeightCells = mYRes / 8;
 	}
 
 	int rgb_to_speccy_pal(int c, int first, int count)
@@ -362,7 +367,9 @@ public:
 		if (ImGui::Combo("Attribute order", &mOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
 		if (ImGui::Combo("Bright attributes", &mOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0")) gDirty = 1;
 		if (ImGui::Combo("Paper attribute", &mOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
-		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) gDirty = 1;
+		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
+		if (ImGui::SliderInt("Bitmap width in cells", &mOptWidthCells, 1, 512 / 8)) { gDirty = 1; gDirtyPic = 1; mXRes = mOptWidthCells * 8; }
+		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 1024 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
 		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 	}
 
@@ -410,6 +417,8 @@ public:
 		Modifier::write(f, mOptPaper);
 		Modifier::write(f, mOptCellSize);
 		Modifier::write(f, mOptScreenOrder);
+		Modifier::write(f, mOptWidthCells);
+		Modifier::write(f, mOptHeightCells);
 	}
 
 	virtual void readOptions(FILE *f)
@@ -419,5 +428,13 @@ public:
 		Modifier::read(f, mOptPaper);
 		Modifier::read(f, mOptCellSize);
 		Modifier::read(f, mOptScreenOrder);
+		Modifier::read(f, mOptWidthCells);
+		Modifier::read(f, mOptHeightCells);
+
+		mXRes = mOptWidthCells * 8;
+		mYRes = mOptHeightCells * (8 >> mOptCellSize);
+
+		gDirty = 1;
+		gDirtyPic = 1;
 	}
 };

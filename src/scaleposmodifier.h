@@ -77,7 +77,6 @@ public:
 	{
 		if (gDirtyPic && gSourceImageData)
 		{
-			gDirtyPic = 0;
 			int i, j;
 			int h = (int)floor(gSourceImageY * mScale);
 			int w = (int)floor(gSourceImageX * mScale);

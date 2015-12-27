@@ -947,14 +947,6 @@ int main(int aParamc, char**aParams)
                 done = true;
         }
 
-		if (gOptTrackFile && gSourceImageData)
-		{
-			int fd = getFileDate(gSourceImageName);
-			if (fd != gSourceImageDate)
-				loadimg(gSourceImageName);
-		}
-
-
         ImGui_ImplSdl_NewFrame(window);
 		//ImGui::ShowTestWindow();
 
@@ -1308,6 +1300,18 @@ int main(int aParamc, char**aParams)
 		modifier_ui();
 		ImGui::EndChild();
 		ImGui::End();	
+
+		if ((gDirtyPic || gOptTrackFile) && gSourceImageData)
+		{
+			int fd = getFileDate(gSourceImageName);
+			if (fd != gSourceImageDate)
+				loadimg(gSourceImageName);
+		}
+
+		if (gDirtyPic && !gSourceImageData)
+		{
+			generateimg();
+		}
 
 		if (gDirty)
 		{
