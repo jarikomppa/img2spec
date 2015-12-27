@@ -69,6 +69,10 @@ bool gWindowOptions = false;
 bool gWindowModifierPalette = false;
 bool gWindowAbout = false;
 bool gWindowHelp = false;
+bool gOptShowOriginal = true;
+bool gOptShowModified = true;
+bool gOptShowResult = true;
+bool gOptImagesDocked = true;
 int gOptZoom = 2;
 int gOptZoomStyle = 0;
 int gOptTrackFile = 1;
@@ -387,6 +391,10 @@ void loadworkspace(char *aFilename = 0)
 			Modifier::read(f, gWindowModifierPalette);
 			Modifier::read(f, gWindowOptions);
 			Modifier::read(f, gWindowZoomedOutput);
+			Modifier::read(f, gOptShowOriginal);
+			Modifier::read(f, gOptShowModified);
+			Modifier::read(f, gOptShowResult);
+			Modifier::read(f, gOptImagesDocked);
 			Modifier::read(f, gDeviceId);
 			delete gDevice;
 			gDevice = 0;
@@ -482,6 +490,10 @@ void saveworkspace()
 			Modifier::write(f, gWindowModifierPalette);
 			Modifier::write(f, gWindowOptions);
 			Modifier::write(f, gWindowZoomedOutput);
+			Modifier::write(f, gOptShowOriginal);
+			Modifier::write(f, gOptShowModified);
+			Modifier::write(f, gOptShowResult);	
+			Modifier::write(f, gOptImagesDocked);
 			Modifier::write(f, gDeviceId);
 			gDevice->writeOptions(f);
 
@@ -1248,58 +1260,85 @@ int main(int aParamc, char**aParams)
 			ImGui::End();
 		}
 		
-		ImGui::SetNextWindowContentSize(ImVec2(828, 512));
-		ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);	
-
-		
-		ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
-
-		ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0,0), ImVec2(gDevice->mXRes/1024.0f, gDevice->mYRes/512.0f));
-		if (ImGui::IsItemHovered())
+		if (gOptImagesDocked)
 		{
-			ImGui::BeginTooltip();
-			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
-			ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-			ImGui::EndTooltip();
+			ImGui::SetNextWindowSize(ImVec2(828, 512));
+			ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 		}
-		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
-		if (ImGui::IsItemHovered())
+		else
 		{
-			ImGui::BeginTooltip();
-			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
-			ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-			ImGui::EndTooltip();
+			ImGui::Begin("Image", 0, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
 		}
-		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureOrig, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
-		if (ImGui::IsItemHovered())
+	
+		if (gOptShowResult)
 		{
-			ImGui::BeginTooltip();
-			float focus_sz = 32.0f;
-			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
-			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
-			ImGui::Image((ImTextureID)gTextureOrig, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-			ImGui::EndTooltip();
+			ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				float focus_sz = 32.0f;
+				float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+				float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
+				ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+				ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
+				ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+				ImGui::EndTooltip();
+			}
+			if (gOptShowModified || gOptShowOriginal) { ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine(); }
 		}
 
+		if (gOptShowModified)
+		{
+			ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				float focus_sz = 32.0f;
+				float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+				float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
+				ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+				ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
+				ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+				ImGui::EndTooltip();
+			}
+			if (gOptShowOriginal) { ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine(); }
+		}
 
-		ImGui::BeginChild("Modifiers");
+		if (gOptShowOriginal)
+		{
+			ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)gTextureOrig, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				float focus_sz = 32.0f;
+				float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+				float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
+				ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+				ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
+				ImGui::Image((ImTextureID)gTextureOrig, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+				ImGui::EndTooltip();
+			}
+		}
+
+		ImGui::Checkbox("Result", &gOptShowResult); ImGui::SameLine();
+		ImGui::Checkbox("Modified", &gOptShowModified); ImGui::SameLine();
+		ImGui::Checkbox("Original", &gOptShowOriginal); ImGui::SameLine();
+		ImGui::Checkbox("Dock images", &gOptImagesDocked);
+
+		if (!gOptImagesDocked)
+		{
+			ImGui::End();
+
+			ImGui::SetNextWindowSize(ImVec2(828, 400));
+			ImGui::Begin("Modifiers", 0, ImGuiWindowFlags_NoResize);
+		}
+		ImGui::BeginChild("Mod");
 		modifier_ui();
-		ImGui::EndChild();
-		ImGui::End();	
+		ImGui::EndChild();		
+		ImGui::End();
 
 		if ((gDirtyPic || gOptTrackFile) && gSourceImageData)
 		{
