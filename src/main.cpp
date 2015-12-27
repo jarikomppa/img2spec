@@ -51,9 +51,13 @@ int gSourceImageDate = 0;
 
 int float_to_color(float aR, float aG, float aB);
 void bitmap_to_float(unsigned int *aBitmap);
+void update_texture(GLuint aTexture, unsigned int *aBitmap);
 
 // Do we need to recalculate?
 int gDirty = 1;
+// Do we need to rescale etc?
+int gDirtyPic = 0;
+
 
 // used to avoid id collisions in ImGui
 int gUniqueValueCounter = 0;
@@ -74,15 +78,15 @@ int gDeviceId = 0;
 GLuint gTextureOrig, gTextureProc, gTextureSpec, gTextureAttr, gTextureAttr2, gTextureBitm; 
 
 // Bitmaps for the textures
-unsigned int gBitmapOrig[256 * 256/*192*/];
-unsigned int gBitmapProc[256 * 256/*192*/];
-unsigned int gBitmapSpec[256 * 256/*192*/];
-unsigned int gBitmapAttr[256 * 256/*192*/];
-unsigned int gBitmapAttr2[256 * 256/*192*/];
-unsigned int gBitmapBitm[256 * 256/*192*/];
+unsigned int gBitmapOrig[1024 * 512];
+unsigned int gBitmapProc[1024 * 512];
+unsigned int gBitmapSpec[1024 * 512];
+unsigned int gBitmapAttr[1024 * 512];
+unsigned int gBitmapAttr2[1024 * 512];
+unsigned int gBitmapBitm[1024 * 512];
 
 // Floating point version of the processed bitmap, for processing
-float gBitmapProcFloat[256 * 192 * 3];
+float gBitmapProcFloat[1024 * 512 * 3];
 
 // Histogram arrays
 float gHistogramR[256];
@@ -113,10 +117,11 @@ enum MODIFIERS
 
 #include "device.h"
 #include "modifier.h"
-#include "zxspectrumdevice.h"
-#include "zx3x64device.h"
 
 Device *gDevice = 0;
+
+#include "zxspectrumdevice.h"
+#include "zx3x64device.h"
 
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
@@ -130,6 +135,23 @@ Device *gDevice = 0;
 #include "ordereddithermodifier.h"
 #include "errordiffusiondithermodifier.h"
 #include "contrastmodifier.h"
+
+void update_texture(GLuint aTexture, unsigned int *aBitmap)
+{
+	glBindTexture(GL_TEXTURE_2D, aTexture);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)aBitmap);
+	glTexSubImage2D(
+		GL_TEXTURE_2D,			// target
+		0,						// level
+		0,						// xofs
+		0,						// yofs
+		gDevice->mXRes,			// width
+		gDevice->mYRes,			// height
+		GL_RGBA,				// format
+		GL_UNSIGNED_BYTE,		// type
+		(GLvoid*)aBitmap);		// data
+}
+
 
 int getFileDate(char *aFilename)
 {
@@ -562,8 +584,8 @@ void loadimg(char *aFilename = 0)
 			}
 		}
 
-		glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+		update_texture(gTextureOrig, gBitmapOrig);
+		
 		gSourceImageDate = getFileDate(gSourceImageName);
 	}
 	gDirty = 1;
@@ -598,8 +620,7 @@ void generateimg()
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+	update_texture(gTextureOrig, gBitmapOrig);
 }
 
 
@@ -811,7 +832,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureOrig);
 	glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -819,7 +840,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureProc);
 	glBindTexture(GL_TEXTURE_2D, gTextureProc);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -827,7 +848,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureSpec);
 	glBindTexture(GL_TEXTURE_2D, gTextureSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -835,7 +856,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureAttr);
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -843,7 +864,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureAttr2);
 	glBindTexture(GL_TEXTURE_2D, gTextureAttr2);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -851,7 +872,7 @@ int main(int aParamc, char**aParams)
 
 	glGenTextures(1, &gTextureBitm);
 	glBindTexture(GL_TEXTURE_2D, gTextureBitm);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)0);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -916,7 +937,7 @@ int main(int aParamc, char**aParams)
     // Main loop
     while (!done)
     {
-		ImVec2 picsize(256, 192);
+		ImVec2 picsize((float)gDevice->mXRes, (float)gDevice->mYRes);
 		
 		SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -1241,43 +1262,43 @@ int main(int aParamc, char**aParams)
 		
 		ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
 
-		ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0,0), ImVec2(1,192/256.0f));
+		ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0,0), ImVec2(gDevice->mXRes/1024.0f, gDevice->mYRes/512.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
 		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f));
+		ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
 		ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
 		tex_screen_pos = ImGui::GetCursorScreenPos();
-		ImGui::Image((ImTextureID)gTextureOrig, picsize, ImVec2(0, 0), ImVec2(1, 192 / 256.0f));
+		ImGui::Image((ImTextureID)gTextureOrig, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 			float focus_sz = 32.0f;
 			float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > 256 - focus_sz) focus_x = 256 - focus_sz;
 			float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > 192 - focus_sz) focus_y = 192 - focus_sz;
-			ImVec2 uv0 = ImVec2((focus_x) / 256.0f, (focus_y) / 256.0f);
-			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 256.0f, (focus_y + focus_sz) / 256.0f);
+			ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+			ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
 			ImGui::Image((ImTextureID)gTextureOrig, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
 			ImGui::EndTooltip();
 		}
@@ -1293,10 +1314,8 @@ int main(int aParamc, char**aParams)
 			process_image();
 			gDevice->filter();
 
-			glBindTexture(GL_TEXTURE_2D, gTextureProc);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapProc);
-			glBindTexture(GL_TEXTURE_2D, gTextureSpec);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapSpec);
+			update_texture(gTextureProc, gBitmapProc);
+			update_texture(gTextureSpec, gBitmapSpec);
 			
 			gDirty = 0;
 		}

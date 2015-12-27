@@ -1,7 +1,6 @@
 class ScalePosModifier : public Modifier
 {
 public:
-	int mDirtyPic;
 	int mX, mY;
 	bool mHQ;
 	float mScale;
@@ -34,7 +33,7 @@ public:
 		mX = 0;
 		mY = 0;
 		mScale = 1;
-		mDirtyPic = 1;
+		gDirtyPic = 1;
 		mOnce = 0;
 	}
 
@@ -53,21 +52,21 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##s  ", &mScale, 0, 1)) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##s   ")) { gDirty = 1; mDirtyPic = 1; mScale = 1; } ImGui::SameLine();
+			if (ImGui::SliderFloat("##s  ", &mScale, 0, 1)) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##s   ")) { gDirty = 1; gDirtyPic = 1; mScale = 1; } ImGui::SameLine();
 			ImGui::Text("Scale");
-			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = 256.0f / gSourceImageX; mDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = 192.0f / gSourceImageY; mDirtyPic = 1; gDirty = 1; } 
+			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = 256.0f / gSourceImageX; gDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = 192.0f / gSourceImageY; gDirtyPic = 1; gDirty = 1; } 
 
-			if (ImGui::SliderInt("##x  ", &mX, -255, (int)floor(gSourceImageX * mScale))) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##x   ")) { gDirty = 1; mDirtyPic = 1; mX = 0; } ImGui::SameLine();
+			if (ImGui::SliderInt("##x  ", &mX, -255, (int)floor(gSourceImageX * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##x   ")) { gDirty = 1; gDirtyPic = 1; mX = 0; } ImGui::SameLine();
 			ImGui::Text("X Offset");
 
-			if (ImGui::SliderInt("##y  ", &mY, -192, (int)floor(gSourceImageY * mScale))) { gDirty = 1; mDirtyPic = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##y   ")) { gDirty = 1; mDirtyPic = 1; mY = 0; } ImGui::SameLine();
+			if (ImGui::SliderInt("##y  ", &mY, -192, (int)floor(gSourceImageY * mScale))) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
+			if (ImGui::Button("Reset##y   ")) { gDirty = 1; gDirtyPic = 1; mY = 0; } ImGui::SameLine();
 			ImGui::Text("Y Offset");
 
-			if (ImGui::Checkbox("High quality scaling", &mHQ)) { gDirty = 1; mDirtyPic = 1; }
+			if (ImGui::Checkbox("High quality scaling", &mHQ)) { gDirty = 1; gDirtyPic = 1; }
 
 		}
 		ImGui::PopID();
@@ -76,9 +75,9 @@ public:
 
 	virtual void process()
 	{
-		if (mDirtyPic && gSourceImageData)
+		if (gDirtyPic && gSourceImageData)
 		{
-			mDirtyPic = 0;
+			gDirtyPic = 0;
 			int i, j;
 			int h = (int)floor(gSourceImageY * mScale);
 			int w = (int)floor(gSourceImageX * mScale);
@@ -117,8 +116,7 @@ public:
 			}
 			delete[] temp;
 
-			glBindTexture(GL_TEXTURE_2D, gTextureOrig);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256/*192*/, 0, GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)gBitmapOrig);
+			update_texture(gTextureOrig, gBitmapOrig);
 
 			bitmap_to_float(gBitmapOrig);
 		}
