@@ -39,6 +39,7 @@ public:
 	// Spectrum format data
 	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
 	unsigned char mSpectrumBitmap[128 * 512];
+	unsigned char mSpectrumBitmapLinear[128 * 512];
 
 	ZXSpectrumDevice()
 	{
@@ -254,6 +255,8 @@ public:
 						gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
 						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
 						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
+						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
 				}
 
@@ -272,17 +275,27 @@ public:
 	virtual void savescr(FILE * f)
 	{
 		int attrib_size_multiplier = 1 << (mOptCellSize);
-		fwrite(mSpectrumBitmap, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
+		unsigned char *bm = mSpectrumBitmap;
+		if (mOptScreenOrder == 0)
+		{
+			bm = mSpectrumBitmapLinear;
+		}
+		fwrite(bm, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
 		fwrite(mSpectrumAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
 	}
 
 	virtual void saveh(FILE * f)
 	{
+		unsigned char *bm = mSpectrumBitmap;
+		if (mOptScreenOrder == 0)
+		{
+			bm = mSpectrumBitmapLinear;
+		}
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i, c = 0;
 		for (i = 0; i < (gDevice->mXRes / 8) * gDevice->mYRes; i++)
 		{
-			fprintf(f, "%3u,", mSpectrumBitmap[i]);
+			fprintf(f, "%3u,", bm[i]);
 			c++;
 			if (c >= 32)
 			{
@@ -306,11 +319,16 @@ public:
 
 	virtual void saveinc(FILE * f)
 	{
+		unsigned char *bm = mSpectrumBitmap;
+		if (mOptScreenOrder == 0)
+		{
+			bm = mSpectrumBitmapLinear;
+		}
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i;
 		for (i = 0; i < (gDevice->mYRes / 8) * gDevice->mYRes; i++)
 		{
-			fprintf(f, "\t.db #0x%02x\n", mSpectrumBitmap[i]);
+			fprintf(f, "\t.db #0x%02x\n", bm[i]);
 		}
 		fprintf(f, "\n\n");
 		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
@@ -351,7 +369,7 @@ public:
 				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 
 				gBitmapAttr[i * gDevice->mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-				gBitmapBitm[i * gDevice->mXRes + j] = (mSpectrumBitmap[SPEC_Y(i) * (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+				gBitmapBitm[i * gDevice->mXRes + j] = (mSpectrumBitmapLinear[(i) * (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 			}
 		}
 		update_texture(gTextureAttr, gBitmapAttr);
