@@ -3,7 +3,6 @@ class MinmaxModifier : public Modifier
 public:
 	float mV;
 	int mAreaX, mAreaY;
-	bool mR_en, mG_en, mB_en;
 	bool mMin;
 	int mOnce;
 
@@ -12,9 +11,6 @@ public:
 		write(f, mV);
 		write(f, mAreaX);
 		write(f, mAreaY);
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 		write(f, mMin);
 	}
 
@@ -23,9 +19,6 @@ public:
 		read(f, mV);
 		read(f, mAreaX);
 		read(f, mAreaY);
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 		read(f, mMin);
 	}
 
@@ -41,9 +34,6 @@ public:
 		mOnce = 0;
 		mAreaX = 2;
 		mAreaY = 2;
-		mR_en = true;
-		mG_en = true;
-		mB_en = true;
 	}
 
 	virtual int ui()
@@ -72,9 +62,6 @@ public:
 			if (ImGui::Button("Reset##kernel areaY   ")) { gDirty = 1; mAreaY = 2; } ImGui::SameLine();
 			ImGui::Text("Kernel height");
 
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox(mMin?"Min###minmax":"Max###minmax", &mMin)) { gDirty = 1; }
 		}
 		ImGui::PopID();

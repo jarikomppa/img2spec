@@ -3,7 +3,6 @@ class EdgeModifier : public Modifier
 public:
 	float mThreshold;
 	float mV;
-	bool mR_en, mG_en, mB_en;
 	bool mDirectional;
 	bool mSeparate;
 	bool mAntialias;
@@ -15,9 +14,6 @@ public:
 	{
 		write(f, mV);
 		write(f, mThreshold);
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 		write(f, mDirectional);
 		write(f, mSeparate);
 		write(f, mAntialias);
@@ -31,9 +27,6 @@ public:
 	{
 		read(f, mV);
 		read(f, mThreshold);
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 		read(f, mDirectional);
 		read(f, mSeparate);
 		read(f, mAntialias);
@@ -54,7 +47,6 @@ public:
 		mV = 1;
 		mThreshold = 1;
 		mOnce = 0;
-		mR_en = mG_en = mB_en = true;
 		mSeparate = false;
 		mDirectional = false;
 		mAntialias = false;
@@ -97,10 +89,7 @@ public:
 
 			if (ImGui::Checkbox("Separate color", &mSeparate)) { gDirty = 1; }ImGui::SameLine();
 			if (ImGui::Checkbox("Directional", &mDirectional)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Antialiased", &mAntialias)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; } 
+			if (ImGui::Checkbox("Antialiased", &mAntialias)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;

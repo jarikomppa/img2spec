@@ -2,7 +2,6 @@ class OrderedDitherModifier : public Modifier
 {
 public:
 	float mV;
-	bool mR_en, mG_en, mB_en;
 	int mOnce;
 	int mXOfs, mYOfs;
 	int mMatrix;
@@ -10,9 +9,6 @@ public:
 	virtual void serialize(FILE * f)
 	{
 		write(f, mV);
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 		write(f, mXOfs);
 		write(f, mYOfs);
 		write(f, mMatrix);
@@ -21,9 +17,6 @@ public:
 	virtual void deserialize(FILE * f)
 	{
 		read(f, mV);
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 		read(f, mXOfs);
 		read(f, mYOfs);
 		read(f, mMatrix);
@@ -39,9 +32,6 @@ public:
 	{
 		mV = 1.0f;
 		mOnce = 0;
-		mR_en = true;
-		mG_en = true;
-		mB_en = true;
 		mXOfs = 0;
 		mYOfs = 0;
 		mMatrix = 4;
@@ -78,10 +68,6 @@ public:
 			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
 			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
-
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;

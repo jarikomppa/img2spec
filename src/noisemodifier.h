@@ -4,7 +4,6 @@ public:
 	float mV;
 	int mSeed;
 	bool mColornoise;
-	bool mR_en, mG_en, mB_en;
 	int mOnce;
 
 	virtual void serialize(FILE * f)
@@ -12,9 +11,6 @@ public:
 		write(f, mV);
 		write(f, mSeed);
 		write(f, mColornoise);
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 	}
 
 	virtual void deserialize(FILE * f)
@@ -22,9 +18,6 @@ public:
 		read(f, mV);
 		read(f, mSeed);
 		read(f, mColornoise);
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 	}
 
 	virtual int gettype()
@@ -38,9 +31,6 @@ public:
 		mSeed = 0;
 		mColornoise = false;
 		mOnce = 0;
-		mR_en = true;
-		mG_en = true;
-		mB_en = true;
 	}
 
 	virtual int ui()
@@ -67,10 +57,7 @@ public:
 			if (ImGui::Button("Randomize")) { gDirty = 1; mSeed = (SDL_GetTicks() * 74531) % 65535; } ImGui::SameLine();
 			ImGui::Text("Seed");
 
-			if (ImGui::Checkbox("Color noise", &mColornoise)) { gDirty = 1; };   ImGui::SameLine();
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
+			if (ImGui::Checkbox("Color noise", &mColornoise)) { gDirty = 1; };
 		}
 		ImGui::PopID();
 		return ret;

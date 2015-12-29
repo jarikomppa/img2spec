@@ -43,6 +43,7 @@
     <ClInclude Include="src\quantizemodifier.h" />
     <ClInclude Include="src\rgbmodifier.h" />
     <ClInclude Include="src\scaleposmodifier.h" />
+    <ClInclude Include="src\superblackmodifier.h" />
     <ClInclude Include="src\yiqmodifier.h" />
     <ClInclude Include="src\zx3x64device.h" />
     <ClInclude Include="src\zxspectrumdevice.h" />

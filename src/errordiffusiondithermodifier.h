@@ -1,7 +1,6 @@
 class ErrorDiffusionDitherModifier : public Modifier
 {
 public:
-	bool mR_en, mG_en, mB_en;
 	float mV;
 	int mModel;
 	int mDirection;
@@ -9,9 +8,6 @@ public:
 
 	virtual void serialize(FILE * f)
 	{
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 		write(f, mV);
 		write(f, mModel);
 		write(f, mDirection);
@@ -19,9 +15,6 @@ public:
 
 	virtual void deserialize(FILE * f)
 	{
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 		read(f, mV);
 		read(f, mModel);
 		read(f, mDirection);
@@ -38,9 +31,6 @@ public:
 		mModel = 0;
 		mOnce = 0;
 		mDirection = 0;
-		mR_en = true;
-		mG_en = true;
-		mB_en = true;
 	}
 
 	virtual int ui()
@@ -73,10 +63,6 @@ public:
 			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
 			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
-
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;

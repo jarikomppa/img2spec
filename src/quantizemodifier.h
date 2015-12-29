@@ -7,7 +7,6 @@ public:
 	float mScale;
 	float mNudge;
 	float mRange;
-	bool mR_en, mG_en, mB_en;
 	int mOnce;
 
 	virtual void serialize(FILE * f)
@@ -17,9 +16,6 @@ public:
 		write(f, mScale);
 		write(f, mNudge);
 		write(f, mRange);
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
 	}
 
 	virtual void deserialize(FILE * f)
@@ -29,9 +25,6 @@ public:
 		read(f, mScale);
 		read(f, mNudge);
 		read(f, mRange);
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
 	}
 
 	virtual int gettype()
@@ -47,7 +40,6 @@ public:
 		mScale = 0;
 		mNudge = 0;
 		mRange = 1;
-		mR_en = mG_en = mB_en = true;
 		mOnce = 0;
 	}
 
@@ -85,10 +77,6 @@ public:
 			if (ImGui::SliderFloat("##range ", &mRange, 0, 2)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##range  ")) { gDirty = 1; mRange = 1; } ImGui::SameLine();
 			ImGui::Text("Range");
-
-			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; } 
 		}
 		ImGui::PopID();
 		return ret;
