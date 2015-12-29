@@ -5,12 +5,14 @@ public:
 	int mModel;
 	int mDirection;
 	int mOnce;
+	float mErrorClamp;
 
 	virtual void serialize(FILE * f)
 	{
 		write(f, mV);
 		write(f, mModel);
 		write(f, mDirection);
+		write(f, mErrorClamp);
 	}
 
 	virtual void deserialize(FILE * f)
@@ -18,6 +20,7 @@ public:
 		read(f, mV);
 		read(f, mModel);
 		read(f, mDirection);
+		read(f, mErrorClamp);
 	}
 
 	virtual int gettype()
@@ -31,6 +34,7 @@ public:
 		mModel = 0;
 		mOnce = 0;
 		mDirection = 0;
+		mErrorClamp = 1;
 	}
 
 	virtual int ui()
@@ -63,6 +67,10 @@ public:
 			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
 			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
 			ImGui::Text("Strength");
+
+			if (ImGui::SliderFloat("##errclamp", &mErrorClamp, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
+			if (ImGui::Button("Reset##errclamp   ")) { gDirty = 1; mErrorClamp = 1.0f; } ImGui::SameLine();
+			ImGui::Text("Maximum error");
 		}
 		ImGui::PopID();
 		return ret;
@@ -190,6 +198,10 @@ public:
 				float r = data[pos * 3 + 2] - ((approx >> 0) & 0xff) / 255.0f;
 				float g = data[pos * 3 + 1] - ((approx >> 8) & 0xff) / 255.0f;
 				float b = data[pos * 3 + 0] - ((approx >> 16) & 0xff) / 255.0f;
+
+				if (abs(r) > mErrorClamp) r = (r > 0) ? mErrorClamp : -mErrorClamp;
+				if (abs(g) > mErrorClamp) g = (g > 0) ? mErrorClamp : -mErrorClamp;
+				if (abs(b) > mErrorClamp) b = (b > 0) ? mErrorClamp : -mErrorClamp;
 
 				int x, y;
 				for (y = 0; y < 3; y++)
