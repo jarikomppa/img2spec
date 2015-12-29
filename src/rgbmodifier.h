@@ -65,9 +65,9 @@ public:
 		int i;
 		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
-			gBitmapProcFloat[i * 3 + 0] += mB;
-			gBitmapProcFloat[i * 3 + 1] += mG;
-			gBitmapProcFloat[i * 3 + 2] += mR;
+			if (mB_en) gBitmapProcFloat[i * 3 + 0] += mB;
+			if (mG_en) gBitmapProcFloat[i * 3 + 1] += mG;
+			if (mR_en) gBitmapProcFloat[i * 3 + 2] += mR;
 		}
 	}
 

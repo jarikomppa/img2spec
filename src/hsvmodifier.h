@@ -169,16 +169,21 @@ public:
 		int i;
 		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
-			rgb2hsv(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
+			float h, s, v;
+			rgb2hsv(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], h, s, v);
 
-			gBitmapProcFloat[i * 3 + 0] += mH;
-			gBitmapProcFloat[i * 3 + 1] += mS;
-			gBitmapProcFloat[i * 3 + 2] += mV;
+			h += mH;
+			s += mS;
+			v += mV;
 
-			if (gBitmapProcFloat[i * 3 + 0] < 0) gBitmapProcFloat[i * 3 + 0] += 360;
-			if (gBitmapProcFloat[i * 3 + 0] > 360) gBitmapProcFloat[i * 3 + 0] -= 360;
+			if (h < 0) h += 360;
+			if (h > 360) h -= 360;
 
-			hsv2rgb(gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2], gBitmapProcFloat[i * 3 + 0], gBitmapProcFloat[i * 3 + 1], gBitmapProcFloat[i * 3 + 2]);
+			float r, g, b;
+			hsv2rgb(h, s, v, r, g, b);
+			if (mB_en) gBitmapProcFloat[i * 3 + 0] = b; 
+			if (mG_en) gBitmapProcFloat[i * 3 + 1] = g;
+			if (mR_en) gBitmapProcFloat[i * 3 + 2] = r;
 		}
 	}
 };

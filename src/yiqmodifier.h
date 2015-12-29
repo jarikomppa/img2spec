@@ -84,9 +84,9 @@ public:
 			g = y - 0.272f * i - 0.647f * q;
 			b = y - 1.106f * i + 1.703f * q;
 
-			gBitmapProcFloat[c * 3 + 0] = b;
-			gBitmapProcFloat[c * 3 + 1] = g;
-			gBitmapProcFloat[c * 3 + 2] = r;
+			if (mB_en) gBitmapProcFloat[c * 3 + 0] = b;
+			if (mG_en) gBitmapProcFloat[c * 3 + 1] = g;
+			if (mR_en) gBitmapProcFloat[c * 3 + 2] = r;
 		}
 	}
 };

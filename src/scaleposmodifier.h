@@ -50,7 +50,7 @@ public:
 
 		if (ImGui::CollapsingHeader("Scale / Position Modifier"))
 		{
-			ret = common();
+			ret = common(0); // don't show RGB enable controls
 
 			if (ImGui::SliderFloat("##s  ", &mScale, 0, 1)) { gDirty = 1; gDirtyPic = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##s   ")) { gDirty = 1; gDirtyPic = 1; mScale = 1; } ImGui::SameLine();

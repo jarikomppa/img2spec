@@ -19,7 +19,7 @@ public:
 		mB_en = true;
 	}
 
-	int common()
+	int common(int aRGBControls = 1)
 	{
 		int ret = 0;
 		if (ImGui::Checkbox("Enabled", &mEnabled)) { gDirty = 1; }
@@ -27,10 +27,13 @@ public:
 		if (ImGui::Button("Remove")) { gDirty = 1; ret = -1; }
 		ImGui::SameLine();
 		if (ImGui::Button("Move down")) { gDirty = 1; ret = 1; }
-		ImGui::SameLine();
-		if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
-		if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
-		if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
+		if (aRGBControls)
+		{
+			ImGui::SameLine();
+			if (ImGui::Checkbox("Red enable", &mR_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
+		}
 
 		return ret;
 	}

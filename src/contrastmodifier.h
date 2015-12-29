@@ -66,9 +66,11 @@ public:
 	{
 
 		int i;
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes * 3; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
-			gBitmapProcFloat[i] = (gBitmapProcFloat[i] - mP) * mC + mP + mB;
+			if (mB_en) gBitmapProcFloat[i * 3 + 0] = (gBitmapProcFloat[i * 3 + 0] - mP) * mC + mP + mB;
+			if (mG_en) gBitmapProcFloat[i * 3 + 1] = (gBitmapProcFloat[i * 3 + 1] - mP) * mC + mP + mB;
+			if (mR_en) gBitmapProcFloat[i * 3 + 2] = (gBitmapProcFloat[i * 3 + 2] - mP) * mC + mP + mB;
 		}
 	}
 };

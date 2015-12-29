@@ -51,10 +51,11 @@ public:
 	virtual void process()
 	{
 		int i;
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes * 3; i++)
+		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 		{
-			if (gBitmapProcFloat[i] <= mThreshold)
-				gBitmapProcFloat[i] = -10000;
+			if (mB_en && gBitmapProcFloat[i * 3 + 0] <= mThreshold) gBitmapProcFloat[i * 3 + 0] = -1;
+			if (mG_en && gBitmapProcFloat[i * 3 + 1] <= mThreshold) gBitmapProcFloat[i * 3 + 1] = -1;
+			if (mR_en && gBitmapProcFloat[i * 3 + 2] <= mThreshold) gBitmapProcFloat[i * 3 + 2] = -1;
 		}
 	}
 };
