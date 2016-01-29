@@ -524,6 +524,33 @@ char * mystrdup(char * aString)
 	return data;
 }
 
+unsigned int *loadscr(char *aFilename)
+{
+	unsigned int *data = (unsigned int *)stbi__malloc((192 * 256) * 4);
+	unsigned char *t = new unsigned char[32 * 192 + 32 * 24];
+	FILE * f = fopen(aFilename, "rb");
+	fread(t, 1, 32*192+32*24, f);
+	fclose(f);
+	int i, j, c;
+	for (i = 0, c = 0; i < 192; i++)
+	{
+		for (j = 0; j < 256; j++, c++)
+		{
+			int d = (t[SPEC_Y(i)*32 + (j / 8)] << (j & 7)) & 0x80;
+			unsigned char a = t[32 * 192 + (i / 8) * 32 + j / 8];
+			int idx = a;
+			if (!d) idx >>= 3;
+			idx &= 7;
+			if (a & 0x40)
+				idx |= 8;
+
+			data[c] = gSpeccyPalette[idx] | 0xff000000;
+		}
+	}
+	delete[] t;
+	return data;
+}
+
 void loadimg(char *aFilename = 0)
 {
 	OPENFILENAMEA ofn;
@@ -534,7 +561,7 @@ void loadimg(char *aFilename = 0)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = 0;
 	ofn.lpstrFilter =
-		"All supported types\0*.png;*.jpg;*.jpeg;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.pnm\0"
+		"All supported types\0*.png;*.jpg;*.jpeg;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.pnm;*.scr\0"
 		"PNG (*.png)\0*.png\0"
 		"JPG (*.jpg)\0*.jpg;*.jpeg\0"
 		"TGA (*.tga)\0*.tga\0"
@@ -544,6 +571,7 @@ void loadimg(char *aFilename = 0)
 		"HDR (*.hdr)\0*.hdr\0"
 		"PIC (*.pic)\0*.pic\0"
 		"PNM (*.pnm)\0*.pnm\0"
+		"SCR (*.scr)\0*.scr\0"
 		"All Files (*.*)\0*.*\0\0";
 
 	ofn.nMaxFile = 1024;
@@ -558,6 +586,8 @@ void loadimg(char *aFilename = 0)
 		FILE *f = fopen(aFilename ? aFilename : szFileName, "rb");
 		if (!f)
 			return;
+		fseek(f, 0, SEEK_END);
+		int len = ftell(f);
 		fclose(f);
 
 		// gSourceImageName may be the same pointer as aFilename, so freeing it first
@@ -574,7 +604,18 @@ void loadimg(char *aFilename = 0)
 		}
 
 		if (data == 0)
-			return;
+		{
+			if (len == (32 * 192 + 32 * 24))
+			{
+				data = loadscr(name);
+				x = 256;
+				y = 192;
+			}
+			else
+			{
+				return;
+			}
+		}
 
 		gSourceImageX = x;
 		gSourceImageY = y;
