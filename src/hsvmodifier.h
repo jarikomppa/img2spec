@@ -180,7 +180,7 @@ public:
 			if (h > 360) h -= 360;
 
 			float r, g, b;
-			hsv2rgb(h, s, v, r, g, b);
+			hsv2rgb(h, s, v, b, g, r);
 			if (mB_en) gBitmapProcFloat[i * 3 + 0] = b; 
 			if (mG_en) gBitmapProcFloat[i * 3 + 1] = g;
 			if (mR_en) gBitmapProcFloat[i * 3 + 2] = r;
