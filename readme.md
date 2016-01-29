@@ -3,8 +3,8 @@
 ![ScreenShot](https://raw.github.com/jarikomppa/img2spec/master/img2spec2.jpg)
 
 This is a GUI tool to help convert normal images suitable to be used in ZX Spectrum (and similar devices).
-Note that the resolution is 256x192. Feeding the tool smaller or bigger images works, but the internal
-image size remains the same.
+Note that the resolution is, by default, 256x192. Feeding the tool smaller or bigger images works, but the internal
+image size remains the same. (The internal resolution can be changed in options, but there are limits).
 
 Instead of trying to be completely automated, this tool lets you interactively adjust the source image
 while letting you see the results in real time. Any number of modifiers can be stacked on top of each other,
@@ -12,9 +12,12 @@ and their order can be changed.
 
 Output can be saved as a PNG, or in raw, C header, or assembler include file.
 
+If wanted, the tool can be used to convert image automatically, by feeding it the input image and a
+workspace file on commandline, along with option to save output.
+
 ## Binaries
 
-http://iki.fi/sol/zip/img2spec_22.zip
+http://iki.fi/sol/zip/img2spec_30.zip
 
 ## Source
 
@@ -96,7 +99,7 @@ depending on the capabilities of the display device, and may be a flickering nig
 
 # License
 
-Copyright (c) 2015 Jari Komppa, http://iki.fi/sol
+Copyright (c) 2015-2016 Jari Komppa, http://iki.fi/sol
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
