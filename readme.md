@@ -23,6 +23,14 @@ http://iki.fi/sol/zip/img2spec_30.zip
 
 https://github.com/jarikomppa/img2spec
 
+## Adjusting Output
+
+Unlike most of programs that convert images to zx spectrum format, Image Spectrumizer is primarily meant to be an artist tool. It does a lot of things automatically, but there is no single "best" conversion from RGB images to the limited graphics zx spectrum offers.
+
+Here's one image converted in a bunch of different ways (these were all made in a few minutes). It all depends on what you're after, really. (I did not even go crazy with false-color stuff here).
+
+![ScreenShot](https://raw.github.com/jarikomppa/img2spec/master/mona.png)
+
 ##Tips:
 
 - The window can be resized.
