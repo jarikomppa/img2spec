@@ -28,6 +28,7 @@ Still, if you find it useful, great!
 #include <Windows.h>
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <SDL.h>
@@ -117,7 +118,8 @@ enum MODIFIERS
 	MOD_EDGE,
 	MOD_MINMAX,
 	MOD_QUANTIZE,
-	MOD_SUPERBLACK
+	MOD_SUPERBLACK,
+	MOD_CURVE
 };
 
 #include "device.h"
@@ -141,6 +143,7 @@ Device *gDevice = 0;
 #include "errordiffusiondithermodifier.h"
 #include "contrastmodifier.h"
 #include "superblackmodifier.h"
+#include "curvemodifier.h"
 
 void update_texture(GLuint aTexture, unsigned int *aBitmap)
 {
@@ -440,6 +443,7 @@ void loadworkspace(char *aFilename = 0)
 				case MOD_MINMAX: n = new MinmaxModifier; break;
 				case MOD_QUANTIZE: n = new QuantizeModifier; break;
 				case MOD_SUPERBLACK: n = new SuperblackModifier; break;
+				case MOD_CURVE: n = new CurveModifier; break;
 				default:
 					fclose(f);
 					return;
@@ -1044,6 +1048,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Add YIQ modifier")) { addModifier(new YIQModifier); }
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
 				if (ImGui::MenuItem("Add Superblack modifier")) { addModifier(new SuperblackModifier); }
+				if (ImGui::MenuItem("Add Curve modifier")) { addModifier(new CurveModifier); }
 				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Blur modifier")) { addModifier(new BlurModifier); }
 				if (ImGui::MenuItem("Add Edge modifier")) { addModifier(new EdgeModifier); }
@@ -1091,6 +1096,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
 				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
 				if (ImGui::Button("Superblack", ImVec2(-1, 0))) { addModifier(new SuperblackModifier); }
+				if (ImGui::Button("Curve", ImVec2(-1, 0))) { addModifier(new CurveModifier); }
 				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				if (ImGui::Button("Blur", ImVec2(-1, 0))) { addModifier(new BlurModifier); }
 				if (ImGui::Button("Edge", ImVec2(-1, 0))) { addModifier(new EdgeModifier); }

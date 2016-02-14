@@ -28,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="src\blurmodifier.h" />
     <ClInclude Include="src\contrastmodifier.h" />
+    <ClInclude Include="src\curvemodifier.h" />
     <ClInclude Include="src\device.h" />
     <ClInclude Include="src\edgemodifier.h" />
     <ClInclude Include="src\errordiffusiondithermodifier.h" />
@@ -47,6 +48,9 @@
     <ClInclude Include="src\yiqmodifier.h" />
     <ClInclude Include="src\zx3x64device.h" />
     <ClInclude Include="src\zxspectrumdevice.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\imgui\imgui_user.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{04569741-95DF-42DC-9A5C-06F47684F3B2}</ProjectGuid>
@@ -123,7 +127,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMGUI_INCLUDE_IMGUI_USER_INL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -139,7 +143,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMGUI_INCLUDE_IMGUI_USER_INL;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -157,7 +161,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMGUI_INCLUDE_IMGUI_USER_INL;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -177,7 +181,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IMGUI_INCLUDE_IMGUI_USER_INL;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>\libraries\sdl2\include;src;src\stb;src\imgui</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
