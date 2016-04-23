@@ -129,6 +129,7 @@ Device *gDevice = 0;
 
 #include "zxspectrumdevice.h"
 #include "zx3x64device.h"
+#include "zxhalftiledevice.h"
 
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
@@ -410,6 +411,9 @@ void loadworkspace(char *aFilename = 0)
 				break;
 			case 1:
 				gDevice = new ZX3x64Device;
+				break;
+			case 2:
+				gDevice = new ZXHalfTileDevice;
 				break;
 			}
 			gDevice->readOptions(f);
@@ -1062,6 +1066,7 @@ int main(int aParamc, char**aParams)
 			{
 				if (ImGui::MenuItem("ZX Spectrum (16 colors)", 0, gDeviceId == 0, gDeviceId != 0)) { gDirty = 1; gDeviceId = 0; delete gDevice; gDevice = new ZXSpectrumDevice; }
 				if (ImGui::MenuItem("ZX Spectrum 3x64 mode", 0, gDeviceId == 1, gDeviceId != 1)) { gDirty = 1; gDeviceId = 1; delete gDevice; gDevice = new ZX3x64Device; }
+				if (ImGui::MenuItem("ZX Spectrum halftile mode", 0, gDeviceId == 2, gDeviceId != 2)) { gDirty = 1; gDeviceId = 2; delete gDevice; gDevice = new ZXHalfTileDevice; }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Help"))
@@ -1254,6 +1259,10 @@ int main(int aParamc, char**aParams)
 					"Note that the color reproduction results in real hardware will differ from the simulated, "
 					"depending on the capabilities of the display device, and may be a flickering nightmare.\n "
 					"\n"
+					"Halftile mode\n"
+					"-------------\n"
+					"In this mode, display bitmap is filled with half-filled tiles for a super-low res, but\n"
+					"relatively high color mode, as each \"pixel\" can use colors more freely\n"
 					);
 			}
 			ImGui::End();

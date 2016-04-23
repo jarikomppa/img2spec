@@ -47,6 +47,7 @@
     <ClInclude Include="src\superblackmodifier.h" />
     <ClInclude Include="src\yiqmodifier.h" />
     <ClInclude Include="src\zx3x64device.h" />
+    <ClInclude Include="src\zxhalftiledevice.h" />
     <ClInclude Include="src\zxspectrumdevice.h" />
   </ItemGroup>
   <ItemGroup>
