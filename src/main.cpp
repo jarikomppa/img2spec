@@ -526,6 +526,8 @@ void saveworkspace()
 			fclose(f);
 		}
 	}
+	gDirty = 1;
+	gDirtyPic = 1;
 }
 
 char * mystrdup(char * aString)
@@ -562,6 +564,10 @@ unsigned int *loadscr(char *aFilename)
 		}
 	}
 	delete[] t;
+
+	gDirty = 1;
+	gDirtyPic = 1;
+
 	return data;
 }
 
@@ -659,6 +665,7 @@ void loadimg(char *aFilename = 0)
 		gSourceImageDate = getFileDate(gSourceImageName);
 	}
 	gDirty = 1;
+	gDirtyPic = 1;
 }
 
 void generateimg()
@@ -691,6 +698,9 @@ void generateimg()
 	}
 
 	update_texture(gTextureOrig, gBitmapOrig);
+	gDirty = 1;
+	gDirtyPic = 1;
+
 }
 
 
