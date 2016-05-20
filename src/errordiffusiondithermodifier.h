@@ -52,6 +52,7 @@ public:
 		{
 			ret = common();
 
+			complexsliderfloat("Strength", &mV, 0, 2, 1, 0.001f);
 			if (ImGui::Combo("##Model  ", &mModel, "Floyd-Steinberg\0Jarvis-Judice-Ninke\0Stucki\0Burkes\0Sierra3\0Sierra2\0Sierra2-4A\0")) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Button("-##model")) { gDirty = 1;  mModel = (mModel + 7 - 1) % 7; } ImGui::SameLine();
 			if (ImGui::Button("+##model")) { gDirty = 1;  mModel = (mModel + 7 + 1) % 7; } ImGui::SameLine();
@@ -64,7 +65,6 @@ public:
 			if (ImGui::Button("Reset##Direction     ")) { gDirty = 1; mDirection = 0; }ImGui::SameLine();
 			ImGui::Text("Direction");
 
-			complexsliderfloat("Strength", &mV, 0, 2, 1, 0.001f);
 			complexsliderfloat("Maximum error", &mErrorClamp, 0, 2, 1, 0.001f);
 		}
 		ImGui::PopID();
