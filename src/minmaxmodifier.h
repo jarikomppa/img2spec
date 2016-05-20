@@ -4,6 +4,7 @@ public:
 	float mV;
 	int mAreaX, mAreaY;
 	bool mMin;
+	bool mRounded;
 	int mOnce;
 
 	virtual void serialize(FILE * f)
@@ -12,6 +13,7 @@ public:
 		write(f, mAreaX);
 		write(f, mAreaY);
 		write(f, mMin);
+		write(f, mRounded);
 	}
 
 	virtual void deserialize(FILE * f)
@@ -20,6 +22,7 @@ public:
 		read(f, mAreaX);
 		read(f, mAreaY);
 		read(f, mMin);
+		read(f, mRounded);
 	}
 
 	virtual int gettype()
@@ -34,6 +37,7 @@ public:
 		mOnce = 0;
 		mAreaX = 2;
 		mAreaY = 2;
+		mRounded = false;
 	}
 
 	virtual int ui()
@@ -55,10 +59,35 @@ public:
 			complexsliderint("Kernel width", &mAreaX, 1, 20, 2, 1);
 			complexsliderint("Kernel height", &mAreaY, 1, 20, 2, 1);
 
-			if (ImGui::Checkbox(mMin?"Min###minmax":"Max###minmax", &mMin)) { gDirty = 1; }
+			if (ImGui::Checkbox(mMin ? "Min###minmax" : "Max###minmax", &mMin)) { gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Checkbox(mRounded ? "Rounded###rounded" : "Rectangle###rounded", &mRounded)) { gDirty = 1; }
 		}
 		ImGui::PopID();
 		return ret;
+	}
+
+	int areahit(int i, int j, int x, int y)
+	{
+		if (mRounded)
+		{
+			int x2 = x - mAreaX / 2;
+			int y2 = y - mAreaY / 2;
+			if (sqrt((float)x2 * x2 + y2 * y2) > (mAreaX + mAreaY) / 4) return 0;
+			if ((j + x - mAreaX / 2) > 0 &&
+				(j + x - mAreaX / 2) < gDevice->mXRes &&
+				(i + y - mAreaY / 2) > 0 &&
+				(i + y - mAreaY / 2) < gDevice->mYRes)
+				return 1;
+		}
+		else
+		{
+			if ((j + x - mAreaX / 2) > 0 &&
+				(j + x - mAreaX / 2) < gDevice->mXRes &&
+				(i + y - mAreaY / 2) > 0 &&
+				(i + y - mAreaY / 2) < gDevice->mYRes)
+				return 1;
+		}
+		return 0;
 	}
 
 	virtual void process()
@@ -81,10 +110,7 @@ public:
 					{
 						for (y = 0; y < mAreaY; y++)
 						{
-							if ((j + x - mAreaX / 2) > 0 &&
-								(j + x - mAreaX / 2) < gDevice->mXRes &&
-								(i + y - mAreaY / 2) > 0 &&
-								(i + y - mAreaY / 2) < gDevice->mYRes)
+							if (areahit(i, j, x, y))
 							{
 								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
 								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
@@ -115,10 +141,7 @@ public:
 					{
 						for (y = 0; y < mAreaY; y++)
 						{
-							if ((j + x - mAreaX / 2) > 0 &&
-								(j + x - mAreaX / 2) < gDevice->mXRes &&
-								(i + y - mAreaY / 2) > 0 &&
-								(i + y - mAreaY / 2) < gDevice->mYRes)
+							if (areahit(i, j, x, y))
 							{
 								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
 								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
