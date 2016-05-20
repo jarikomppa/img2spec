@@ -391,8 +391,22 @@ public:
 		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 	}
 
-	virtual void zoomed()
+	virtual void zoomed(int aWhich)
 	{
+		int tex;
+		switch (aWhich)
+		{
+		default: //case 0:
+			tex = gTextureSpec;
+			break;
+		case 1:
+			tex = gTextureProc;
+			break;
+		case 2:
+			tex = gTextureOrig;
+			break;
+		}
+
 		if (gOptZoomStyle == 1)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
@@ -404,7 +418,7 @@ public:
 				for (j = 0; j < (gDevice->mXRes / 8); j++)
 				{
 					ImGui::Image(
-						(ImTextureID)gTextureSpec,
+						(ImTextureID)tex,
 						ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
 						ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
 						ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
@@ -420,7 +434,7 @@ public:
 		else
 		{
 			ImGui::Image(
-				(ImTextureID)gTextureSpec, 
+				(ImTextureID)tex, 
 				ImVec2((float)gDevice->mXRes * gOptZoom, 
 				(float)gDevice->mYRes * gOptZoom), 
 				ImVec2(0, 0),

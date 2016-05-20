@@ -64,6 +64,8 @@ int gDirtyPic = 0;
 int gUniqueValueCounter = 0;
 
 bool gWindowZoomedOutput = false;
+bool gWindowZoomedInput = false;
+bool gWindowZoomedModified = false;
 bool gWindowAttribBitmap = false;
 bool gWindowHistograms = false;
 bool gWindowOptions = false;
@@ -397,6 +399,8 @@ void loadworkspace(char *aFilename = 0)
 			Modifier::read(f, gWindowModifierPalette);
 			Modifier::read(f, gWindowOptions);
 			Modifier::read(f, gWindowZoomedOutput);
+			Modifier::read(f, gWindowZoomedModified);
+			Modifier::read(f, gWindowZoomedInput);
 			Modifier::read(f, gOptShowOriginal);
 			Modifier::read(f, gOptShowModified);
 			Modifier::read(f, gOptShowResult);
@@ -501,6 +505,8 @@ void saveworkspace()
 			Modifier::write(f, gWindowModifierPalette);
 			Modifier::write(f, gWindowOptions);
 			Modifier::write(f, gWindowZoomedOutput);
+			Modifier::write(f, gWindowZoomedModified);
+			Modifier::write(f, gWindowZoomedInput);
 			Modifier::write(f, gOptShowOriginal);
 			Modifier::write(f, gOptShowModified);
 			Modifier::write(f, gOptShowResult);	
@@ -1033,12 +1039,14 @@ int main(int aParamc, char**aParams)
 			}
 			if (ImGui::BeginMenu("Window"))
 			{
-				if (ImGui::MenuItem("Open all windows")) { gWindowAttribBitmap = true; gWindowHistograms = true; gWindowModifierPalette = true; gWindowZoomedOutput = true; gWindowOptions = true; }
+				if (ImGui::MenuItem("Open all windows")) { gWindowAttribBitmap = true; gWindowHistograms = true; gWindowModifierPalette = true; gWindowZoomedOutput = true; gWindowZoomedModified = true; gWindowZoomedInput = true; gWindowOptions = true; }
 				ImGui::Separator();
 				if (ImGui::MenuItem("Attribute/bitmap", 0, &gWindowAttribBitmap)) {}
 				if (ImGui::MenuItem("Histogram", 0, &gWindowHistograms)) {}
 				if (ImGui::MenuItem("Modifier palette", 0, &gWindowModifierPalette)) {}
 				if (ImGui::MenuItem("Zoomed output", 0, &gWindowZoomedOutput)) {}
+				if (ImGui::MenuItem("Zoomed modified", 0, &gWindowZoomedModified)) {}
+				if (ImGui::MenuItem("Zoomed input", 0, &gWindowZoomedInput)) {}
 				if (ImGui::MenuItem("Options", 0, &gWindowOptions)) {}
 				ImGui::EndMenu();
 			}
@@ -1296,7 +1304,25 @@ int main(int aParamc, char**aParams)
 		{
 			if (ImGui::Begin("Zoomed output", &gWindowZoomedOutput, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
-				gDevice->zoomed();
+				gDevice->zoomed(0);
+			}
+			ImGui::End();
+		}
+
+		if (gWindowZoomedModified)
+		{
+			if (ImGui::Begin("Zoomed modified", &gWindowZoomedModified, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				gDevice->zoomed(1);
+			}
+			ImGui::End();
+		}
+
+		if (gWindowZoomedInput)
+		{
+			if (ImGui::Begin("Zoomed input", &gWindowZoomedInput, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
+			{
+				gDevice->zoomed(2);
 			}
 			ImGui::End();
 		}

@@ -15,7 +15,7 @@ public:
 	virtual void saveinc(FILE * f) = 0;
 	virtual void attr_bitm() = 0;
 	virtual void options() = 0;
-	virtual void zoomed() = 0;
+	virtual void zoomed(int aWhich) = 0;
 	virtual void writeOptions(FILE *f) = 0;
 	virtual void readOptions(FILE *f) = 0;
 };
