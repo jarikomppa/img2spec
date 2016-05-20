@@ -2,19 +2,19 @@ int gC64Palette[16]
 {
 		0x000000,
 		0xFFFFFF,
-		0x744335,
-		0x7CACBA,
-		0x7B4890,
-		0x64974F,
-		0x403285,
-		0xBFCD7A,
-		0x7B5B2F,
-		0x4f4500,
-		0xa37265,
+		0x354374,
+		0xBAAC7C,
+		0x90487B,
+		0x4F9764,
+		0x853240,
+		0x7ACDBF,
+		0x2F5B7B,
+		0x00454f,
+		0x6572a3,
 		0x505050,
 		0x787878,
-		0xa4d78e,
-		0x786abd,
+		0x8ed7a4,
+		0xbd6a78,
 		0x9f9f9f
 };
 
@@ -23,25 +23,20 @@ class C64HiresDevice : public Device
 public:
 
 	int mOptAttribOrder;
-	int mOptBright;
 	int mOptPaper;
 	int mOptCellSize;
-	int mOptScreenOrder;
 	int mOptWidthCells;
 	int mOptHeightCells;
 
 	// Spectrum format data
-	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
-	unsigned char mSpectrumBitmap[128 * 512];
-	unsigned char mSpectrumBitmapLinear[128 * 512];
+	unsigned char mAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
+	unsigned char mBitmap[128 * 512];
 
 	C64HiresDevice()
 	{
 		mOptAttribOrder = 0;
-		mOptBright = 32;
 		mOptPaper = 0;
 		mOptCellSize = 0;
-		mOptScreenOrder = 1;
 
 		mXRes = 320;
 		mYRes = 200;
@@ -210,13 +205,13 @@ public:
 					{
 						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
 						gBitmapSpec[loc] = pick_from_2_c64_cols(gBitmapProc[loc], col1, col2);
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mBitmap[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
+						mBitmap[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
 				}
 
 				// Store the cell's attribute
-				mSpectrumAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
+				mAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0xf) | ((col1 & 0xf) << 4);
 			}
 		}
 
@@ -229,21 +224,18 @@ public:
 
 	virtual void savescr(FILE * f)
 	{
-		int attrib_size_multiplier = 1 << (mOptCellSize);
-		unsigned char *bm = mSpectrumBitmapLinear;
-		fwrite(bm, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
-		fwrite(mSpectrumAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
+		int attrib_size_multiplier = 1 << (mOptCellSize);		
+		fwrite(mBitmap, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
+		fwrite(mAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
 	}
 
 	virtual void saveh(FILE * f)
-	{
-		unsigned char *bm = mSpectrumBitmapLinear;
-
+	{		
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i, c = 0;
 		for (i = 0; i < (gDevice->mXRes / 8) * gDevice->mYRes; i++)
 		{
-			fprintf(f, "%3u,", bm[i]);
+			fprintf(f, "%3u,", mBitmap[i]);
 			c++;
 			if (c >= 32)
 			{
@@ -255,7 +247,7 @@ public:
 		c = 0;
 		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "%3u%s", mSpectrumAttributes[i], i != ((gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
+			fprintf(f, "%3u%s", mAttributes[i], i != ((gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
 			c++;
 			if (c >= 32)
 			{
@@ -266,19 +258,17 @@ public:
 	}
 
 	virtual void saveinc(FILE * f)
-	{
-		unsigned char *bm = mSpectrumBitmapLinear;
-		
+	{		
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i;
 		for (i = 0; i < (gDevice->mYRes / 8) * gDevice->mYRes; i++)
 		{
-			fprintf(f, "\t.db #0x%02x\n", bm[i]);
+			fprintf(f, "\t.db #0x%02x\n", mBitmap[i]);
 		}
 		fprintf(f, "\n\n");
 		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "\t.db #0x%02x\n", mSpectrumAttributes[i]);
+			fprintf(f, "\t.db #0x%02x\n", mAttributes[i]);
 		}
 	}
 
@@ -309,12 +299,12 @@ public:
 			{
 				int fg, bg;
 
-				int attr = mSpectrumAttributes[(i / cellht) * (gDevice->mXRes / 8) + j / 8];
-				fg = gC64Palette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
-				bg = gC64Palette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
+				int attr = mAttributes[(i / cellht) * (gDevice->mXRes / 8) + j / 8];
+				fg = gC64Palette[((attr >> 0) & 0xf)] | 0xff000000;
+				bg = gC64Palette[((attr >> 4) & 0xf)] | 0xff000000;
 
 				gBitmapAttr[i * gDevice->mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-				gBitmapBitm[i * gDevice->mXRes + j] = (mSpectrumBitmapLinear[(i)* (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+				gBitmapBitm[i * gDevice->mXRes + j] = (mBitmap[(i)* (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 			}
 		}
 		update_texture(gTextureAttr, gBitmapAttr);
@@ -328,11 +318,27 @@ public:
 	virtual void options()
 	{
 		if (ImGui::Combo("Attribute order", &mOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
-		if (ImGui::Combo("Paper attribute", &mOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
+		if (ImGui::Combo("Paper attribute", &mOptPaper, 
+			"Optimal (calculate)\0"
+			"Black (0)\0"
+			"White (1)\0"
+			"Red (2)\0"
+			"Cyan (3)\0"
+			"Purple (4)\0"
+			"Green (5)\0"
+			"Blue (6)\0"
+			"Yellow (7)\0"
+			"Orange (8)\0"
+			"Brown (9)\0"
+			"Light red (10)\0"
+			"Dark grey (11)\0"
+			"Grey (12)\0"
+			"Light green (13)\0"
+			"Light blue (14)\0"
+			"Light grey (15)\0")) gDirty = 1;
 		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
 		if (ImGui::SliderInt("Bitmap width in cells", &mOptWidthCells, 1, 1028 / 8)) { gDirty = 1; gDirtyPic = 1; mXRes = mOptWidthCells * 8; }
 		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 512 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
-		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 	}
 
 	virtual void zoomed(int aWhich)
@@ -389,10 +395,8 @@ public:
 	virtual void writeOptions(FILE *f)
 	{
 		Modifier::write(f, mOptAttribOrder);
-		Modifier::write(f, mOptBright);
 		Modifier::write(f, mOptPaper);
 		Modifier::write(f, mOptCellSize);
-		Modifier::write(f, mOptScreenOrder);
 		Modifier::write(f, mOptWidthCells);
 		Modifier::write(f, mOptHeightCells);
 	}
@@ -400,10 +404,8 @@ public:
 	virtual void readOptions(FILE *f)
 	{
 		Modifier::read(f, mOptAttribOrder);
-		Modifier::read(f, mOptBright);
 		Modifier::read(f, mOptPaper);
 		Modifier::read(f, mOptCellSize);
-		Modifier::read(f, mOptScreenOrder);
 		Modifier::read(f, mOptWidthCells);
 		Modifier::read(f, mOptHeightCells);
 
