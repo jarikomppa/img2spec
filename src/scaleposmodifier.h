@@ -52,13 +52,15 @@ public:
 		{
 			ret = common(0); // don't show RGB enable controls
 
-			if (complexsliderfloat("Scale", &mScale, 0, 2, 1, 0.001f)) gDirtyPic = 1;
+			if (complexsliderfloat("Scale", &mScale, 0, 4, 1, 0.001f)) gDirtyPic = 1;
 
 			if (ImGui::Button("Fit horizontally")) { if (gSourceImageX) mScale = (float)gDevice->mXRes / gSourceImageX; gDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Button("Fit vertically")) { if (gSourceImageX) mScale = (float)gDevice->mYRes / gSourceImageY; gDirtyPic = 1; gDirty = 1; }
-			
+		
 			if (complexsliderint("X Offset", &mX, -gDevice->mXRes, (int)floor(gSourceImageX * mScale), 0, 1)) gDirtyPic = 1;
 			if (complexsliderint("Y Offset", &mY, -gDevice->mYRes, (int)floor(gSourceImageY * mScale), 0, 1)) gDirtyPic = 1;
+			if (ImGui::Button("Center horizontally")) { mX = (int)floor(-gSourceImageX * mScale / 2 + gDevice->mXRes / 2); gDirtyPic = 1; gDirty = 1; } ImGui::SameLine();
+			if (ImGui::Button("Center vertically")) { mY = (int)floor(-gSourceImageY * mScale / 2 + gDevice->mYRes / 2); gDirtyPic = 1; gDirty = 1; }
 
 			if (ImGui::Checkbox("High quality scaling", &mHQ)) { gDirty = 1; gDirtyPic = 1; }
 
