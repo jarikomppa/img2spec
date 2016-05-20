@@ -12,7 +12,7 @@ public:
 	virtual void options()
 	{
 		if (ImGui::Combo("Wide or tall tiles", &mOptTileType, "Tall (64x24)\0Wide (32x48)\0")) { gDirty = 1; gDirtyPic = 1; }
-		if (ImGui::Combo("Bright attributes", &mOptBright, "Only dark\0Prefer dark\0Normal\0Prefer bright\0Only bright\0")) gDirty = 1;
+		if (ImGui::SliderInt("Bright attributes", &mOptBright, 0, 64, "<- less, more ->")) gDirty = 1;
 		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
 		if (ImGui::SliderInt("Bitmap width in cells", &mOptWidthCells, 1, 1028 / 8)) { gDirty = 1; gDirtyPic = 1; mXRes = mOptWidthCells * 8; }
 		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 512 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
@@ -100,24 +100,13 @@ public:
 					}
 				}
 
-				switch (mOptBright)
-				{
-				case 0: // only dark
-					brights = 0;
-					break;
-				case 1: // prefer dark
-					brights = (brights >= (8 * cellht - blacks)) * 8;
-					break;
-				case 2: // default
-					brights = (brights >= (8 * cellht - blacks) / 2) * 8;
-					break;
-				case 3: // prefer bright
-					brights = (brights >= (8 * cellht - blacks) / 4) * 8;
-					break;
-				case 4: // only bright
+				if (brights >= ((63 - mOptBright) * cellht / 8 - blacks))
 					brights = 8;
-					break;
-				}
+				else
+					brights = 0;
+
+				if (mOptBright == 0) brights = 0;
+				if (mOptBright == 64) brights = 8;
 
 				int counts_left[16];
 				int counts_right[16];
