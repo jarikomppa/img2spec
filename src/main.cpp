@@ -132,6 +132,7 @@ Device *gDevice = 0;
 #include "zxspectrumdevice.h"
 #include "zx3x64device.h"
 #include "zxhalftiledevice.h"
+#include "c64hiresdevice.h"
 
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
@@ -418,6 +419,9 @@ void loadworkspace(char *aFilename = 0)
 				break;
 			case 2:
 				gDevice = new ZXHalfTileDevice;
+				break;
+			case 3:
+				gDevice = new C64HiresDevice;
 				break;
 			}
 			gDevice->readOptions(f);
@@ -1085,6 +1089,7 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("ZX Spectrum (16 colors)", 0, gDeviceId == 0, gDeviceId != 0)) { gDirty = 1; gDeviceId = 0; delete gDevice; gDevice = new ZXSpectrumDevice; }
 				if (ImGui::MenuItem("ZX Spectrum 3x64 mode", 0, gDeviceId == 1, gDeviceId != 1)) { gDirty = 1; gDeviceId = 1; delete gDevice; gDevice = new ZX3x64Device; }
 				if (ImGui::MenuItem("ZX Spectrum halftile mode", 0, gDeviceId == 2, gDeviceId != 2)) { gDirty = 1; gDeviceId = 2; delete gDevice; gDevice = new ZXHalfTileDevice; }
+				if (ImGui::MenuItem("C64 hires mode", 0, gDeviceId == 3, gDeviceId != 3)) { gDirty = 1; gDeviceId = 3; delete gDevice; gDevice = new C64HiresDevice; }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Help"))
@@ -1386,47 +1391,49 @@ int main(int aParamc, char**aParams)
 				ImGui::EndTooltip();
 			}
 			if (gOptShowModified || gOptShowResult) { ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine(); }
+		}
 
-			if (gOptShowModified)
+		if (gOptShowModified)
+		{
+			ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			if (ImGui::IsItemHovered())
 			{
-				ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
-				ImGui::Image((ImTextureID)gTextureProc, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
-				if (ImGui::IsItemHovered())
-				{
-					ImGui::BeginTooltip();
-					float focus_sz = 32.0f;
-					float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
-					float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
-					ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
-					ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
-					ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-					ImGui::EndTooltip();
-				}
-				if (gOptShowResult) { ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine(); }
+				ImGui::BeginTooltip();
+				float focus_sz = 32.0f;
+				float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+				float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
+				ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+				ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
+				ImGui::Image((ImTextureID)gTextureProc, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+				ImGui::EndTooltip();
 			}
-			if (gOptShowResult)
-			{
-				ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
-				ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
-				if (ImGui::IsItemHovered())
-				{
-					ImGui::BeginTooltip();
-					float focus_sz = 32.0f;
-					float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
-					float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
-					ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
-					ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
-					ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
-					ImGui::EndTooltip();
-				}
+			if (gOptShowResult) { ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine(); }
+		}
 
+		if (gOptShowResult)
+		{
+			ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+			ImGui::Image((ImTextureID)gTextureSpec, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				float focus_sz = 32.0f;
+				float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > gDevice->mXRes - focus_sz) focus_x = gDevice->mXRes - focus_sz;
+				float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > gDevice->mYRes - focus_sz) focus_y = gDevice->mYRes - focus_sz;
+				ImVec2 uv0 = ImVec2((focus_x) / 1024.0f, (focus_y) / 512.0f);
+				ImVec2 uv1 = ImVec2((focus_x + focus_sz) / 1024.0f, (focus_y + focus_sz) / 512.0f);
+				ImGui::Image((ImTextureID)gTextureSpec, ImVec2(128, 128), uv0, uv1, ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+				ImGui::EndTooltip();
 			}
+
+
 
 		}
 
-		ImGui::Checkbox("Result", &gOptShowResult); ImGui::SameLine();
-		ImGui::Checkbox("Modified", &gOptShowModified); ImGui::SameLine();
 		ImGui::Checkbox("Original", &gOptShowOriginal); ImGui::SameLine();
+		ImGui::Checkbox("Modified", &gOptShowModified); ImGui::SameLine();
+		ImGui::Checkbox("Result", &gOptShowResult); ImGui::SameLine();
 		ImGui::Checkbox("Dock images", &gOptImagesDocked);
 
 		if (!gOptImagesDocked)
