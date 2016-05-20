@@ -1359,7 +1359,9 @@ int main(int aParamc, char**aParams)
 		
 		if (gOptImagesDocked)
 		{
-			ImGui::SetNextWindowSize(ImVec2(828, 512));
+			//ImGui::SetNextWindowSize(ImVec2(828, 512));
+			//ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+			ImGui::SetNextWindowSize(ImVec2(828, ImGui::GetIO().DisplaySize.y-32));
 			ImGui::Begin("Image", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 		}
 		else
@@ -1431,8 +1433,10 @@ int main(int aParamc, char**aParams)
 		{
 			ImGui::End();
 
-			ImGui::SetNextWindowSize(ImVec2(828, 400));
-			ImGui::Begin("Modifiers", 0, ImGuiWindowFlags_NoResize);
+//			ImGui::SetNextWindowSize(ImVec2(828, 400));
+//			ImGui::Begin("Modifiers", 0, ImGuiWindowFlags_NoResize);
+			ImGui::SetNextWindowSize(ImVec2(828, ImGui::GetIO().DisplaySize.y-32));
+			ImGui::Begin("Modifiers", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 		}
 		ImGui::BeginChild("Mod");
 		modifier_ui();
