@@ -53,24 +53,19 @@ public:
 			ret = common();
 
 			if (ImGui::Combo("##Model  ", &mModel, "Floyd-Steinberg\0Jarvis-Judice-Ninke\0Stucki\0Burkes\0Sierra3\0Sierra2\0Sierra2-4A\0")) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##model     ")) { gDirty = 1; mModel = 0; }ImGui::SameLine();
 			if (ImGui::Button("-##model")) { gDirty = 1;  mModel = (mModel + 7 - 1) % 7; } ImGui::SameLine();
 			if (ImGui::Button("+##model")) { gDirty = 1;  mModel = (mModel + 7 + 1) % 7; } ImGui::SameLine();
+			if (ImGui::Button("Reset##model     ")) { gDirty = 1; mModel = 0; }ImGui::SameLine();
 			ImGui::Text("Model");
 
 			if (ImGui::Combo("##Direction  ", &mDirection, "Left-right\0Right-left\0Bidirectional, left-right first\0Bidirectional, right-left first\0")) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##Direction     ")) { gDirty = 1; mDirection = 0; }ImGui::SameLine();
 			if (ImGui::Button("-##Direction")) { gDirty = 1;  mDirection = (mDirection + 4 - 1) % 4; } ImGui::SameLine();
 			if (ImGui::Button("+##Direction")) { gDirty = 1;  mDirection = (mDirection + 4 + 1) % 4; } ImGui::SameLine();
+			if (ImGui::Button("Reset##Direction     ")) { gDirty = 1; mDirection = 0; }ImGui::SameLine();
 			ImGui::Text("Direction");
 
-			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
-			ImGui::Text("Strength");
-
-			if (ImGui::SliderFloat("##errclamp", &mErrorClamp, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##errclamp   ")) { gDirty = 1; mErrorClamp = 1.0f; } ImGui::SameLine();
-			ImGui::Text("Maximum error");
+			complexsliderfloat("Strength", &mV, 0, 2, 1, 0.001f);
+			complexsliderfloat("Maximum error", &mErrorClamp, 0, 2, 1, 0.001f);
 		}
 		ImGui::PopID();
 		return ret;

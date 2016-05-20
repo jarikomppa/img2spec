@@ -40,9 +40,7 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##Threshold  ", &mThreshold, -1, 1)) { gDirty = 1; }  ImGui::SameLine();
-			if (ImGui::Button("Reset##threshold   ")) { gDirty = 1; mThreshold = 0; }ImGui::SameLine();
-			ImGui::Text("Threshold");
+			complexsliderfloat("Threshold", &mThreshold, -1, 1, 0, 0.001f);
 		}
 		ImGui::PopID();
 		return ret;

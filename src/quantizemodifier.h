@@ -58,25 +58,11 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##Strength", &mV, 0, 1.0f)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1; } ImGui::SameLine();
-			ImGui::Text("Strength");
-
-			if (ImGui::SliderInt("##levels  ", &mLevels, 2, MAX_LEVELS)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##levels   ")) { gDirty = 1; mLevels = 4; } ImGui::SameLine();
-			ImGui::Text("Levels");
-
-			if (ImGui::SliderFloat("##scale", &mScale, -2, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##scale ")) { gDirty = 1; mScale = 0; } ImGui::SameLine();
-			ImGui::Text("Exp/Log Scale");
-
-			if (ImGui::SliderFloat("##nudge ", &mNudge, -0.5f, 0.5f)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##nudge  ")) { gDirty = 1; mNudge = 0; } ImGui::SameLine();
-			ImGui::Text("Nudge");
-
-			if (ImGui::SliderFloat("##range ", &mRange, 0, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##range  ")) { gDirty = 1; mRange = 1; } ImGui::SameLine();
-			ImGui::Text("Range");
+			complexsliderfloat("Strength", &mV, 0, 1, 1, 0.001f);
+			complexsliderint("Levels", &mLevels, 2, MAX_LEVELS, 4, 1);
+			complexsliderfloat("Exp/Log Scale", &mScale, -2, 2, 0, 0.001f);
+			complexsliderfloat("Nudge", &mNudge, -0.5f, 0.5f, 0, 0.001f);
+			complexsliderfloat("Range", &mRange, 0, 2, 1, 0.001f);
 		}
 		ImGui::PopID();
 		return ret;

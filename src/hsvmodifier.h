@@ -147,17 +147,9 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##Hue       ", &mH, -360, 360)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##hue        ")) { gDirty = 1; mH = 0; } ImGui::SameLine();
-			ImGui::Text("Hue (color)");
-
-			if (ImGui::SliderFloat("##Saturation", &mS, -2, 2)) { gDirty = 1; }     ImGui::SameLine();
-			if (ImGui::Button("Reset##saturation ")) { gDirty = 1; mS = 0; } ImGui::SameLine();
-			ImGui::Text("Saturation (richness)");
-
-			if (ImGui::SliderFloat("##Value     ", &mV, -2, 2)) { gDirty = 1; }     ImGui::SameLine();
-			if (ImGui::Button("Reset##value      ")) { gDirty = 1; mV = 0; } ImGui::SameLine();
-			ImGui::Text("Value (brightness)");
+			complexsliderfloat("Hue (color)", &mH, -360, 360, 0, 1);
+			complexsliderfloat("Saturation (richness)", &mS, -2, 2, 0, 0.001f);
+			complexsliderfloat("Value (brightness)", &mV, -2, 2, 0, 0.001f);
 		}
 		ImGui::PopID();
 		return ret;

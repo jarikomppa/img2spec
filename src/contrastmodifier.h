@@ -46,17 +46,9 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##Contrast  ", &mC, 0, 5)) { gDirty = 1; }  ImGui::SameLine();
-			if (ImGui::Button("Reset##contrast   ")) { gDirty = 1; mC = 1; }ImGui::SameLine();
-			ImGui::Text("Contrast");
-
-			if (ImGui::SliderFloat("##Brightness", &mB, -2, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##brightness ")) { gDirty = 1; mB = 0; }ImGui::SameLine();
-			ImGui::Text("Brightness");
-
-			if (ImGui::SliderFloat("##Pivot     ", &mP, -2, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##pivot      ")) { gDirty = 1; mP = 0.5f; }ImGui::SameLine();
-			ImGui::Text("Pivot");
+			complexsliderfloat("Contrast", &mC, 0, 5, 1, 0.001f);
+			complexsliderfloat("Brightness", &mB, -2, 2, 0, 0.001f);
+			complexsliderfloat("Pivot", &mP, -2, 2, 0.5f, 0.001f);
 		}
 		ImGui::PopID();
 		return ret;

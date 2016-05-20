@@ -71,17 +71,9 @@ public:
 		{
 			ret = common();
 
-			if (ImGui::SliderFloat("##Strength", &mV, 0, 1.0f)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1; } ImGui::SameLine();
-			ImGui::Text("Strength");
-
-			if (ImGui::SliderFloat("##Threshold  ", &mThreshold, 0, 2)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##Threshold   ")) { gDirty = 1; mThreshold = 1; } ImGui::SameLine();
-			ImGui::Text("Threshold");
-
-			if (ImGui::SliderFloat("##Direction  ", &mDirection, 0, 1)) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##Direction   ")) { gDirty = 1; mDirection = 0; } ImGui::SameLine();
-			ImGui::Text("Direction");
+			complexsliderfloat("Strength", &mV, 0, 1, 1, 0.001f);
+			complexsliderfloat("Threshold", &mThreshold, 0, 2, 1, 0.001f);
+			complexsliderfloat("Direction", &mDirection, 0, 1, 0, 0.001f);
 
 			if (ImGui::ColorEdit3("##fill", mFillColor)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Button("Reset##fill   ")) { gDirty = 1; mFillColor[0] = 0; mFillColor[1] = 0; mFillColor[2] = 0; } ImGui::SameLine();

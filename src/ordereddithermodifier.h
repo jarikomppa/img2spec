@@ -51,23 +51,17 @@ public:
 		if (ImGui::CollapsingHeader("Ordered Dither Modifier"))
 		{
 			ret = common();
+			complexsliderfloat("Strength", &mV, 0, 2, 1, 0.001f);
+
 			if (ImGui::Combo("##Matrix  ", &mMatrix, "2x2\0" "3x3\0" "3x3 (alt)\0" "4x4\0" "8x8\0")) { gDirty = 1; } ImGui::SameLine();
-			if (ImGui::Button("Reset##matrix     ")) { gDirty = 1; mMatrix = 4; } ImGui::SameLine();
 			if (ImGui::Button("-##matrix")) { gDirty = 1;  mMatrix = (mMatrix + 5 - 1) % 5; } ImGui::SameLine();
 			if (ImGui::Button("+##matrix")) { gDirty = 1;  mMatrix = (mMatrix + 5 + 1) % 5; } ImGui::SameLine();
+			if (ImGui::Button("Reset##matrix     ")) { gDirty = 1; mMatrix = 4; } ImGui::SameLine();
 			ImGui::Text("Matrix");
 
-			if (ImGui::SliderInt("##X offset", &mXOfs, 0, 8)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##X offset   ")) { gDirty = 1; mXOfs = 0; } ImGui::SameLine();
-			ImGui::Text("X Offset");
+			complexsliderint("X Offset", &mXOfs, 0, 8, 0, 1);
+			complexsliderint("Y Offset", &mYOfs, 0, 8, 0, 1);
 
-			if (ImGui::SliderInt("##Y offset", &mYOfs, 0, 8)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##Y offset   ")) { gDirty = 1; mYOfs = 0; } ImGui::SameLine();
-			ImGui::Text("Y Offset");
-
-			if (ImGui::SliderFloat("##Strength", &mV, 0, 2)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1.0f; } ImGui::SameLine();
-			ImGui::Text("Strength");
 		}
 		ImGui::PopID();
 		return ret;

@@ -50,16 +50,10 @@ public:
 		if (ImGui::CollapsingHeader("Blur Modifier"))
 		{
 			ret = common();
-			if (ImGui::SliderFloat("##Strength", &mV, 0, 1.0f)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##strength   ")) { gDirty = 1; mV = 1; } ImGui::SameLine();
-			ImGui::Text("Strength");
 
-			if (ImGui::SliderInt("##kernel areaX", &mAreaX, 1, 32)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##kernel areaX   ")) { gDirty = 1; mAreaX = 2; } ImGui::SameLine();
-			ImGui::Text("Kernel width");
-			if (ImGui::SliderInt("##kernel areaY", &mAreaY, 1, 32)) { gDirty = 1; }	ImGui::SameLine();
-			if (ImGui::Button("Reset##kernel areaY   ")) { gDirty = 1; mAreaY = 2; } ImGui::SameLine();
-			ImGui::Text("Kernel height");
+			complexsliderfloat("Strength", &mV, 0, 1, 1, 0.001f);
+			complexsliderint("Kernel width", &mAreaX, 1, 32, 2, 1);
+			complexsliderint("Kernel height", &mAreaY, 1, 32, 2, 1);
 
 			if (ImGui::Checkbox("Subtract blurred from source", &mNegate)) { gDirty = 1; }
 		}
