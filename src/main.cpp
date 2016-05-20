@@ -43,7 +43,7 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "3.0"
+#define VERSION "3.1"
 
 char *gSourceImageName = 0;
 unsigned int *gSourceImageData = 0;
@@ -133,6 +133,7 @@ Device *gDevice = 0;
 #include "zx3x64device.h"
 #include "zxhalftiledevice.h"
 #include "c64hiresdevice.h"
+#include "c64multicolordevice.h"
 
 #include "scaleposmodifier.h"
 #include "rgbmodifier.h"
@@ -422,6 +423,9 @@ void loadworkspace(char *aFilename = 0)
 				break;
 			case 3:
 				gDevice = new C64HiresDevice;
+				break;
+			case 4:
+				gDevice = new C64MulticolorDevice;
 				break;
 			}
 			gDevice->readOptions(f);
@@ -1089,7 +1093,9 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("ZX Spectrum (16 colors)", 0, gDeviceId == 0, gDeviceId != 0)) { gDirty = 1; gDeviceId = 0; delete gDevice; gDevice = new ZXSpectrumDevice; }
 				if (ImGui::MenuItem("ZX Spectrum 3x64 mode", 0, gDeviceId == 1, gDeviceId != 1)) { gDirty = 1; gDeviceId = 1; delete gDevice; gDevice = new ZX3x64Device; }
 				if (ImGui::MenuItem("ZX Spectrum halftile mode", 0, gDeviceId == 2, gDeviceId != 2)) { gDirty = 1; gDeviceId = 2; delete gDevice; gDevice = new ZXHalfTileDevice; }
-				if (ImGui::MenuItem("C64 hires mode", 0, gDeviceId == 3, gDeviceId != 3)) { gDirty = 1; gDeviceId = 3; delete gDevice; gDevice = new C64HiresDevice; }
+				ImGui::Separator();
+				if (ImGui::MenuItem("C64 hires mode (experimental)", 0, gDeviceId == 3, gDeviceId != 3)) { gDirty = 1; gDeviceId = 3; delete gDevice; gDevice = new C64HiresDevice; }
+				if (ImGui::MenuItem("C64 multicolor mode (experimental)", 0, gDeviceId == 4, gDeviceId != 4)) { gDirty = 1; gDeviceId = 4; delete gDevice; gDevice = new C64MulticolorDevice; }
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Help"))

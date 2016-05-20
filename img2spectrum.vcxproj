@@ -28,6 +28,7 @@
   <ItemGroup>
     <ClInclude Include="src\blurmodifier.h" />
     <ClInclude Include="src\c64hiresdevice.h" />
+    <ClInclude Include="src\c64multicolordevice.h" />
     <ClInclude Include="src\contrastmodifier.h" />
     <ClInclude Include="src\curvemodifier.h" />
     <ClInclude Include="src\device.h" />
