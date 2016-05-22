@@ -1062,9 +1062,11 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Attribute/bitmap", 0, &gWindowAttribBitmap)) {}
 				if (ImGui::MenuItem("Histogram", 0, &gWindowHistograms)) {}
 				if (ImGui::MenuItem("Modifier palette", 0, &gWindowModifierPalette)) {}
+				ImGui::Separator();
 				if (ImGui::MenuItem("Zoomed output", 0, &gWindowZoomedOutput)) {}
 				if (ImGui::MenuItem("Zoomed modified", 0, &gWindowZoomedModified)) {}
 				if (ImGui::MenuItem("Zoomed input", 0, &gWindowZoomedInput)) {}
+				ImGui::Separator();
 				if (ImGui::MenuItem("Options", 0, &gWindowOptions)) {}
 				ImGui::EndMenu();
 			}
@@ -1073,17 +1075,20 @@ int main(int aParamc, char**aParams)
 				if (ImGui::MenuItem("Open modifier palette")) { gWindowModifierPalette = !gWindowModifierPalette; }
 				ImGui::Separator();
 				if (ImGui::MenuItem("Add Scale/Position modifier")) { addModifier(new ScalePosModifier); }
+				ImGui::Separator();
 				if (ImGui::MenuItem("Add RGB modifier")) { addModifier(new RGBModifier); }
 				if (ImGui::MenuItem("Add HSV modifier")) { addModifier(new HSVModifier); }
 				if (ImGui::MenuItem("Add YIQ modifier")) { addModifier(new YIQModifier); }
 				if (ImGui::MenuItem("Add Contrast modifier")) { addModifier(new ContrastModifier); }
+				ImGui::Separator();
 				if (ImGui::MenuItem("Add Superblack modifier")) { addModifier(new SuperblackModifier); }
 				if (ImGui::MenuItem("Add Curve modifier")) { addModifier(new CurveModifier); }
-				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Blur modifier")) { addModifier(new BlurModifier); }
 				if (ImGui::MenuItem("Add Edge modifier")) { addModifier(new EdgeModifier); }
 				if (ImGui::MenuItem("Add Quantize modifier")) { addModifier(new QuantizeModifier); }
 				if (ImGui::MenuItem("Add Min/max modifier")) { addModifier(new MinmaxModifier); }
+				ImGui::Separator();
+				if (ImGui::MenuItem("Add Noise modifier")) { addModifier(new NoiseModifier); }
 				if (ImGui::MenuItem("Add Ordered Dither modifier")) { addModifier(new OrderedDitherModifier); }
 				if (ImGui::MenuItem("Add Error Diffusion Dither modifier")) { addModifier(new ErrorDiffusionDitherModifier); }
 				ImGui::EndMenu();
@@ -1125,17 +1130,20 @@ int main(int aParamc, char**aParams)
 			if (ImGui::Begin("Add Modifiers", &gWindowModifierPalette, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize))
 			{
 				if (ImGui::Button("Scale/Position", ImVec2(-1, 0))) { addModifier(new ScalePosModifier); }
+				ImGui::Separator();
 				if (ImGui::Button("RGB", ImVec2(-1, 0))) { addModifier(new RGBModifier); }
 				if (ImGui::Button("HSV", ImVec2(-1, 0))) { addModifier(new HSVModifier); }
 				if (ImGui::Button("YIQ", ImVec2(-1, 0))) { addModifier(new YIQModifier); }
 				if (ImGui::Button("Contrast", ImVec2(-1, 0))) { addModifier(new ContrastModifier); }
+				ImGui::Separator();
 				if (ImGui::Button("Superblack", ImVec2(-1, 0))) { addModifier(new SuperblackModifier); }
 				if (ImGui::Button("Curve", ImVec2(-1, 0))) { addModifier(new CurveModifier); }
-				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				if (ImGui::Button("Blur", ImVec2(-1, 0))) { addModifier(new BlurModifier); }
 				if (ImGui::Button("Edge", ImVec2(-1, 0))) { addModifier(new EdgeModifier); }
 				if (ImGui::Button("Quantize", ImVec2(-1, 0))) { addModifier(new QuantizeModifier); }
 				if (ImGui::Button("Min/max", ImVec2(-1, 0))) { addModifier(new MinmaxModifier); }
+				ImGui::Separator();
+				if (ImGui::Button("Noise", ImVec2(-1, 0))) { addModifier(new NoiseModifier); }
 				if (ImGui::Button("Ordered Dither", ImVec2(-1, 0))) { addModifier(new OrderedDitherModifier); }
 				// widest button defines the window width, so we can't set it to "auto size"
 				if (ImGui::Button("Error Diffusion Dither" /*, ImVec2(-1, 0)*/)) { addModifier(new ErrorDiffusionDitherModifier); }
