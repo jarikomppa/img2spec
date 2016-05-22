@@ -59,9 +59,13 @@ public:
 
 		mOptWidthCells = mXRes / 8;
 		mOptHeightCells = mYRes / 8;
+
+		memset(mSpectrumAttributes, 0, 128 * 64 * 8 * 2);
+		memset(mSpectrumBitmap, 0, 128 * 512);
+		memset(mSpectrumBitmapLinear, 0, 128 * 512);
 	}
 
-	int rgb_to_speccy_pal(int c, int first, int count)
+	static int rgb_to_speccy_pal(int c, int first, int count)
 	{
 		int i;
 		int r = (c >> 16) & 0xff;
@@ -94,7 +98,7 @@ public:
 		return gSpeccyPalette[rgb_to_speccy_pal(c, 0, 16)] | 0xff000000;
 	}
 
-	int pick_from_2_speccy_cols(int c, int col1, int col2)
+	static int pick_from_2_speccy_cols(int c, int col1, int col2)
 	{
 		int r = (c >> 16) & 0xff;
 		int g = (c >> 8) & 0xff;
@@ -121,7 +125,7 @@ public:
 		return col2;
 	}
 
-	void find_nearestcolor(int &col1, int &col2, int cellht, int x, int y)
+	void find_nearestcolor(int &col1, int &col2, int cellht, int x, int y) const
 	{
 		int i, j;
 		// Count bright pixels in cell
@@ -273,7 +277,7 @@ public:
 		col2 = res1;
 	}
 
-	void calc_brightness(int brightness[8 * 8], int cellht, int x, int y, int &total)
+	static void calc_brightness(int brightness[8 * 8], int cellht, int x, int y, int &total)
 	{
 		int i, j, c;
 		for (c = 0; c < 8 * 8; c++)
@@ -291,7 +295,7 @@ public:
 		}
 	}
 
-	void sort_brightness(int brightness[8 * 8], int order[8 * 8], int max)
+	static void sort_brightness(int brightness[8 * 8], int order[8 * 8], int max)
 	{
 		int i, j;
 		for (i = 0; i < max; i++)

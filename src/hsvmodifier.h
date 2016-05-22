@@ -33,7 +33,7 @@ public:
 		mOnce = 0;
 	}
 
-	void rgb2hsv(float r, float g, float b, float &h, float &s, float &v)
+	static void rgb2hsv(float r, float g, float b, float &h, float &s, float &v)
 	{
 		float      min, max, delta;
 
@@ -76,7 +76,7 @@ public:
 	}
 
 
-	void hsv2rgb(float h, float s, float v, float &r, float &g, float &b)
+	static void hsv2rgb(float h, float s, float v, float &r, float &g, float &b)
 	{
 		float      hh, p, q, t, ff;
 		long        i;

@@ -43,9 +43,12 @@ public:
 
 		mOptWidthCells = mXRes / 8;
 		mOptHeightCells = mYRes / 8;
+
+		memset(mAttributes, 0, 128 * 64 * 8 * 2);
+		memset(mBitmap, 0, 128 * 512);
 	}
 
-	int rgb_to_c64_pal(int c, int first, int count)
+	static int rgb_to_c64_pal(int c, int first, int count)
 	{
 		int i;
 		int r = (c >> 16) & 0xff;
@@ -78,7 +81,7 @@ public:
 		return gC64Palette[rgb_to_c64_pal(c, 0, 16)] | 0xff000000;
 	}
 
-	int pick_from_2_c64_cols(int c, int col1, int col2)
+	static int pick_from_2_c64_cols(int c, int col1, int col2)
 	{
 		int r = (c >> 16) & 0xff;
 		int g = (c >> 8) & 0xff;

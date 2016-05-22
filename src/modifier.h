@@ -38,7 +38,7 @@ public:
 		return ret;
 	}
 
-	int complexsliderfloat(char *aName, float *aValue, float aX0, float aX1, float aReset, float aNudge)
+	static int complexsliderfloat(char *aName, float *aValue, float aX0, float aX1, float aReset, float aNudge)
 	{
 		char buttonstring[256];
 		char resetstring[256];
@@ -61,7 +61,7 @@ public:
 		return modified;
 	}
 
-	int complexsliderint(char *aName, int *aValue, int aX0, int aX1, int aReset, int aNudge)
+	static int complexsliderint(char *aName, int *aValue, int aX0, int aX1, int aReset, int aNudge)
 	{
 		char buttonstring[256];
 		char resetstring[256];

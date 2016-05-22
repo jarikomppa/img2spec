@@ -3,10 +3,6 @@ class C64MulticolorDevice : public C64HiresDevice
 {
 public:
 
-	// Spectrum format data
-	unsigned char mAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
-	unsigned char mBitmap[128 * 512];
-
 	C64MulticolorDevice()
 	{
 		mOptAttribOrder = 0;
@@ -18,9 +14,12 @@ public:
 
 		mOptWidthCells = mXRes / 8;
 		mOptHeightCells = mYRes / 8;
+
+		memset(mAttributes, 0, 128 * 64 * 8 * 2);
+		memset(mBitmap, 0, 128 * 512);
 	}
 
-	int pick_from_4_c64_cols(int c, int col1, int col2, int col3, int col4)
+	static int pick_from_4_c64_cols(int c, int col1, int col2, int col3, int col4)
 	{
 		int r = (c >> 16) & 0xff;
 		int g = (c >> 8) & 0xff;
@@ -84,21 +83,23 @@ public:
 		}
 
 		int papercolor = 0;
-		int best = 0;
-		if (mOptPaper == 0)
 		{
-			for (i = 0; i < 16; i++)
+			if (mOptPaper == 0)
 			{
-				if (counts[i] > best)
+				int best = 0;
+				for (i = 0; i < 16; i++)
 				{
-					best = counts[i];
-					papercolor = i;
+					if (counts[i] > best)
+					{
+						best = counts[i];
+						papercolor = i;
+					}
 				}
 			}
-		}
-		else
-		{
-			papercolor = (mOptPaper - 1);
+			else
+			{
+				papercolor = (mOptPaper - 1);
+			}
 		}
 
 		int ymax;

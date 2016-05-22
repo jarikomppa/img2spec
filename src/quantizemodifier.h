@@ -72,19 +72,21 @@ public:
 	{
 		float point[MAX_LEVELS];
 		int i;
-		float p = 1;
-		if (mScale > 0)
 		{
-			p = mScale + 1;
-		}
-		else
-		{
-			p = 1 / (1 + -mScale);
-		}
+			float p = 1;
+			if (mScale > 0)
+			{
+				p = mScale + 1;
+			}
+			else
+			{
+				p = 1 / (1 + -mScale);
+			}
 
-		for (i = 0; i < mLevels; i++)
-		{
-			point[i] = pow(i / ((float)mLevels - 1), p) * mRange - (mRange - 1)/2 + mNudge;
+			for (i = 0; i < mLevels; i++)
+			{
+				point[i] = pow(i / ((float)mLevels - 1), p) * mRange - (mRange - 1) / 2 + mNudge;
+			}
 		}
 
 		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
