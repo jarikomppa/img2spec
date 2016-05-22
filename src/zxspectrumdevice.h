@@ -29,12 +29,14 @@ class ZXSpectrumDevice : public Device
 public:
 
 	int mOptAttribOrder;
-	int mOptBright;
+	float mOptBright;
 	int mOptPaper;
 	int mOptCellSize;
 	int mOptScreenOrder;
 	int mOptWidthCells;
 	int mOptHeightCells;
+	int mOptConversionMode;
+	float mOptPivotBias;
 
 	// Spectrum format data
 	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
@@ -44,10 +46,13 @@ public:
 	ZXSpectrumDevice()
 	{
 		mOptAttribOrder = 0;
-		mOptBright = 32;
+		mOptBright = 0.5f;
 		mOptPaper = 0;
 		mOptCellSize = 0;
 		mOptScreenOrder = 1;
+		mOptConversionMode = 0;
+		mOptPivotBias = 0.5f;
+ 
 
 		mXRes = 256;
 		mYRes = 192;
@@ -116,6 +121,243 @@ public:
 		return col2;
 	}
 
+	void find_nearestcolor(int &col1, int &col2, int cellht, int x, int y)
+	{
+		int i, j;
+		// Count bright pixels in cell
+		int brights = 0;
+		int blacks = 0;
+		for (i = 0; i < cellht; i++)
+		{
+			for (j = 0; j < 8; j++)
+			{
+				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				if (gBitmapSpec[loc] > 7)
+					brights++;
+				if (gBitmapSpec[loc] == 0)
+					blacks++;
+			}
+		}
+
+		if (brights >= ((63 - 64 * mOptBright) * cellht / 8 - blacks))
+			brights = 8;
+		else
+			brights = 0;
+
+		if (mOptBright <= 0) brights = 0;
+		if (mOptBright >= 1) brights = 8;
+
+		int counts[16];
+		for (i = 0; i < 16; i++)
+			counts[i] = 0;
+
+		// Remap with just bright OR dark colors, based on whether the whole cell is bright or not
+		for (i = 0; i < cellht; i++)
+		{
+			for (j = 0; j < 8; j++)
+			{
+				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				int r = rgb_to_speccy_pal(gBitmapProc[loc], brights, 8);
+				gBitmapSpec[loc] = r;
+				counts[r]++;
+			}
+		}
+
+		// Find two most common colors in cell
+		col1 = 0;
+		col2 = 0;
+		int best = 0;
+		if (mOptPaper == 0)
+		{
+			for (i = 0; i < 16; i++)
+			{
+				if (counts[i] > best)
+				{
+					best = counts[i];
+					col1 = i;
+				}
+			}
+		}
+		else
+		{
+			col1 = (mOptPaper - 1) + brights;
+		}
+
+		// reset count of selected color to zero so we don't pick it twice
+		counts[col1] = 0;
+
+		best = 0;
+		for (i = 0; i < 16; i++)
+		{
+			if (counts[i] > best)
+			{
+				best = counts[i];
+				col2 = i;
+			}
+		}
+	}
+
+	void avg_colors(int brightness[8 * 8], int total, int cellht, int x, int y, int pivot, int &col1, int &col2)
+	{
+		int i, j, c;
+		int r0 = 0, r1 = 0;
+		int g0 = 0, g1 = 0;
+		int b0 = 0, b1 = 0;
+
+		int locount = 0, hicount = 0;
+		for (i = 0, c = 0; i < cellht; i++)
+		{
+			for (j = 0; j < 8; j++, c++)
+			{
+				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+
+				if (brightness[c] > pivot)
+				{
+					r1 += (gBitmapProc[loc] >> 16) & 0xff;
+					g1 += (gBitmapProc[loc] >> 8) & 0xff;
+					b1 += (gBitmapProc[loc] >> 0) & 0xff;
+					hicount++;
+				}
+				else
+				{
+					r0 += (gBitmapProc[loc] >> 16) & 0xff;
+					g0 += (gBitmapProc[loc] >> 8) & 0xff;
+					b0 += (gBitmapProc[loc] >> 0) & 0xff;
+					locount++;
+				}
+			}
+		}
+
+		if (locount)
+		{
+			r0 /= locount;
+			g0 /= locount;
+			b0 /= locount;
+		}
+		if (hicount)
+		{
+			r1 /= hicount;
+			g1 /= hicount;
+			b1 /= hicount;
+		}		
+
+		int c0 = (r0 << 16) | (g0 << 8) | (b0 << 0);
+		int c1 = (r1 << 16) | (g1 << 8) | (b1 << 0);
+
+		int brights = 0;
+		total /= cellht * 8;
+		if (total > 0xff * 9 * (1 - mOptBright))
+		{
+			brights = 8;
+		}
+
+		int res0 = rgb_to_speccy_pal(c0, brights, 8);
+		int res1 = rgb_to_speccy_pal(c1, brights, 8);
+
+		if (mOptPaper)
+		{
+			// Well great, user wants to pick paper color. Let's do the best we can.
+			int closest = pick_from_2_speccy_cols(gSpeccyPalette[mOptPaper-1], res0, res1);
+			if (closest == res0)
+			{
+				res0 = mOptPaper - 1;
+			}
+			else
+			{
+				res1 = res0;
+				res0 = mOptPaper - 1;
+			}
+		}
+
+		col1 = res0;
+		col2 = res1;
+	}
+
+	void calc_brightness(int brightness[8 * 8], int cellht, int x, int y, int &total)
+	{
+		int i, j, c;
+		for (c = 0; c < 8 * 8; c++)
+			brightness[c] = 0;
+
+		for (i = 0, c = 0; i < cellht; i++)
+		{
+			for (j = 0; j < 8; j++, c++)
+			{
+				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				// approximate brightness - b*1, r*3, g*5
+				brightness[c] += (((gBitmapProc[loc] >> 0) & 0xff) * 1) + (((gBitmapProc[loc] >> 8) & 0xff) * 5) + (((gBitmapProc[loc] >> 16) & 0xff) * 3);
+				total += brightness[c];
+			}
+		}
+	}
+
+	void sort_brightness(int brightness[8 * 8], int order[8 * 8], int max)
+	{
+		int i, j;
+		for (i = 0; i < max; i++)
+			order[i] = i;
+
+		for (i = 0; i < max; i++)
+		{
+			for (j = i; j < max; j++)
+			{
+				if (brightness[order[i]] > brightness[order[j]])
+				{
+					int t = order[i];
+					order[i] = order[j];
+					order[j] = t;
+				}
+			}
+		}
+	}
+
+	void find_pivot_middle(int &col1, int &col2, int cellht, int x, int y)
+	{
+		int brightness[8 * 8];
+		int total = 0;
+
+		calc_brightness(brightness, cellht, x, y, total);
+
+		int pivot = total / (cellht * 8);
+		pivot -= (int)floor(pivot - 2 * pivot * mOptPivotBias);
+
+		avg_colors(brightness, total, cellht, x, y, pivot, col1, col2);
+	}
+
+	void find_pivot_median(int &col1, int &col2, int cellht, int x, int y)
+	{
+		int brightness[8 * 8];
+		int total = 0;
+
+		calc_brightness(brightness, cellht, x, y, total);
+
+		int order[8 * 8];
+		sort_brightness(brightness, order, cellht * 8);
+
+		int pivot = (int)floor((cellht * 8 - 1) * mOptPivotBias);
+
+		pivot = brightness[order[pivot]];
+
+		avg_colors(brightness, total, cellht, x, y, pivot, col1, col2);
+	}
+
+	void find_pivot_dualmedian(int &col1, int &col2, int cellht, int x, int y)
+	{
+		int brightness[8 * 8];
+		int total = 0;
+
+		calc_brightness(brightness, cellht, x, y, total);
+
+		int order[8 * 8];
+		sort_brightness(brightness, order, cellht * 8);
+
+		int pivot = (int)floor(cellht * 8 * mOptPivotBias / 2); // 0..0.5
+
+		pivot = (brightness[order[pivot]] + brightness[order[cellht * 8 - pivot - 1]]) / 2;
+
+		avg_colors(brightness, total, cellht, x, y, pivot, col1, col2);
+	}
+
 	virtual void filter()
 	{
 		int x, y, i, j;
@@ -150,76 +392,27 @@ public:
 		{
 			for (x = 0; x < (gDevice->mXRes / 8); x++)
 			{
-				// Count bright pixels in cell
-				int brights = 0;
-				int blacks = 0;
-				for (i = 0; i < cellht; i++)
-				{
-					for (j = 0; j < 8; j++)
-					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
-						if (gBitmapSpec[loc] > 7)
-							brights++;
-						if (gBitmapSpec[loc] == 0)
-							blacks++;
-					}
-				}
-
-				if (brights >= ((63 - mOptBright) * cellht / 8 - blacks))
-					brights = 8;
-				else
-					brights = 0;
-
-				if (mOptBright == 0) brights = 0;				
-				if (mOptBright == 64) brights = 8;
-											
-				int counts[16];
-				for (i = 0; i < 16; i++)
-					counts[i] = 0;
-
-				// Remap with just bright OR dark colors, based on whether the whole cell is bright or not
-				for (i = 0; i < cellht; i++)
-				{
-					for (j = 0; j < 8; j++)
-					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
-						int r = rgb_to_speccy_pal(gBitmapProc[loc], brights, 8);
-						gBitmapSpec[loc] = r;
-						counts[r]++;
-					}
-				}
-
-				// Find two most common colors in cell
 				int col1 = 0, col2 = 0;
-				int best = 0;
-				if (mOptPaper == 0)
+				if (mOptConversionMode == 0)
 				{
-					for (i = 0; i < 16; i++)
-					{
-						if (counts[i] > best)
-						{
-							best = counts[i];
-							col1 = i;
-						}
-					}
+					find_nearestcolor(col1, col2, cellht, x, y);
 				}
 				else
+				if (mOptConversionMode == 1)
 				{
-					col1 = (mOptPaper - 1) + brights;
+					find_pivot_middle(col1, col2, cellht, x, y);
+				}
+				else
+				if (mOptConversionMode == 2)
+				{
+					find_pivot_median(col1, col2, cellht, x, y);
+				}
+				else
+				if (mOptConversionMode == 3)
+				{
+					find_pivot_dualmedian(col1, col2, cellht, x, y);
 				}
 
-				// reset count of selected color to zero so we don't pick it twice
-				counts[col1] = 0;
-
-				best = 0;
-				for (i = 0; i < 16; i++)
-				{
-					if (counts[i] > best)
-					{
-						best = counts[i];
-						col2 = i;
-					}
-				}
 
 				// Make sure we're using bright black
 				if (col2 == 0 && col1 > 7) col2 = 8;
@@ -371,13 +564,17 @@ public:
 
 	virtual void options()
 	{
-		if (ImGui::Combo("Attribute order", &mOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
-		if (ImGui::SliderInt("Bright attributes", &mOptBright, 0, 64, "<- less, more ->")) gDirty = 1;
-		if (ImGui::Combo("Paper attribute", &mOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
 		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
 		if (ImGui::SliderInt("Bitmap width in cells", &mOptWidthCells, 1, 1028 / 8)) { gDirty = 1; gDirtyPic = 1; mXRes = mOptWidthCells * 8; }
 		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 512 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
+		if (ImGui::Combo("Attribute order", &mOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
 		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
+		ImGui::Separator();
+		if (ImGui::SliderFloat("Bright attribute bias", &mOptBright, 0, 1)) gDirty = 1;
+		if (ImGui::Combo("Paper attribute", &mOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
+		if (ImGui::Combo("Coversion mode", &mOptConversionMode, "Popular color\0Average - middle\0Average - median\0Average - dual median\0")) { gDirty = 1; }
+		if (mOptConversionMode != 0)
+		if (ImGui::SliderFloat("Pivot bias", &mOptPivotBias, 0, 1)) { gDirty = 1; }
 	}
 
 	virtual void zoomed(int aWhich)
@@ -440,6 +637,8 @@ public:
 		Modifier::write(f, mOptScreenOrder);
 		Modifier::write(f, mOptWidthCells);
 		Modifier::write(f, mOptHeightCells);
+		Modifier::write(f, mOptConversionMode);
+		Modifier::write(f, mOptPivotBias);
 	}
 
 	virtual void readOptions(FILE *f)
@@ -451,6 +650,8 @@ public:
 		Modifier::read(f, mOptScreenOrder);
 		Modifier::read(f, mOptWidthCells);
 		Modifier::read(f, mOptHeightCells);
+		Modifier::read(f, mOptConversionMode);
+		Modifier::read(f, mOptPivotBias);
 
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);

@@ -12,7 +12,7 @@ public:
 	virtual void options()
 	{
 		if (ImGui::Combo("Wide or tall tiles", &mOptTileType, "Tall (64x24)\0Wide (32x48)\0")) { gDirty = 1; gDirtyPic = 1; }
-		if (ImGui::SliderInt("Bright attributes", &mOptBright, 0, 64, "<- less, more ->")) gDirty = 1;
+		if (ImGui::SliderFloat("Bright attribute bias", &mOptBright, 0, 1)) gDirty = 1;
 		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
 		if (ImGui::SliderInt("Bitmap width in cells", &mOptWidthCells, 1, 1028 / 8)) { gDirty = 1; gDirtyPic = 1; mXRes = mOptWidthCells * 8; }
 		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 512 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
@@ -100,13 +100,13 @@ public:
 					}
 				}
 
-				if (brights >= ((63 - mOptBright) * cellht / 8 - blacks))
+				if (brights >= ((63 - 64 * mOptBright) * cellht / 8 - blacks))
 					brights = 8;
 				else
 					brights = 0;
 
-				if (mOptBright == 0) brights = 0;
-				if (mOptBright == 64) brights = 8;
+				if (mOptBright <= 0) brights = 0;
+				if (mOptBright >= 1) brights = 8;
 
 				int counts_left[16];
 				int counts_right[16];
