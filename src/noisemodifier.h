@@ -6,18 +6,23 @@ public:
 	bool mColornoise;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "NoiseModifier"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mV);
-		write(f, mSeed);
-		write(f, mColornoise);
+		SERIALIZE(mV);
+		SERIALIZE(mSeed);
+		SERIALIZE(mColornoise);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mSeed);
-		read(f, mColornoise);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mSeed);
+		DESERIALIZE(mColornoise);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

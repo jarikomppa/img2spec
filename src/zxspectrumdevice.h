@@ -38,6 +38,9 @@ public:
 	int mOptConversionMode;
 	float mOptPivotBias;
 
+	virtual char *getname() { return "ZXSpectrum"; }
+
+
 	// Spectrum format data
 	unsigned char mSpectrumAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
 	unsigned char mSpectrumBitmap[128 * 512];
@@ -632,30 +635,36 @@ public:
 		}
 	}
 
-	virtual void writeOptions(FILE *f)
+	virtual void writeOptions(JSON_Object *root)
 	{
-		Modifier::write(f, mOptAttribOrder);
-		Modifier::write(f, mOptBright);
-		Modifier::write(f, mOptPaper);
-		Modifier::write(f, mOptCellSize);
-		Modifier::write(f, mOptScreenOrder);
-		Modifier::write(f, mOptWidthCells);
-		Modifier::write(f, mOptHeightCells);
-		Modifier::write(f, mOptConversionMode);
-		Modifier::write(f, mOptPivotBias);
+#define WRITECONFIG(x) json_object_dotset_number(root, "Device." #x, x);
+		WRITECONFIG(mOptAttribOrder);
+		WRITECONFIG(mOptBright);
+		WRITECONFIG(mOptPaper);
+		WRITECONFIG(mOptCellSize);
+		WRITECONFIG(mOptScreenOrder);
+		WRITECONFIG(mOptWidthCells);
+		WRITECONFIG(mOptHeightCells);
+		WRITECONFIG(mOptConversionMode);
+		WRITECONFIG(mOptPivotBias);
+#undef WRITECONFIG
 	}
 
-	virtual void readOptions(FILE *f)
+	virtual void readOptions(JSON_Object *root)
 	{
-		Modifier::read(f, mOptAttribOrder);
-		Modifier::read(f, mOptBright);
-		Modifier::read(f, mOptPaper);
-		Modifier::read(f, mOptCellSize);
-		Modifier::read(f, mOptScreenOrder);
-		Modifier::read(f, mOptWidthCells);
-		Modifier::read(f, mOptHeightCells);
-		Modifier::read(f, mOptConversionMode);
-		Modifier::read(f, mOptPivotBias);
+#define READCONFIG(x) if (json_object_dotget_value(root, "Device." #x) != NULL) x = json_object_dotget_number(root, "Device." #x);
+#pragma warning(disable:4244; disable:4800)
+		READCONFIG(mOptAttribOrder);
+		READCONFIG(mOptBright);
+		READCONFIG(mOptPaper);
+		READCONFIG(mOptCellSize);
+		READCONFIG(mOptScreenOrder);
+		READCONFIG(mOptWidthCells);
+		READCONFIG(mOptHeightCells);
+		READCONFIG(mOptConversionMode);
+		READCONFIG(mOptPivotBias);
+#pragma warning(default:4244; default:4800)
+#undef READCONFIG
 
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);

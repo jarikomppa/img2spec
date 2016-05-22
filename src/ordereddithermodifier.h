@@ -6,20 +6,25 @@ public:
 	int mXOfs, mYOfs;
 	int mMatrix;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "OrderedDither"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mV);
-		write(f, mXOfs);
-		write(f, mYOfs);
-		write(f, mMatrix);
+		SERIALIZE(mV);
+		SERIALIZE(mXOfs);
+		SERIALIZE(mYOfs);
+		SERIALIZE(mMatrix);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mXOfs);
-		read(f, mYOfs);
-		read(f, mMatrix);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mXOfs);
+		DESERIALIZE(mYOfs);
+		DESERIALIZE(mMatrix);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

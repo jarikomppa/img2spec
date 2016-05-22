@@ -7,20 +7,25 @@ public:
 	int mOnce;
 	float mErrorClamp;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "ErrorDiffusionDither"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mV);
-		write(f, mModel);
-		write(f, mDirection);
-		write(f, mErrorClamp);
+		SERIALIZE(mV);
+		SERIALIZE(mModel);
+		SERIALIZE(mDirection);
+		SERIALIZE(mErrorClamp);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mModel);
-		read(f, mDirection);
-		read(f, mErrorClamp);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mModel);
+		DESERIALIZE(mDirection);
+		DESERIALIZE(mErrorClamp);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

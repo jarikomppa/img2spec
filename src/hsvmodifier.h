@@ -5,18 +5,23 @@ public:
 	float mH, mS, mV;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "HSV"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mH);
-		write(f, mS);
-		write(f, mV);
+		SERIALIZE(mH);
+		SERIALIZE(mS);
+		SERIALIZE(mV);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mH);
-		read(f, mS);
-		read(f, mV);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mH);
+		DESERIALIZE(mS);
+		DESERIALIZE(mV);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

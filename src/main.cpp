@@ -1,5 +1,5 @@
 /*
- *	Copyright (c) 2015 Jari Komppa, http://iki.fi/sol
+ *	Copyright (c) 2015-2016 Jari Komppa, http://iki.fi/sol
  *
  *	This software is provided 'as-is', without any express or implied
  *	warranty. In no event will the authors be held liable for any damages
@@ -34,6 +34,8 @@ Still, if you find it useful, great!
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+#include "parson\parson.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -43,7 +45,11 @@ Still, if you find it useful, great!
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
-#define VERSION "3.1"
+#define VERSION "4.0"
+
+#define SERIALIZE(x) json_object_dotset_number(root, #x, x);
+#define DESERIALIZE(x) if (json_object_dotget_value(root, #x) != NULL) x = json_object_dotget_number(root, #x);
+
 
 char *gSourceImageName = 0;
 unsigned int *gSourceImageData = 0;
@@ -377,99 +383,108 @@ void loadworkspace(char *aFilename = 0)
 
 	if (aFilename || GetOpenFileNameA(&ofn))
 	{
-		FILE * f;
-		f = fopen(aFilename ? aFilename : szFileName, "rb");
-		if (f)
+
+		JSON_Value *root_value = json_parse_file(aFilename ? aFilename : szFileName);
+		if (root_value)
 		{
-			unsigned int t;
-			Modifier::read(f, t);
-			if (t != 0x50534D49) // "IMSP"
+			JSON_Object *root = json_value_get_object(root_value);
+			if (_stricmp(json_object_dotget_string(root, "About.Magic"), "0x50534D49") == 0 &&
+				json_object_dotget_number(root, "About.Version") == 4)
 			{
-				fclose(f);
-				return;
-			}
-			Modifier::read(f, t);
-			if (t != 3) // version 3
-			{
-				fclose(f);
-				return;
-			}
-			Modifier::read(f, gWindowAbout);
-			Modifier::read(f, gWindowAttribBitmap);
-			Modifier::read(f, gWindowHelp);
-			Modifier::read(f, gWindowHistograms);
-			Modifier::read(f, gWindowModifierPalette);
-			Modifier::read(f, gWindowOptions);
-			Modifier::read(f, gWindowZoomedOutput);
-			Modifier::read(f, gWindowZoomedModified);
-			Modifier::read(f, gWindowZoomedInput);
-			Modifier::read(f, gOptShowOriginal);
-			Modifier::read(f, gOptShowModified);
-			Modifier::read(f, gOptShowResult);
-			Modifier::read(f, gOptImagesDocked);
-			Modifier::read(f, gDeviceId);
-			delete gDevice;
-			gDevice = 0;
-			switch(gDeviceId)
-			{
-			case 0:
-				gDevice = new ZXSpectrumDevice;
-				break;
-			case 1:
-				gDevice = new ZX3x64Device;
-				break;
-			case 2:
-				gDevice = new ZXHalfTileDevice;
-				break;
-			case 3:
-				gDevice = new C64HiresDevice;
-				break;
-			case 4:
-				gDevice = new C64MulticolorDevice;
-				break;
-			}
-			gDevice->readOptions(f);
-
-
-			Modifier *walker = gModifierRoot;
-			while (walker)
-			{
-				Modifier *last = walker;
-				walker = walker->mNext;
-				delete last;
-			}
-
-			while (!feof(f))
-			{
-				int m;
-				Modifier::read(f, m);
-				Modifier *n = 0;
-				switch (m)
+#define READCONFIG(x) if (json_object_dotget_value(root, "Config." #x) != NULL) x = json_object_dotget_number(root, "Config." #x);
+#pragma warning(disable:4244; disable:4800)
+				READCONFIG(gWindowAbout);
+				READCONFIG(gWindowAttribBitmap);
+				READCONFIG(gWindowHelp);
+				READCONFIG(gWindowHistograms);
+				READCONFIG(gWindowModifierPalette);
+				READCONFIG(gWindowOptions);
+				READCONFIG(gWindowZoomedOutput);
+				READCONFIG(gWindowZoomedModified);
+				READCONFIG(gWindowZoomedInput);
+				READCONFIG(gOptShowOriginal);
+				READCONFIG(gOptShowModified);
+				READCONFIG(gOptShowResult);
+				READCONFIG(gOptImagesDocked);
+				READCONFIG(gOptTrackFile);
+				READCONFIG(gDeviceId);
+#pragma warning(default:4244; default:4800)
+#undef READCONFIG
+				delete gDevice;
+				gDevice = 0;
+				switch (gDeviceId)
 				{
-				case MOD_SCALEPOS: n = new ScalePosModifier; break;
-				case MOD_RGB: n = new RGBModifier; break;
-				case MOD_YIQ: n = new YIQModifier; break;
-				case MOD_HSV: n = new HSVModifier; break;
-				case MOD_NOISE: n = new NoiseModifier; break;
-				case MOD_ORDEREDDITHER: n = new OrderedDitherModifier; break;
-				case MOD_ERRORDIFFUSION: n = new ErrorDiffusionDitherModifier; break;
-				case MOD_CONTRAST: n = new ContrastModifier; break;
-				case MOD_BLUR: n = new BlurModifier; break;
-				case MOD_EDGE: n = new EdgeModifier; break;
-				case MOD_MINMAX: n = new MinmaxModifier; break;
-				case MOD_QUANTIZE: n = new QuantizeModifier; break;
-				case MOD_SUPERBLACK: n = new SuperblackModifier; break;
-				case MOD_CURVE: n = new CurveModifier; break;
-				default:
-					fclose(f);
-					return;
+				case 0:
+					gDevice = new ZXSpectrumDevice;
+					break;
+				case 1:
+					gDevice = new ZX3x64Device;
+					break;
+				case 2:
+					gDevice = new ZXHalfTileDevice;
+					break;
+				case 3:
+					gDevice = new C64HiresDevice;
+					break;
+				case 4:
+					gDevice = new C64MulticolorDevice;
+					break;
 				}
-				addModifier(n);
-				n->deserialize_common(f);
-				n->deserialize(f);
-			}
+				gDevice->readOptions(root);
 
-			fclose(f);
+				Modifier *walker = gModifierRoot;
+				while (walker)
+				{
+					Modifier *last = walker;
+					walker = walker->mNext;
+					delete last;
+				}
+				gModifierRoot = 0;
+
+				int number = 0;
+				char path[256];
+				sprintf(path, "Stack.Item[%d]", number);
+				JSON_Object *item = json_object_dotget_object(root, path);
+
+				while (item)
+				{
+					
+					int m;
+					if (json_object_get_value(item, "Type"))
+					{
+						m = (int)json_object_get_number(item, "Type");
+						
+						Modifier *n = 0;
+						switch (m)
+						{
+						case MOD_SCALEPOS: n = new ScalePosModifier; break;
+						case MOD_RGB: n = new RGBModifier; break;
+						case MOD_YIQ: n = new YIQModifier; break;
+						case MOD_HSV: n = new HSVModifier; break;
+						case MOD_NOISE: n = new NoiseModifier; break;
+						case MOD_ORDEREDDITHER: n = new OrderedDitherModifier; break;
+						case MOD_ERRORDIFFUSION: n = new ErrorDiffusionDitherModifier; break;
+						case MOD_CONTRAST: n = new ContrastModifier; break;
+						case MOD_BLUR: n = new BlurModifier; break;
+						case MOD_EDGE: n = new EdgeModifier; break;
+						case MOD_MINMAX: n = new MinmaxModifier; break;
+						case MOD_QUANTIZE: n = new QuantizeModifier; break;
+						case MOD_SUPERBLACK: n = new SuperblackModifier; break;
+						case MOD_CURVE: n = new CurveModifier; break;
+						default:
+							json_value_free(root_value);
+							return;
+						}
+						addModifier(n);
+						n->deserialize_common(item);
+						n->deserialize(item);
+					}
+					number++;
+					sprintf(path, "Stack.Item[%d]", number);
+					item = json_object_dotget_object(root, path);
+				}
+			}
+			json_value_free(root_value);
 		}
 	}
 }
@@ -498,41 +513,54 @@ void saveworkspace()
 
 	if (GetSaveFileNameA(&ofn))
 	{
-		FILE * f;
-		f = fopen(szFileName, "wb");
-		if (f)
-		{
-			unsigned int t = 0x50534D49;
-			Modifier::write(f, t); // "IMSP"
-			t = 3; // version
-			Modifier::write(f, t);
-			Modifier::write(f, gWindowAbout);
-			Modifier::write(f, gWindowAttribBitmap);
-			Modifier::write(f, gWindowHelp);
-			Modifier::write(f, gWindowHistograms);
-			Modifier::write(f, gWindowModifierPalette);
-			Modifier::write(f, gWindowOptions);
-			Modifier::write(f, gWindowZoomedOutput);
-			Modifier::write(f, gWindowZoomedModified);
-			Modifier::write(f, gWindowZoomedInput);
-			Modifier::write(f, gOptShowOriginal);
-			Modifier::write(f, gOptShowModified);
-			Modifier::write(f, gOptShowResult);	
-			Modifier::write(f, gOptImagesDocked);
-			Modifier::write(f, gDeviceId);
-			gDevice->writeOptions(f);
-
-			Modifier *walker = gModifierApplyStack;
-			while (walker)
-			{
-				Modifier::write(f, walker->gettype());
-				walker->serialize_common(f);
-				walker->serialize(f);
-				walker = walker->mApplyNext;
-			}
+		JSON_Value *root_value = json_value_init_object();
+		JSON_Object *root = json_value_get_object(root_value);
+		json_object_dotset_string(root, "About.WhatIsThis", "Image Spectrumizer " VERSION " workspace file"); 		
+		json_object_dotset_string(root, "About.Magic", "0x50534D49");
+		json_object_dotset_number(root, "About.Version", 4);
 			
-			fclose(f);
+#define WRITECONFIG(x) json_object_dotset_number(root, "Config." #x, x);
+		WRITECONFIG(gWindowAbout);
+		WRITECONFIG(gWindowAttribBitmap);
+		WRITECONFIG(gWindowHelp);
+		WRITECONFIG(gWindowHistograms);
+		WRITECONFIG(gWindowModifierPalette);
+		WRITECONFIG(gWindowOptions);
+		WRITECONFIG(gWindowZoomedOutput);
+		WRITECONFIG(gWindowZoomedModified);
+		WRITECONFIG(gWindowZoomedInput);
+		WRITECONFIG(gOptShowOriginal);
+		WRITECONFIG(gOptShowModified);
+		WRITECONFIG(gOptShowResult);
+		WRITECONFIG(gOptImagesDocked);
+		WRITECONFIG(gOptTrackFile);
+		WRITECONFIG(gDeviceId);
+		json_object_dotset_string(root, "Device.Name", gDevice->getname());
+#undef WRITECONFIG
+		gDevice->writeOptions(root);
+
+		Modifier *walker = gModifierApplyStack;		
+		int number = 0;
+		while (walker)
+		{
+			char path[256];
+			sprintf(path, "Stack.Item[%d]", number);
+			char temp[256];
+			sprintf(temp, "%s.Name", path);
+			json_object_dotset_string(root, temp, walker->getname());
+			sprintf(temp, "%s.Type", path);
+			json_object_dotset_number(root, temp, walker->gettype());
+			JSON_Object *item = json_object_dotget_object(root, path);
+			walker->serialize_common(item);
+			walker->serialize(item);
+			walker = walker->mApplyNext;
+			number++;
 		}
+
+
+		json_serialize_to_file_pretty(root_value, szFileName);
+		json_value_free(root_value);
+
 	}
 	gDirty = 1;
 	gDirtyPic = 1;
@@ -1163,7 +1191,7 @@ int main(int aParamc, char**aParams)
 					"Sources available at:\n"
 					"https://github.com/jarikomppa/img2spec\n"
 					"\n"
-					"Copyright(c) 2015 Jari Komppa, http://iki.fi/sol\n"
+					"Copyright(c) 2015-2016 Jari Komppa, http://iki.fi/sol\n"
 					"\n"
 					"This software is provided 'as-is', without any express or implied "
 					"warranty.In no event will the authors be held liable for any damages "
@@ -1180,14 +1208,16 @@ int main(int aParamc, char**aParams)
 					"2. Altered source versions must be plainly marked as such, and must not be "
 					"misrepresented as being the original software.\n"
 					"3. This notice may not be removed or altered from any source distribution.\n"
-					"-----------\n"
 					"\n"
+					"--- 8< --- 8< --- 8< ---\n"
+					"\n");
+				ImGui::TextWrapped(
 					"Uses Ocornut's ImGui library, from:\n"
 					"https://github.com/ocornut/imgui\n"
 					"\n"
 					"The MIT License(MIT)\n"
 					"\n"
-					"Copyright(c) 2014 - 2015 Omar Cornut and ImGui contributors\n"
+					"Copyright(c) 2014 - 2016 Omar Cornut and ImGui contributors\n"
 					"\n"
 					"Permission is hereby granted, free of charge, to any person obtaining a copy "
 					"of this software and associated documentation files(the \"Software\"), to deal "
@@ -1207,10 +1237,36 @@ int main(int aParamc, char**aParams)
 					"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE "
 					"SOFTWARE.\n"
 					"\n"
-					"-----------\n"
+					"--- 8< --- 8< --- 8< ---\n"
+					"\n");
+				ImGui::TextWrapped(
 					"Uses various STB libraries from:\n"
 					"https://github.com/nothings/stb/\n"
-					"by Sean Barrett, under public domain\n");
+					"by Sean Barrett, under public domain\n"
+					"\n"
+					"--- 8< --- 8< --- 8< ---\n"
+					"\n"
+					"For JSON parsing, uses Parson(http://kgabis.github.com/parson/ )\n"
+					"Copyright(c) 2012 - 2016 Krzysztof Gabis\n"
+					"\n"
+					"Permission is hereby granted, free of charge, to any person obtaining a copy "
+					"of this software and associated documentation files(the \"Software\"), to deal "
+					"in the Software without restriction, including without limitation the rights "
+					"to use, copy, modify, merge, publish, distribute, sublicense, and / or sell "
+					"copies of the Software, and to permit persons to whom the Software is "
+					"furnished to do so, subject to the following conditions :\n"
+					"\n"
+					"The above copyright notice and this permission notice shall be included in "
+					"all copies or substantial portions of the Software.\n"
+					"\n"
+					"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR "
+					"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+					"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE "
+					"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+					"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+					"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN "
+					"THE SOFTWARE.\n"
+					"\n");
 
 			}
 			ImGui::End();

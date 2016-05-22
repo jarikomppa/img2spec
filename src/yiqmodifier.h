@@ -4,18 +4,22 @@ public:
 	float mY, mI, mQ;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
-	{
-		write(f, mY);
-		write(f, mI);
-		write(f, mQ);
+	virtual char *getname() { return "YIQ"; }
+
+	virtual void serialize(JSON_Object * root)
+	{ 
+		SERIALIZE(mY);
+		SERIALIZE(mI);
+		SERIALIZE(mQ);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mY);
-		read(f, mI);
-		read(f, mQ);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mY);
+		DESERIALIZE(mI);
+		DESERIALIZE(mQ);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

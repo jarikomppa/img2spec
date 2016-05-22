@@ -3,6 +3,9 @@ class C64MulticolorDevice : public C64HiresDevice
 {
 public:
 
+	virtual char *getname() { return "C64Multicolor"; }
+
+
 	C64MulticolorDevice()
 	{
 		mOptAttribOrder = 0;
@@ -333,29 +336,5 @@ public:
 				ImVec2(0, 0),
 				ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
 		}
-	}
-
-	virtual void writeOptions(FILE *f)
-	{
-		Modifier::write(f, mOptAttribOrder);
-		Modifier::write(f, mOptPaper);
-		Modifier::write(f, mOptCellSize);
-		Modifier::write(f, mOptWidthCells);
-		Modifier::write(f, mOptHeightCells);
-	}
-
-	virtual void readOptions(FILE *f)
-	{
-		Modifier::read(f, mOptAttribOrder);
-		Modifier::read(f, mOptPaper);
-		Modifier::read(f, mOptCellSize);
-		Modifier::read(f, mOptWidthCells);
-		Modifier::read(f, mOptHeightCells);
-
-		mXRes = mOptWidthCells * 8;
-		mYRes = mOptHeightCells * (8 >> mOptCellSize);
-
-		gDirty = 1;
-		gDirtyPic = 1;
 	}
 };

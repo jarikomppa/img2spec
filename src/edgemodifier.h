@@ -10,30 +10,35 @@ public:
 	float mDirection;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Edge"; }
+
+
+	virtual void serialize(JSON_Object *root)
 	{
-		write(f, mV);
-		write(f, mThreshold);
-		write(f, mDirectional);
-		write(f, mSeparate);
-		write(f, mAntialias);
-		write(f, mDirection);
-		write(f, mFillColor[0]);
-		write(f, mFillColor[1]);
-		write(f, mFillColor[2]);
+		SERIALIZE(mV);
+		SERIALIZE(mThreshold);
+		SERIALIZE(mDirectional);
+		SERIALIZE(mSeparate);
+		SERIALIZE(mAntialias);
+		SERIALIZE(mDirection);
+		SERIALIZE(mFillColor[0]);
+		SERIALIZE(mFillColor[1]);
+		SERIALIZE(mFillColor[2]);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mThreshold);
-		read(f, mDirectional);
-		read(f, mSeparate);
-		read(f, mAntialias);
-		read(f, mDirection);
-		read(f, mFillColor[0]);
-		read(f, mFillColor[1]);
-		read(f, mFillColor[2]);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mThreshold);
+		DESERIALIZE(mDirectional);
+		DESERIALIZE(mSeparate);
+		DESERIALIZE(mAntialias);
+		DESERIALIZE(mDirection);
+		DESERIALIZE(mFillColor[0]);
+		DESERIALIZE(mFillColor[1]);
+		DESERIALIZE(mFillColor[2]);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

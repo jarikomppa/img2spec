@@ -7,6 +7,7 @@ public:
 	Modifier * mNext;
 	Modifier * mApplyNext;
 
+
 	Modifier()
 	{
 		gUniqueValueCounter++;
@@ -84,26 +85,28 @@ public:
 		return modified;
 	}
 
-	template <typename T> static void write(FILE * f, T v) { fwrite(&v, sizeof(T), 1, f); }
-	template <typename T> static void read(FILE * f, T &v) { fread(&v, sizeof(T), 1, f); }
-
 	virtual int ui() = 0;
 	virtual void process() = 0;
-	virtual void serialize(FILE * f) = 0;
-	virtual void deserialize(FILE * f) = 0;
-	void serialize_common(FILE * f) 
-	{ 
-		write(f, mEnabled); 
-		write(f, mR_en);
-		write(f, mG_en);
-		write(f, mB_en);
+	virtual void serialize(JSON_Object *root) = 0;
+	virtual void deserialize(JSON_Object *root) = 0;
+
+	void serialize_common(JSON_Object * root)
+	{
+		SERIALIZE(mEnabled);
+		SERIALIZE(mR_en);
+		SERIALIZE(mG_en);
+		SERIALIZE(mB_en);
 	}
-	void deserialize_common(FILE * f) 
+
+	void deserialize_common(JSON_Object *root) 
 	{ 
-		read(f, mEnabled); 
-		read(f, mR_en);
-		read(f, mG_en);
-		read(f, mB_en);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mEnabled); 
+		DESERIALIZE(mR_en);
+		DESERIALIZE(mG_en);
+		DESERIALIZE(mB_en);
+#pragma warning(default:4244; default:4800)
 	}
 	virtual int gettype() = 0;
+	virtual char *getname() = 0;
 };

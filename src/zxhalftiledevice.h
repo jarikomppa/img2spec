@@ -4,6 +4,9 @@ public:
 
 	int mOptTileType;
 
+	virtual char *getname() { return "ZXHalfTile"; }
+
+
 	ZXHalfTileDevice() 
 	{
 		mOptTileType = 0;
@@ -19,25 +22,30 @@ public:
 		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 	}
 
-	virtual void writeOptions(FILE *f)
+	virtual void writeOptions(JSON_Object *root)
 	{
-		Modifier::write(f, mOptTileType);
-		Modifier::write(f, mOptBright);
-		Modifier::write(f, mOptCellSize);
-		Modifier::write(f, mOptScreenOrder);
-		Modifier::write(f, mOptWidthCells);
-		Modifier::write(f, mOptHeightCells);
+#define WRITECONFIG(x) json_object_dotset_number(root, "Device." #x, x);
+		WRITECONFIG(mOptTileType);
+		WRITECONFIG(mOptBright);
+		WRITECONFIG(mOptCellSize);
+		WRITECONFIG(mOptScreenOrder);
+		WRITECONFIG(mOptWidthCells);
+		WRITECONFIG(mOptHeightCells);
+#undef WRITECONFIG
 	}
 
-	virtual void readOptions(FILE *f)
+	virtual void readOptions(JSON_Object *root)
 	{
-		Modifier::read(f, mOptTileType);
-		Modifier::read(f, mOptBright);
-		Modifier::read(f, mOptCellSize);
-		Modifier::read(f, mOptScreenOrder);
-		Modifier::read(f, mOptWidthCells);
-		Modifier::read(f, mOptHeightCells);
-
+#define READCONFIG(x) if (json_object_dotget_value(root, "Device." #x) != NULL) x = json_object_dotget_number(root, "Device." #x);
+#pragma warning(disable:4244; disable:4800)
+		READCONFIG(mOptTileType);
+		READCONFIG(mOptBright);
+		READCONFIG(mOptCellSize);
+		READCONFIG(mOptScreenOrder);
+		READCONFIG(mOptWidthCells);
+		READCONFIG(mOptHeightCells);
+#pragma warning(default:4244; default:4800)
+#undef READCONFIG
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);
 

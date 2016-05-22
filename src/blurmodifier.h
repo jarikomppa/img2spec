@@ -6,20 +6,25 @@ public:
 	bool mNegate;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Blur"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mV);
-		write(f, mAreaX);
-		write(f, mAreaY);
-		write(f, mNegate);
+		SERIALIZE(mV);
+		SERIALIZE(mAreaX);
+		SERIALIZE(mAreaY);
+		SERIALIZE(mNegate);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mAreaX);
-		read(f, mAreaY);
-		read(f, mNegate);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mAreaX);
+		DESERIALIZE(mAreaY);
+		DESERIALIZE(mNegate);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

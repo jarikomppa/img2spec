@@ -28,6 +28,9 @@ public:
 	int mOptWidthCells;
 	int mOptHeightCells;
 
+	virtual char *getname() { return "C64Hires"; }
+
+
 	// Spectrum format data
 	unsigned char mAttributes[128 * 64 * 8 * 2]; // big enough for 8x1 attribs in 3x64 mode at 1024x512
 	unsigned char mBitmap[128 * 512];
@@ -395,22 +398,28 @@ public:
 		}
 	}
 
-	virtual void writeOptions(FILE *f)
+	virtual void writeOptions(JSON_Object *root)
 	{
-		Modifier::write(f, mOptAttribOrder);
-		Modifier::write(f, mOptPaper);
-		Modifier::write(f, mOptCellSize);
-		Modifier::write(f, mOptWidthCells);
-		Modifier::write(f, mOptHeightCells);
+#define WRITECONFIG(x) json_object_dotset_number(root, "Device." #x, x);
+		WRITECONFIG(mOptAttribOrder);
+		WRITECONFIG(mOptPaper);
+		WRITECONFIG(mOptCellSize);
+		WRITECONFIG(mOptWidthCells);
+		WRITECONFIG(mOptHeightCells);
+#undef WRITECONFIG
 	}
 
-	virtual void readOptions(FILE *f)
+	virtual void readOptions(JSON_Object *root)
 	{
-		Modifier::read(f, mOptAttribOrder);
-		Modifier::read(f, mOptPaper);
-		Modifier::read(f, mOptCellSize);
-		Modifier::read(f, mOptWidthCells);
-		Modifier::read(f, mOptHeightCells);
+#define READCONFIG(x) if (json_object_dotget_value(root, "Device." #x) != NULL) x = json_object_dotget_number(root, "Device." #x);
+#pragma warning(disable:4244; disable:4800)
+		READCONFIG(mOptAttribOrder);
+		READCONFIG(mOptPaper);
+		READCONFIG(mOptCellSize);
+		READCONFIG(mOptWidthCells);
+		READCONFIG(mOptHeightCells);
+#pragma warning(default:4244; default:4800)
+#undef READCONFIG
 
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);

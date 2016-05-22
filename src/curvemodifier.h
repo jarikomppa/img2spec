@@ -10,23 +10,32 @@ public:
 	ImVec2 mPoints[16];
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Curve"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
 		int i;
+		char temp[256];
 		for (i = 0; i < 16; i++)
-		{
-			write(f, mPoints[i].x);
-			write(f, mPoints[i].y);
+		{ 
+			sprintf(temp, "mPoints[%d].x", i);
+			json_object_dotset_number(root, temp, mPoints[i].x);
+			sprintf(temp, "mPoints[%d].y", i);
+			json_object_dotset_number(root, temp, mPoints[i].y);
 		}
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
 		int i;
+		char temp[256];
 		for (i = 0; i < 16; i++)
 		{
-			read(f, mPoints[i].x);
-			read(f, mPoints[i].y);
+			sprintf(temp, "mPoints[%d].x", i);
+			if (json_object_dotget_value(root, temp)) mPoints[i].x = (float)json_object_dotget_number(root, temp);
+			sprintf(temp, "mPoints[%d].y", i);
+			if (json_object_dotget_value(root, temp)) mPoints[i].y = (float)json_object_dotget_number(root, temp);
 		}
 	}
 

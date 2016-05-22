@@ -16,6 +16,7 @@ public:
 	virtual void attr_bitm() = 0;
 	virtual void options() = 0;
 	virtual void zoomed(int aWhich) = 0;
-	virtual void writeOptions(FILE *f) = 0;
-	virtual void readOptions(FILE *f) = 0;
+	virtual void writeOptions(JSON_Object *root) = 0;
+	virtual void readOptions(JSON_Object *root) = 0;
+	virtual char *getname() = 0;
 };

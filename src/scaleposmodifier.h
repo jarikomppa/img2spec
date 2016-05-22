@@ -6,20 +6,25 @@ public:
 	float mScale;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "ScalePos"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mX);
-		write(f, mY);
-		write(f, mHQ);
-		write(f, mScale);
+		SERIALIZE(mX);
+		SERIALIZE(mY);
+		SERIALIZE(mHQ);
+		SERIALIZE(mScale);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mX);
-		read(f, mY);
-		read(f, mHQ);
-		read(f, mScale);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mX);
+		DESERIALIZE(mY);
+		DESERIALIZE(mHQ);
+		DESERIALIZE(mScale);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

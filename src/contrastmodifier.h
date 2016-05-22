@@ -5,18 +5,23 @@ public:
 	float mC, mB, mP;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Contrast"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mC);
-		write(f, mB);
-		write(f, mP);
+		SERIALIZE(mC);
+		SERIALIZE(mB);
+		SERIALIZE(mP);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mC);
-		read(f, mB);
-		read(f, mP);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mC);
+		DESERIALIZE(mB);
+		DESERIALIZE(mP);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

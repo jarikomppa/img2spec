@@ -5,14 +5,19 @@ public:
 	float mThreshold;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Superblack"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mThreshold);
+		SERIALIZE(mThreshold);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mThreshold);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mThreshold);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

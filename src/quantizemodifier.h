@@ -9,22 +9,27 @@ public:
 	float mRange;
 	int mOnce;
 
-	virtual void serialize(FILE * f)
+	virtual char *getname() { return "Quantize"; }
+
+
+	virtual void serialize(JSON_Object * root)
 	{
-		write(f, mV);
-		write(f, mLevels);
-		write(f, mScale);
-		write(f, mNudge);
-		write(f, mRange);
+		SERIALIZE(mV);
+		SERIALIZE(mLevels);
+		SERIALIZE(mScale);
+		SERIALIZE(mNudge);
+		SERIALIZE(mRange);
 	}
 
-	virtual void deserialize(FILE * f)
+	virtual void deserialize(JSON_Object * root)
 	{
-		read(f, mV);
-		read(f, mLevels);
-		read(f, mScale);
-		read(f, mNudge);
-		read(f, mRange);
+#pragma warning(disable:4244; disable:4800)
+		DESERIALIZE(mV);
+		DESERIALIZE(mLevels);
+		DESERIALIZE(mScale);
+		DESERIALIZE(mNudge);
+		DESERIALIZE(mRange);
+#pragma warning(default:4244; default:4800)
 	}
 
 	virtual int gettype()

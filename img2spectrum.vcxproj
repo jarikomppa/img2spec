@@ -24,6 +24,7 @@
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui\imgui_impl_sdl.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\parson\parson.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\blurmodifier.h" />
@@ -43,6 +44,7 @@
     <ClInclude Include="src\ordereddithermodifier.h" />
     <ClInclude Include="src\pal3x64.h" />
     <ClInclude Include="src\pal3x64_measured.h" />
+    <ClInclude Include="src\parson\parson.h" />
     <ClInclude Include="src\quantizemodifier.h" />
     <ClInclude Include="src\rgbmodifier.h" />
     <ClInclude Include="src\scaleposmodifier.h" />
