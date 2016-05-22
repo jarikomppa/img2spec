@@ -112,9 +112,11 @@ public:
 						{
 							if (areahit(i, j, x, y))
 							{
-								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
-								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
-								float r = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 2];
+								int ofs = ((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3;
+								assert(ofs >= 0 && ofs + 2 <= gDevice->mYRes * gDevice->mXRes * 3);
+								float b = buf[ofs + 0];
+								float g = buf[ofs + 1];
+								float r = buf[ofs + 2];
 								if (b < bmin) bmin = b;
 								if (g < gmin) gmin = g;
 								if (r < rmin) rmin = r;
@@ -143,9 +145,11 @@ public:
 						{
 							if (areahit(i, j, x, y))
 							{
-								float b = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 0];
-								float g = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 1];
-								float r = buf[((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3 + 2];
+								int ofs = ((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3;
+								assert(ofs >= 0 && ofs + 2 <= gDevice->mYRes * gDevice->mXRes * 3);
+								float b = buf[ofs + 0];
+								float g = buf[ofs + 1];
+								float r = buf[ofs + 2];
 								if (b > bmax) bmax = b;
 								if (g > gmax) gmax = g;
 								if (r > rmax) rmax = r;
