@@ -32,6 +32,7 @@ Still, if you find it useful, great!
 #include <stdio.h>
 #include <math.h>
 #include <SDL.h>
+#include <SDL_syswm.h>
 #include <SDL_opengl.h>
 
 #include "parson\parson.h"
@@ -82,6 +83,7 @@ bool gOptShowOriginal = true;
 bool gOptShowModified = true;
 bool gOptShowResult = true;
 bool gOptImagesDocked = true;
+int gOptTopmost = 0;
 int gOptZoom = 2;
 int gOptZoomStyle = 0;
 int gOptTrackFile = 1;
@@ -407,6 +409,7 @@ void loadworkspace(char *aFilename = 0)
 				READCONFIG(gOptShowResult);
 				READCONFIG(gOptImagesDocked);
 				READCONFIG(gOptTrackFile);
+				READCONFIG(gOptTopmost);
 				READCONFIG(gDeviceId);
 #pragma warning(default:4244; default:4800)
 #undef READCONFIG
@@ -534,6 +537,7 @@ void saveworkspace()
 		WRITECONFIG(gOptShowResult);
 		WRITECONFIG(gOptImagesDocked);
 		WRITECONFIG(gOptTrackFile);
+		WRITECONFIG(gOptTopmost);
 		WRITECONFIG(gDeviceId);
 		json_object_dotset_string(root, "Device.Name", gDevice->getname());
 #undef WRITECONFIG
@@ -921,6 +925,7 @@ void measurecrap()
 
 int main(int aParamc, char**aParams)
 {
+	SDL_SysWMinfo wminfo;
 
 	gDevice = new ZXSpectrumDevice;
 	// Setup SDL
@@ -940,7 +945,8 @@ int main(int aParamc, char**aParams)
 	SDL_GetCurrentDisplayMode(0, &current);
 	SDL_Window *window = SDL_CreateWindow("Image Spectrumizer " VERSION " - http://iki.fi/sol", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
 	SDL_GLContext glcontext = SDL_GL_CreateContext(window);
-
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWindowWMInfo(window, &wminfo);
     // Setup ImGui binding
     ImGui_ImplSdl_Init(window);
 
@@ -1072,6 +1078,7 @@ int main(int aParamc, char**aParams)
 			{
 				if (ImGui::MenuItem("Load image")) { loadimg(); }
 				if (ImGui::MenuItem("Reload changed image", 0, (bool*)&gOptTrackFile)) {};
+				if (ImGui::MenuItem("Topmost window", 0, (bool*)&gOptTopmost)) { gDirty = 1; };
 				ImGui::Separator();
 				if (ImGui::MenuItem("Load workspace")) { loadworkspace(); }
 				ImGui::Separator();
@@ -1372,6 +1379,7 @@ int main(int aParamc, char**aParams)
 				ImGui::Combo("Zoomed window style", &gOptZoomStyle, "Normal\0Separated cells\0");
 				ImGui::Separator();
 				ImGui::Combo("Track changes to source image", &gOptTrackFile, "Do not track\0Reload when changed\0");
+				if (ImGui::Combo("Keep window topmost", &gOptTopmost, "Normal window\0Topmost window\0")) gDirty = 1;
 			}
 			ImGui::End();
 		}
@@ -1547,6 +1555,12 @@ int main(int aParamc, char**aParams)
 			
 			gDirty = 0;
 			gDirtyPic = 0;
+			
+			if (gOptTopmost)
+				SetWindowPos(wminfo.info.win.window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+			else
+				SetWindowPos(wminfo.info.win.window, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+				
 		}
 
         // Rendering
