@@ -36,6 +36,7 @@ public:
 	int mOptWidthCells;
 	int mOptHeightCells;
 	int mOptConversionMode;
+	int mOptEmptyCellInkColor;
 	float mOptPivotBias;
 
 	virtual char *getname() { return "ZXSpectrum"; }
@@ -55,6 +56,7 @@ public:
 		mOptScreenOrder = 1;
 		mOptConversionMode = 0;
 		mOptPivotBias = 0.5f;
+		mOptEmptyCellInkColor = 0;
  
 
 		mXRes = 256;
@@ -435,6 +437,7 @@ public:
 					}
 				}
 
+				int livecount = 0;
 				// Final pass on cell, select which of two colors we can use
 				for (i = 0; i < cellht; i++)
 				{
@@ -442,11 +445,18 @@ public:
 					{
 						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
 						gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
+						if (gBitmapSpec[loc] != col1)
+							livecount++;
 						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
 						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
 						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
+				}
+
+				if (livecount == 0 )
+				{
+					col2 = mOptEmptyCellInkColor;
 				}
 
 				// Store the cell's attribute
@@ -579,6 +589,7 @@ public:
 		ImGui::Separator();
 		if (ImGui::SliderFloat("Bright attribute bias", &mOptBright, 0, 1)) gDirty = 1;
 		if (ImGui::Combo("Paper attribute", &mOptPaper, "Optimal\0Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
+		if (ImGui::Combo("Ink color for empty cells", &mOptEmptyCellInkColor, "Black\0Blue\0Red\0Purple\0Green\0Cyan\0Yellow\0White\0")) gDirty = 1;
 		if (ImGui::Combo("Coversion mode", &mOptConversionMode, "Popular color\0Average - middle\0Average - median\0Average - dual median\0")) { gDirty = 1; }
 		if (mOptConversionMode != 0)
 		if (ImGui::SliderFloat("Pivot bias", &mOptPivotBias, 0, 1)) { gDirty = 1; }
@@ -649,6 +660,7 @@ public:
 		WRITECONFIG(mOptHeightCells);
 		WRITECONFIG(mOptConversionMode);
 		WRITECONFIG(mOptPivotBias);
+		WRITECONFIG(mOptEmptyCellInkColor);
 #undef WRITECONFIG
 	}
 
@@ -665,6 +677,7 @@ public:
 		READCONFIG(mOptHeightCells);
 		READCONFIG(mOptConversionMode);
 		READCONFIG(mOptPivotBias);
+		READCONFIG(mOptEmptyCellInkColor);
 #pragma warning(default:4244; default:4800)
 #undef READCONFIG
 
