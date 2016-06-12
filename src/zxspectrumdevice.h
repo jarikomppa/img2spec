@@ -603,36 +603,38 @@ public:
 		if (gOptZoomStyle == 1)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
-			int i, j;
-			int cellht = 8 >> mOptCellSize;
-			int ymax = (gDevice->mYRes / 8) << mOptCellSize;
-			for (i = 0; i < ymax; i++)
-			{
-				for (j = 0; j < (gDevice->mXRes / 8); j++)
-				{
-					ImGui::Image(
-						(ImTextureID)tex,
-						ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
-						ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
-						ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
-
-					if (j != (gDevice->mXRes / 8)-1)
-					{
-						ImGui::SameLine();
-					}
-				}
-			}
-			ImGui::PopStyleVar();
 		}
 		else
 		{
-			ImGui::Image(
-				(ImTextureID)tex, 
-				ImVec2((float)gDevice->mXRes * gOptZoom, 
-				(float)gDevice->mYRes * gOptZoom), 
-				ImVec2(0, 0),
-				ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 		}
+		int i, j;
+		int cellht = 8 >> mOptCellSize;
+		int ymax = (gDevice->mYRes / 8) << mOptCellSize;
+		for (i = 0; i < ymax; i++)
+		{
+			for (j = 0; j < (gDevice->mXRes / 8); j++)
+			{
+				ImGui::Image(
+					(ImTextureID)tex,
+					ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
+					ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
+					ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
+
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::BeginTooltip();
+					ImGui::Text("x:%d\ny:%d", j, i);
+					ImGui::EndTooltip();
+				}
+
+				if (j != (gDevice->mXRes / 8)-1)
+				{
+					ImGui::SameLine();
+				}
+			}
+		}
+		ImGui::PopStyleVar();
 	}
 
 	virtual void writeOptions(JSON_Object *root)
