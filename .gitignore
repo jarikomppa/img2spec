@@ -3,3 +3,4 @@ out/
 *.sdf
 *.opensdf
 build/
+build-w*

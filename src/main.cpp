@@ -25,7 +25,7 @@ Still, if you find it useful, great!
 */
 
 #define _CRT_SECURE_NO_WARNINGS
-#include <Windows.h>
+#include <windows.h>
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 
@@ -35,7 +35,7 @@ Still, if you find it useful, great!
 #include <SDL_syswm.h>
 #include <SDL_opengl.h>
 
-#include "parson\parson.h"
+#include "parson/parson.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -173,7 +173,6 @@ void update_texture(GLuint aTexture, unsigned int *aBitmap)
 		GL_UNSIGNED_BYTE,		// type
 		(GLvoid*)aBitmap);		// data
 }
-
 
 int getFileDate(char *aFilename)
 {
