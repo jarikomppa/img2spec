@@ -24,8 +24,12 @@ code quality leaves a lot to be desired..
 Still, if you find it useful, great!
 */
 
+#ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
-#include <windows.h>
+#endif
+
+#include "platform/common.h"
+
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 
@@ -172,26 +176,6 @@ void update_texture(GLuint aTexture, unsigned int *aBitmap)
 		GL_RGBA,				// format
 		GL_UNSIGNED_BYTE,		// type
 		(GLvoid*)aBitmap);		// data
-}
-
-int getFileDate(char *aFilename)
-{
-	FILETIME ft;
-	HANDLE f = 0;
-	int iters = 0;
-	while (f == 0 && iters < 16)
-	{
-		f = CreateFileA(aFilename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-		if (!f)
-			SDL_Delay(20);
-		iters++;
-	}
-	if (f)
-	{
-		GetFileTime(f, 0, 0, &ft);
-		CloseHandle(f);
-	}
-	return ft.dwHighDateTime ^ ft.dwLowDateTime;
 }
 
 void bitmap_to_float(unsigned int *aBitmap)
@@ -360,32 +344,23 @@ void addModifier(Modifier *aNewModifier)
 	gDirty = 1;
 }
 
-void loadworkspace(char *aFilename = 0)
+void loadworkspace(char *aFilename = nullptr)
 {
 	gDirty = 1;
 
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = openDialog("Load workspace",
+                                    "Image Spectrumizer Workspace (*.isw)\0*.isw\0"
+                                            "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"Image Spectrumizer Workspace (*.isw)\0*.isw\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Load workspace";
-
-	if (aFilename || GetOpenFileNameA(&ofn))
+	if (FileName)
 	{
 
-		JSON_Value *root_value = json_parse_file(aFilename ? aFilename : szFileName);
+		JSON_Value *root_value = json_parse_file(FileName);
 		if (root_value)
 		{
 			JSON_Object *root = json_value_get_object(root_value);
@@ -494,26 +469,12 @@ void loadworkspace(char *aFilename = 0)
 
 void saveworkspace()
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
-
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"Image Spectrumizer Workspace (*.isw)\0*.isw\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Save workspace";
-	ofn.lpstrDefExt = "isw";
-
-	if (GetSaveFileNameA(&ofn))
+	if ((FileName = saveDialog("Save workspace",
+                               "Image Spectrumizer Workspace (*.isw)\0*.isw\0"
+                                       "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0",
+                               "isw")))
 	{
 		JSON_Value *root_value = json_value_init_object();
 		JSON_Object *root = json_value_get_object(root_value);
@@ -561,7 +522,7 @@ void saveworkspace()
 		}
 
 
-		json_serialize_to_file_pretty(root_value, szFileName);
+		json_serialize_to_file_pretty(root_value, FileName);
 		json_value_free(root_value);
 
 	}
@@ -610,39 +571,30 @@ unsigned int *loadscr(char *aFilename)
 	return data;
 }
 
-void loadimg(char *aFilename = 0)
+void loadimg(char *aFilename = nullptr)
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = openDialog("Load image",
+                                    "All supported types\0*.png;*.jpg;*.jpeg;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.pnm;*.scr\0"
+                                            "PNG (*.png)\0*.png\0"
+                                            "JPG (*.jpg)\0*.jpg;*.jpeg\0"
+                                            "TGA (*.tga)\0*.tga\0"
+                                            "BMP (*.bmp)\0*.bmp\0"
+                                            "PSD (*.psd)\0*.psd\0"
+                                            "GIF (*.gif)\0*.gif\0"
+                                            "HDR (*.hdr)\0*.hdr\0"
+                                            "PIC (*.pic)\0*.pic\0"
+                                            "PNM (*.pnm)\0*.pnm\0"
+                                            "SCR (*.scr)\0*.scr\0"
+                                            "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"All supported types\0*.png;*.jpg;*.jpeg;*.tga;*.bmp;*.psd;*.gif;*.hdr;*.pic;*.pnm;*.scr\0"
-		"PNG (*.png)\0*.png\0"
-		"JPG (*.jpg)\0*.jpg;*.jpeg\0"
-		"TGA (*.tga)\0*.tga\0"
-		"BMP (*.bmp)\0*.bmp\0"
-		"PSD (*.psd)\0*.psd\0"
-		"GIF (*.gif)\0*.gif\0"
-		"HDR (*.hdr)\0*.hdr\0"
-		"PIC (*.pic)\0*.pic\0"
-		"PNM (*.pnm)\0*.pnm\0"
-		"SCR (*.scr)\0*.scr\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Load image";
-
-	if (aFilename || GetOpenFileNameA(&ofn))
+	if (FileName)
 	{
-		FILE *f = fopen(aFilename ? aFilename : szFileName, "rb");
+		FILE *f = fopen(FileName, "rb");
 		if (!f)
 			return;
 		fseek(f, 0, SEEK_END);
@@ -651,7 +603,7 @@ void loadimg(char *aFilename = 0)
 
 		// gSourceImageName may be the same pointer as aFilename, so freeing it first
 		// and then trying to duplicate it to itself might... well..
-		char *name = mystrdup(aFilename ? aFilename : szFileName);
+		char *name = mystrdup((char *)FileName);
 		int n, iters = 0, x, y;
 		unsigned int *data = 0;
 		while (data == 0 && iters < 16)
@@ -743,120 +695,84 @@ void generateimg()
 }
 
 
-void savepng(char *aFilename = 0)
+void savepng(char *aFilename = nullptr)
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = saveDialog("Save png",
+                        "PNG (*.png)\0*.png\0"
+                        "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0",
+                        "png")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"PNG (*.png)\0*.png\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Save png";
-	ofn.lpstrDefExt = "png";
-
-	if (aFilename || GetSaveFileNameA(&ofn))
+	if (FileName)
 	{
-		stbi_write_png(aFilename ? aFilename : szFileName, gDevice->mXRes, gDevice->mYRes, 4, gBitmapSpec, gDevice->mXRes * 4);
+		stbi_write_png(FileName, gDevice->mXRes, gDevice->mYRes, 4, gBitmapSpec, gDevice->mXRes * 4);
 	}
 }
 
 
-void savescr(char *aFilename = 0)
+void savescr(char *aFilename = nullptr)
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = saveDialog("Save scr",
+                                    "scr (*.scr)\0*.scr\0"
+                                    "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0",
+                                    "scr")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"scr (*.scr)\0*.scr\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Save scr";
-	ofn.lpstrDefExt = "scr";
-
-	if (aFilename || GetSaveFileNameA(&ofn))
-	{
-		FILE * f = fopen(aFilename?aFilename:szFileName, "wb");
-		gDevice->savescr(f);
-		fclose(f);
-	}
+    if (FileName)
+    {
+        FILE * f = fopen(FileName, "wb");
+        gDevice->savescr(f);
+        fclose(f);
+    }
 }
 
 void saveh(char *aFilename = 0)
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = saveDialog("Save h",
+                                    "C header (*.h)\0*.h\0"
+                                            "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0",
+                                    "h")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"C header (*.h)\0*.h\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Save h";
-	ofn.lpstrDefExt = "h";
-
-	if (aFilename || GetSaveFileNameA(&ofn))
-	{
-		FILE * f = fopen(aFilename ? aFilename : szFileName, "w");
-		gDevice->saveh(f);
-		fclose(f);
-	}
+    if (FileName)
+    {
+        FILE * f = fopen(FileName, "w");
+        gDevice->saveh(f);
+        fclose(f);
+    }
 }
 
 
 void saveinc(char *aFilename = 0)
 {
-	OPENFILENAMEA ofn;
-	char szFileName[1024] = "";
+    const char *FileName;
 
-	ZeroMemory(&ofn, sizeof(ofn));
+    if(aFilename)
+        FileName = aFilename;
+    else if ((FileName = saveDialog("Save inc",
+                                    "inc (*.inc)\0*.inc\0"
+                                            "All Files (" ALL_FILES ")\0" ALL_FILES "\0\0",
+                                    "inc")))
+        ;
 
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = 0;
-	ofn.lpstrFilter =
-		"inc (*.inc)\0*.inc\0"
-		"All Files (*.*)\0*.*\0\0";
-
-	ofn.nMaxFile = 1024;
-
-	ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-	ofn.lpstrFile = szFileName;
-
-	ofn.lpstrTitle = "Save inc";
-	ofn.lpstrDefExt = "inc";
-
-	if (aFilename || GetSaveFileNameA(&ofn))
-	{
-		FILE * f = fopen(aFilename ? aFilename : szFileName, "w");
-		gDevice->saveinc(f);
-		fclose(f);
-	}
+    if (FileName)
+    {
+        FILE * f = fopen(FileName, "w");
+        gDevice->saveinc(f);
+        fclose(f);
+    }
 }
 
 
@@ -1554,11 +1470,13 @@ int main(int aParamc, char**aParams)
 			
 			gDirty = 0;
 			gDirtyPic = 0;
-			
+
+#ifdef _WIN32
 			if (gOptTopmost)
 				SetWindowPos(wminfo.info.win.window, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 			else
 				SetWindowPos(wminfo.info.win.window, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+#endif
 				
 		}
 
