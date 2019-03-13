@@ -31,13 +31,13 @@ Here's one image converted in a bunch of different ways (these were all made in 
 
 ![ScreenShot](https://raw.github.com/jarikomppa/img2spec/master/mona.png)
 
-##Tips:
+## Tips:
 
 - The window can be resized.
 - Various helper windows can be opened from the window menu.
 - Don't hesitate to play with conversion options.
 
-##Typical workflow:
+## Typical workflow:
 
 1. Load an image (file->load image)
 2. Add modifiers (modifiers->...)
@@ -45,7 +45,7 @@ Here's one image converted in a bunch of different ways (these were all made in 
 4. Tweak modifiers until result is acceptable
 5. Export result (file->export ...)
 
-##Image editor interoperation
+## Image editor interoperation
 If you keep the image file open in image spectrumizer and the image editor of your 
 choice (such as photoshop), image spectrumizer can detect when the file has changed 
 and reloads the image automatically. This way you can keep editing the source image 
@@ -54,7 +54,7 @@ results relatively quickly.
 
 This feature is enabled by default, and can be disabled from the options.
 
-##File formats:
+## File formats:
 
 The file formats for scr, h and inc are basically the same. Bitmap (in spectrum screen 
 order) is followed by attribute data. In case of non-standard cell sizes, the attribute 
@@ -68,7 +68,7 @@ change that from the options.
 
 .h is C array, only data is included, so typical use would be:
 
-```
+```c
     const char myimagedata[]= {
     #include "myimagedata.h"
     };
@@ -76,7 +76,7 @@ change that from the options.
 
 .inc is assembler .db lines.
 
-##Command line arguments
+## Command line arguments
 
 Any image or workspace file names given as arguments are loaded (in the order given). If 
 multiple loadable images or workspaces are given, the last ones are the ones that are used. 
@@ -91,11 +91,11 @@ To save results on commandline, use the following flags:
 
 Example:
 
-img2spec cat.png mush.isw -h cat.h
+`img2spec cat.png mush.isw -h cat.h`
 
 Output files are overwritten without a warning, but I trust you know what you're doing.
 
-##3x64 mode
+## 3x64 mode
 In this mode, two sets of attributes are calculated, and the application is expected to 
 swap between the two every frame. This creates approximately 3*64 colors (due to double 
 blacks, the actual number of colors is quite much lower). The effect flickers on emulators 
