@@ -17,7 +17,7 @@ workspace file on commandline, along with option to save output.
 
 ## Binaries
 
-http://iki.fi/sol/zip/img2spec_40.zip
+https://solhsa.com/zip/img2spec_40.zip
 
 ## Source
 
